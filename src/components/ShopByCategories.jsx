@@ -2,12 +2,12 @@ import { Box, Typography, Grid, Card, CardMedia, CardContent, Container } from "
 
 const categories = [
     { id: 1, name: "EARRINGS", image: "/catgImg.png" },
-    { id: 2, name: "FINGER RINGS", image: "/catgImg.png" },
-    { id: 3, name: "PENDANTS", image: "/catgImg.png" },
-    { id: 4, name: "MANGALSUTRA", image: "/catgImg.png" },
-    { id: 5, name: "BRACELETS", image: "/catgImg.png" },
-    { id: 6, name: "BANGLES", image: "/catgImg.png" },
-    { id: 7, name: "CHAINS", image: "/catgImg.png" },
+    { id: 2, name: "FINGER RINGS", image: "/matchImg1.png" },
+    { id: 3, name: "PENDANTS", image: "/matchImg2.png" },
+    { id: 4, name: "MANGALSUTRA", image: "/matchImg3.png" },
+    { id: 5, name: "BRACELETS", image: "/matchImg4.png" },
+    { id: 6, name: "BANGLES", image: "/matchImg5.png" },
+    { id: 7, name: "CHAINS", image: "/matchImg6.png" },
 ];
 
 const ShopByCategories = () => (
@@ -45,9 +45,9 @@ const ShopByCategories = () => (
                                 component="img"
                                 image={image}
                                 alt={name}
-                                sx={{ height: {xs:180, lg:380}, objectFit: "cover" }}
+                                sx={{ height: { xs: 180, lg: 380 }, objectFit: "cover" }}
                             />
-                            <Typography variant="body2" fontWeight={600} color="#2C2C2C" fontSize={{ xs: "0.8rem", md: "0.9rem" }} sx={{ letterSpacing: 1, textTransform: "uppercase", textAlign: "center",my:1 }}>
+                            <Typography variant="body2" fontWeight={600} color="#2C2C2C" fontSize={{ xs: "0.8rem", md: "0.9rem" }} sx={{ letterSpacing: 1, textTransform: "uppercase", textAlign: "center", my: 1 }}>
                                 {name}
                             </Typography>
                         </Card>
