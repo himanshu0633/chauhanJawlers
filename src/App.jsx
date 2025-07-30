@@ -7,6 +7,7 @@ import ShopByCategories from './components/ShopByCategories'
 import Treasure from './components/Treasure'
 import Trending from './components/Trending'
 import MasterDaimondSlider from './components/MasterDaimondSlider'
+import Footer from './components/Footer'
 function App() {
 
   return (
@@ -19,6 +20,7 @@ function App() {
       <Trending />
       {/* <MasterDaimondSlider /> */}
       <MasterDaimondSlider />
+      <Footer />
 
     </>
   )
