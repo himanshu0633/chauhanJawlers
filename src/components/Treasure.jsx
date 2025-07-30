@@ -139,7 +139,7 @@ const categories = [
     {
         id: 1,
         name: "Ear Rings",
-        image: "/bangles.png",
+        image: "/latestImg1.png",
     },
     {
         id: 2,
@@ -149,7 +149,7 @@ const categories = [
     {
         id: 3,
         name: "Pendants",
-        image: "/bangles.png",
+        image: "/latestImg3.png",
     },
 ]
 

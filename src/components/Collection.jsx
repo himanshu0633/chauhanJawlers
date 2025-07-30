@@ -125,14 +125,14 @@ const collections = [
     },
     {
         id: 2,
-        image: "/collection1.png",
+        image: "/collection2.png",
         name: "Graceful",
         script: "Ear",
         description: "Glam",
     },
     {
         id: 3,
-        image: "/collection1.png",
+        image: "/collection3.png",
         name: "Casual",
         script: "Chic",
         description: "Chain",
