@@ -6,6 +6,7 @@ const SectionContainer = styled(Box)({
     backgroundColor: "#fff",
     paddingTop: "80px",
     paddingBottom: "80px",
+    "@media (max-width: 1024px)": { paddingTop: "0px", }
 });
 
 const HeaderContainer = styled(Container)({
@@ -36,13 +37,14 @@ const FlexCardGrid = styled(Box)({
     position: "relative",
     display: "flex",
     flexWrap: "wrap",
-    width: 800,
+    // width: 1100,
+    overflow: "hidden",
     margin: "0 auto",
-    minHeight: 600,
+    // minHeight: 600,
     justifyContent: "center",
     alignItems: "center",
-    "@media (max-width: 960px)": { width: 600, minHeight: 440 },
-    "@media (max-width: 600px)": { width: 340, minHeight: 300 }
+    // "@media (max-width: 1140px)": { width: 800, minHeight: 440 },
+    // "@media (max-width: 600px)": { width: 340, minHeight: 300 }
 });
 
 const CategoryCard = styled(Box)({
@@ -52,16 +54,17 @@ const CategoryCard = styled(Box)({
     cursor: "pointer",
     transition: "transform 0.3s, box-shadow 0.3s",
     boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-    width: 350,
-    height: 280,
+    width: 480,
+    height: 340,
     margin: 16,
     background: "#f6f1ed",
     "&:hover": {
         transform: "translateY(-8px)",
         boxShadow: "0 16px 40px rgba(0,0,0,0.22)"
     },
-    "@media (max-width: 960px)": { width: 260, height: 190, margin: 10 },
-    "@media (max-width: 600px)": { width: 155, height: 120, margin: 5 }
+    "@media (max-width: 1100px)": { width: 350, height: 250, margin: 10 },
+    "@media (max-width: 780px)": { width: 250, height: 250, margin: 5 },
+    "@media (max-width: 700px)": { width: 200, height: 220, margin: 5 }
 });
 
 const CategoryImage = styled("img")({
@@ -178,7 +181,7 @@ export default function ChauhanWorld() {
                 </SubTitle>
             </HeaderContainer>
 
-            <Container maxWidth="lg">
+            <Container maxWidth="xl">
                 <FlexCardGrid>
                     {/* 2x2 Category Cards */}
                     {[0, 1, 2, 3].map(i => (
