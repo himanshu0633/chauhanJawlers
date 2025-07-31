@@ -10,6 +10,7 @@ import Footer from './components/Footer'
 import NewCollection from './components/NewCollection'
 import ChauhanWorld from './components/ChauhanWorld'
 import ExchangeOffer from './components/ExchangeOffer'
+import Exclusive from './components/Exclusive'
 function App() {
 
   return (
@@ -23,7 +24,8 @@ function App() {
       <MasterDaimondSlider />
       <NewCollection />
       <ChauhanWorld />
-      <ExchangeOffer/>
+      <ExchangeOffer />
+      <Exclusive />
       <Footer />
 
     </>
