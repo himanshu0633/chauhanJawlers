@@ -1,53 +1,81 @@
 import React from "react";
-import { BottomNavigation, BottomNavigationAction, Paper, useTheme, useMediaQuery } from "@mui/material";
-import { Home, Category, ShoppingCart, Person } from "@mui/icons-material";
+import {
+    BottomNavigation,
+    BottomNavigationAction,
+    Paper,
+    useTheme,
+    useMediaQuery
+} from "@mui/material";
+import {
+    Home,
+    Category,
+    ShoppingCart,
+    PersonOutline,
+    Star
+} from "@mui/icons-material";
 
-// You may need to swap Category for an icon of your choice if MUI doesn't have "Category"
 export const MobileBottomNav = () => {
-  const [value, setValue] = React.useState(0);
-  const theme = useTheme();
-  const isMobile = useMediaQuery("(max-width:500px)");
+    const [value, setValue] = React.useState(0);
+    const theme = useTheme();
+    const isMobile = useMediaQuery("(max-width:600px)");
 
-  // Only show on mobile ≤500px
-  if (!isMobile) return null;
+    if (!isMobile) return null;
 
-  return (
-    <Paper
-      elevation={8}
-      sx={{
-        position: "fixed",
-        bottom: 10,
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: "98vw",
-        maxWidth: 430,
-        borderRadius: 4,
-        bgcolor: "#fff",
-        boxShadow: "0 2px 16px 0 rgba(0,0,0,0.07)",
-        zIndex: 1500,
-        px: 0.5,
-      }}
-    >
-      <BottomNavigation
-        showLabels
-        value={value}
-        onChange={(event, newValue) => setValue(newValue)}
-        sx={{
-          bgcolor: "#fff",
-          borderRadius: 4,
-          "& .Mui-selected, & .Mui-selected .MuiBottomNavigationAction-label": {
-            color: "#e98a36",
-          },
-          "& .MuiBottomNavigationAction-label": {
-            fontSize: 12,
-          },
-        }}
-      >
-        <BottomNavigationAction label="Home" icon={<Home />} />
-        <BottomNavigationAction label="Category" icon={<Category />} />
-        <BottomNavigationAction label="Cart" icon={<ShoppingCart />} />
-        <BottomNavigationAction label="You" icon={<Person />} />
-      </BottomNavigation>
-    </Paper>
-  );
+    return (
+        <Paper
+            elevation={12}
+            sx={{
+                position: "fixed",
+                bottom: 0,
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: "100vw",
+                maxWidth: 600,
+                borderTopLeftRadius: 16,
+                borderTopRightRadius: 16,
+                bgcolor: "#44170D !important",
+                boxShadow: "0 0 16px 0 rgba(0,0,0,0.12), 0 0.5px 1.5px rgba(0,0,0,0.08)",
+                zIndex: 1500,
+                px: 0,
+                py: 0.5,
+            }}
+        >
+            <BottomNavigation
+                showLabels
+                value={value}
+                onChange={(_, newValue) => setValue(newValue)}
+                sx={{
+                    bgcolor: "#44170D",
+                    borderRadius: 2,
+                    "& .MuiSvgIcon-root": {
+                        color: "#fff", // All icons white by default
+                    },
+                    "& .MuiBottomNavigationAction-label": {
+                        color: "#fff", // All labels white by default
+                        fontSize: 11,
+                        letterSpacing: 0.1,
+                        fontWeight: 500,
+                        mt: "1px"
+                    },
+                    "& .Mui-selected, & .Mui-selected .MuiBottomNavigationAction-label": {
+                        color: "#FFD700", // Selected color (gold) - change as needed
+                    },
+                    "& .MuiBottomNavigationAction-root": {
+                        minWidth: 0,
+                        maxWidth: "100px",
+                        flex: 1
+                    }
+                }}
+            >
+                <BottomNavigationAction label="Home" icon={<Home />} />
+                <BottomNavigationAction label="Categories" icon={<Category />} />
+                <BottomNavigationAction label="Offers" icon={<Star />} />
+                <BottomNavigationAction label="Cart" icon={<ShoppingCart />} />
+                <BottomNavigationAction label="You" icon={<PersonOutline />} />
+            </BottomNavigation>
+        </Paper>
+    );
 };
+
+
+
