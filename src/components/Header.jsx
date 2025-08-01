@@ -657,9 +657,9 @@ export default function Header() {
 
   const menuItems = [
     { icon: <Star sx={{ fontSize: "16px" }} />, label: "All Jewellery" },
-    { icon: <Circle sx={{ fontSize: "16px", color: "#d8d7d0ff" }} />, label: "Silver" },
     { icon: <Circle sx={{ fontSize: "16px", color: "#FFD700" }} />, label: "Gold" },
     { icon: <DiamondOutlined sx={{ fontSize: "16px" }} />, label: "Diamond" },
+    { icon: <Circle sx={{ fontSize: "16px", color: "#d8d7d0ff" }} />, label: "Silver" },
     { icon: <Circle sx={{ fontSize: "16px" }} />, label: "Earrings" },
     { icon: <Circle sx={{ fontSize: "16px" }} />, label: "Rings" },
     { icon: <Star sx={{ fontSize: "16px" }} />, label: "Daily Wear" },
