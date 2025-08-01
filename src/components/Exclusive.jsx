@@ -200,7 +200,7 @@ const VerticalBar = styled(Box)(({ theme }) => ({
   borderRadius: 8,
   [theme.breakpoints.down("sm")]: {
     width: 6,
-    left: 21,
+    // left: 21,
   },
 }));
 
@@ -209,46 +209,12 @@ const HorizontalBar = styled(Box)(({ theme }) => ({
   left: 0,
   right: 0,
   height: 8,
-  top: 95,
+  bottom: 95,
   background: "#f5b14f",
   borderRadius: 8,
   [theme.breakpoints.down("sm")]: {
     height: 6,
-    top: 62,
-  },
-}));
-
-const Starburst = styled(Box)(({ theme }) => ({
-  position: "absolute",
-  left: 34,
-  top: 88,
-  zIndex: 1,
-  width: 32,
-  height: 32,
-  [theme.breakpoints.down("sm")]: {
-    left: 18,
-    top: 55,
-    width: 18,
-    height: 18,
-  },
-  "&::before, &::after": {
-    content: '""',
-    position: "absolute",
-    borderRadius: "50%",
-    border: "1.8px solid #f5b14f",
-    width: "100%",
-    height: "100%",
-    top: 0,
-    left: 0,
-    opacity: 0.42,
-  },
-  "&::after": {
-    border: "1px solid #f5b14f",
-    width: "60%",
-    height: "60%",
-    top: "20%",
-    left: "20%",
-    opacity: 0.62,
+    bottom: 62,
   },
 }));
 
@@ -309,23 +275,13 @@ const RightHeader = styled(Box)({
   gap: 9,
 });
 
-const Crown = styled(Box)({
-  width: 36,
-  height: 36,
-  background: "url(/crown.png) no-repeat center/contain",
-  "@media (max-width:600px)": {
-    width: 22,
-    height: 22,
-  },
-});
-
 const RightTitle = styled(Typography)(({ theme }) => ({
   fontFamily: "Georgia, serif",
   fontWeight: 500,
-  fontSize: 23,
+  fontSize: 40,
   color: "#fff",
   [theme.breakpoints.down("sm")]: {
-    fontSize: 16,
+    fontSize: 24,
   },
 }));
 
@@ -380,7 +336,7 @@ export default function Exclusive() {
           <PromoBlock>
             <VerticalBar />
             <HorizontalBar />
-            <Starburst />
+            <img className="giftImgPos" src="/ylwFlower.png" alt="img" />
             <LeftContent>
               <MainText>Gift Your Way</MainText>
               <SubText>STARTING AT ₹5,000</SubText>
@@ -389,11 +345,10 @@ export default function Exclusive() {
           </PromoBlock>
 
           <PromoBlock variant="right">
+              <div><img className="" src="/logo.svg" alt="img" /></div>
             <RightHeader>
-              <Crown />
               <RightTitle>
                 Exchange your Old
-                <br />
                 Gold for 100% Value!
               </RightTitle>
             </RightHeader>

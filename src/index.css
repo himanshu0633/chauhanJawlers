@@ -8,3 +8,11 @@
         height: 100px;
     }
 }
+
+.giftImgPos {
+    position: absolute;
+    width: 50px;
+    top: 80%;
+    left: 10%;
+    transform: translate(-50%, -50%);
+}
