@@ -12,7 +12,6 @@
 //   useMediaQuery,
 //   Typography,
 //   Divider,
-//   Slide,
 //   Drawer,
 // } from "@mui/material";
 // import {
@@ -32,13 +31,13 @@
 // } from "@mui/icons-material";
 // import { useTheme } from "@mui/material/styles";
 
-// // Brown themed AppBar
+// // -------- Styled components remain the same, except minor addition below! --------
+
 // const StyledAppBar = styled(AppBar)(({ theme }) => ({
 //   backgroundColor: "#44170D",
 //   boxShadow: "none",
 // }));
 
-// // Responsive arrangement for toolbar
 // const HeaderToolbar = styled(Toolbar)(({ theme }) => ({
 //   minHeight: 64,
 //   paddingLeft: theme.spacing(2),
@@ -79,14 +78,13 @@
 //   },
 // });
 
-// // Search bar
 // const SearchBarWrap = styled(Box)(({ theme }) => ({
+//   width: "100%",
 //   display: "flex",
 //   justifyContent: "center",
 //   background: "transparent",
 //   marginTop: 4,
 //   marginBottom: 4,
-//   width: "100%",
 //   [theme.breakpoints.down("md")]: {
 //     marginTop: 6,
 //     marginBottom: 5,
@@ -183,7 +181,6 @@
 //   flex: 1,
 //   marginTop: theme.spacing(1),
 //   paddingLeft: 4,
-//   // Add scroll if content overflows
 //   overflowY: "auto",
 // }));
 
@@ -194,26 +191,6 @@
 //   padding: theme.spacing(2, 2, 1, 2.5),
 //   borderBottom: "1px solid rgba(255,255,255,0.06)"
 // }));
-
-// const PopupPromo = styled(Box)(({ theme }) => ({
-//   background: "rgba(255,255,255,0.075)",
-//   borderRadius: 10,
-//   padding: theme.spacing(1.5, 2),
-//   margin: theme.spacing(2, 2, 2.5, 2),
-//   display: "flex",
-//   alignItems: "center",
-//   gap: theme.spacing(1.5),
-//   fontSize: 17,
-//   fontWeight: 500,
-// }));
-
-// const Flat500 = styled("span")({
-//   fontWeight: 600,
-//   fontSize: 20,
-//   color: "#FFD700",
-//   marginRight: 2,
-//   marginLeft: 2,
-// });
 
 // const DrawerMenuAction = styled(Button)({
 //   borderRadius: 8,
@@ -231,6 +208,7 @@
 //   }
 // });
 
+// // ---------------- Header MAIN COMPONENT ----------------
 // export default function Header() {
 //   const theme = useTheme();
 //   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
@@ -238,9 +216,9 @@
 
 //   const menuItems = [
 //     { icon: <Star sx={{ fontSize: "16px" }} />, label: "All Jewellery" },
-//     { icon: <Circle sx={{ fontSize: "16px", color: "#d8d7d0ff" }} />, label: "Silver" },
 //     { icon: <Circle sx={{ fontSize: "16px", color: "#FFD700" }} />, label: "Gold" },
 //     { icon: <DiamondOutlined sx={{ fontSize: "16px" }} />, label: "Diamond" },
+//     { icon: <Circle sx={{ fontSize: "16px", color: "#d8d7d0ff" }} />, label: "Silver" },
 //     { icon: <Circle sx={{ fontSize: "16px" }} />, label: "Earrings" },
 //     { icon: <Circle sx={{ fontSize: "16px" }} />, label: "Rings" },
 //     { icon: <Star sx={{ fontSize: "16px" }} />, label: "Daily Wear" },
@@ -251,57 +229,33 @@
 //   ];
 
 //   return (
-//       <StyledAppBar sx={{ position: "fixed", padding: "4px", PaddingBottom: "50px" }} >
-//         {/* Topbar */}
-//         <HeaderToolbar disableGutters>
-//           {/* Hamburger menu (always left on mobile) */}
-//           <div className="topbar-left">
-//             {!isMdUp && (
-//               <IconButton
-//                 onClick={() => setOpen(true)}
-//                 size="large"
-//                 edge="start"
-//                 sx={{ color: "#fff", mr: 0.5 }}
-//                 aria-label="menu"
-//               >
-//                 <MenuIcon />
-//               </IconButton>
-//             )}
-//             <LogoContainer sx={{ ml: !isMdUp ? 0.5 : 0, flex: "none" }}>
-//               <img src="/logo.svg" alt="logo" />
-//             </LogoContainer>
-//           </div>
+//     <StyledAppBar sx={{ position: "fixed", padding: "4px" }} >
+//       {/* Topbar */}
+//       <HeaderToolbar disableGutters>
+//         {/* Hamburger menu (always left on mobile) */}
+//         <div className="topbar-left" style={{
+//           display: "flex",
+//           alignItems: "center"
+//         }}>
+//           {!isMdUp && (
+//             <IconButton
+//               onClick={() => setOpen(true)}
+//               size="large"
+//               edge="start"
+//               sx={{ color: "#fff", mr: 0.5 }}
+//               aria-label="menu"
+//             >
+//               <MenuIcon />
+//             </IconButton>
+//           )}
+//           <LogoContainer sx={{ ml: !isMdUp ? 0.5 : 0, flex: "none" }}>
+//             <img src="/logo.svg" alt="logo" />
+//           </LogoContainer>
+//         </div>
 
-
-//           {/* Center (empty flex-grow on mobile, flex to center the search bar on desktop) */}
-//           <Box sx={{ flex: 1, display: { xs: "none", md: "block" } }} />
-
-//           {/* Icons row */}
-//           <IconsRow>
-//             <TopIconButton size="small">
-//               <DiamondOutlined sx={{ fontSize: 20 }} />
-//             </TopIconButton>
-//             <TopIconButton size="small">
-//               <LocalMallOutlined sx={{ fontSize: 20 }} />
-//             </TopIconButton>
-//             <TopIconButton size="small">
-//               <FavoriteBorder sx={{ fontSize: 20 }} />
-//             </TopIconButton>
-//             <TopIconButton size="small">
-//               <PersonOutline sx={{ fontSize: 20 }} />
-//             </TopIconButton>
-//             <TopIconButton size="small">
-//               <ShoppingBagOutlined sx={{ fontSize: 20 }} />
-//             </TopIconButton>
-//           </IconsRow>
-//         </HeaderToolbar>
-
-//         {/* Search bar:
-//           - Below toolbar on mobile/tablet
-//           - Inside nav row (next to menu) on desktop
-//       */}
-//         {!isMdUp && (
-//           <SearchBarWrap>
+//         {/* Only show search bar between logo and icons on md+ screens */}
+//         {isMdUp && (
+//           <Box sx={{ flex: 1, px: 2, display: "flex", alignItems: "center", justifyContent: "center" }}>
 //             <SearchContainer>
 //               <SearchIconWrapper>
 //                 <SearchIcon sx={{ fontSize: "20px" }} />
@@ -311,132 +265,130 @@
 //                 inputProps={{ "aria-label": "search" }}
 //               />
 //             </SearchContainer>
-//           </SearchBarWrap>
+//           </Box>
 //         )}
 
-//         {/* Navigation Bar */}
-//         <NavigationBar>
-//           <Container maxWidth="xl" sx={{ position: "relative" }}>
-//             {isMdUp ? (
-//               <Box
-//                 sx={{
-//                   display: "flex",
-//                   alignItems: "center",
-//                   justifyContent: { xs: "space-between", md: "center" },
-//                   flexWrap: "wrap",
-//                   gap: 1,
+//         {/* Icons row (align right) */}
+//         <IconsRow>
+//           <TopIconButton size="small">
+//             <DiamondOutlined sx={{ fontSize: 20 }} />
+//           </TopIconButton>
+//           <TopIconButton size="small">
+//             <LocalMallOutlined sx={{ fontSize: 20 }} />
+//           </TopIconButton>
+//           <TopIconButton size="small">
+//             <FavoriteBorder sx={{ fontSize: 20 }} />
+//           </TopIconButton>
+//           <TopIconButton size="small">
+//             <PersonOutline sx={{ fontSize: 20 }} />
+//           </TopIconButton>
+//           <TopIconButton size="small">
+//             <ShoppingBagOutlined sx={{ fontSize: 20 }} />
+//           </TopIconButton>
+//         </IconsRow>
+//       </HeaderToolbar>
 
-//                 }}
-//               >
-//                 {/* Search Bar (desktop only: left, big) */}
-//                 <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center", mx: { xs: 0, sm: 2 } }}>
-//                   <SearchContainer>
-//                     <SearchIconWrapper>
-//                       <SearchIcon sx={{ fontSize: "20px" }} />
-//                     </SearchIconWrapper>
-//                     <StyledInputBase
-//                       placeholder="Search for Gold Jewellery, Diamond Jewellery and more..."
-//                       inputProps={{ "aria-label": "search" }}
-//                     />
-//                   </SearchContainer>
-//                 </Box>
-//                 {/* Nav menu */}
-//                 <Box
-//                   sx={{
-//                     display: "flex",
-//                     alignItems: "center",
-//                     flexWrap: "wrap",
-//                     gap: 1,
-//                   }}
-//                 >
-//                   {menuItems.map(({ icon, label }) => (
-//                     <NavButton key={label} startIcon={icon}>
-//                       {label}
-//                     </NavButton>
-//                   ))}
-//                 </Box>
-//               </Box>
-//             ) : (
-//               // Mobile/tablet: no nav buttons; use Hamburger/Drawer instead
-//               null
-//             )}
-//           </Container>
-//         </NavigationBar>
+//       {/* Search bar below the AppBar for small screens */}
+//       {!isMdUp && (
+//         <SearchBarWrap>
+//           <SearchContainer>
+//             <SearchIconWrapper>
+//               <SearchIcon sx={{ fontSize: "20px" }} />
+//             </SearchIconWrapper>
+//             <StyledInputBase
+//               placeholder="Search for Gold Jewellery, Diamond Jewellery and more..."
+//               inputProps={{ "aria-label": "search" }}
+//             />
+//           </SearchContainer>
+//         </SearchBarWrap>
+//       )}
 
-//         {/* --- Drawer/popup style menu on mobile/tablet --- */}
-//         <Drawer
-//           anchor="left"
-//           open={open}
-//           onClose={() => setOpen(false)}
-//           PaperProps={{
-//             sx: {
-//               p: 0,
-//               background: "#44170D",
-//               color: "#fff",
-//               width: "92vw",
-//               maxWidth: 410,
-//               [theme.breakpoints.down("sm")]: { maxWidth: "100vw" },
-//             },
-//           }}
-//         >
-//           {/* Drawer Header */}
-//           <PopupHead>
-//             {/* <Typography variant="body2" sx={{ fontWeight: 700, fontSize: 16 }}>
-//             <span style={{ color: "#FFD700", fontWeight: 700 }}>Flat Rs. 500 off</span>
-//             <span style={{ color: "#fff", fontWeight: 400 }}>&nbsp;on your first order</span>
-//           </Typography> */}
+//       {/* Navigation Bar & Drawer remain unchanged */}
+//       <NavigationBar>
+//         <Container maxWidth="xl" sx={{ position: "relative" }}>
+//           {isMdUp ? (
+//             <Box
+//               sx={{
+//                 display: "flex",
+//                 alignItems: "center",
+//                 justifyContent: { xs: "space-between", md: "center" },
+//                 flexWrap: "wrap",
+//                 gap: 1,
+//               }}
+//             >
+//               {menuItems.map(({ icon, label }) => (
+//                 <NavButton key={label} startIcon={icon}>
+//                   {label}
+//                 </NavButton>
+//               ))}
+//             </Box>
+//           ) : null}
+//         </Container>
+//       </NavigationBar>
 
-//             <IconButton
-//               size="small"
-//               edge="end"
+//       {/* Drawer for mobile menu */}
+//       <Drawer
+//         anchor="left"
+//         open={open}
+//         onClose={() => setOpen(false)}
+//         PaperProps={{
+//           sx: {
+//             p: 0,
+//             background: "#44170D",
+//             color: "#fff",
+//             width: "92vw",
+//             maxWidth: 410,
+//             [theme.breakpoints.down("sm")]: { maxWidth: "100vw" },
+//           },
+//         }}
+//       >
+//         <PopupHead>
+//           <IconButton
+//             size="small"
+//             edge="end"
+//             onClick={() => setOpen(false)}
+//             sx={{ color: "#fff", bgcolor: "rgba(255,255,255,0.06)" }}
+//           >
+//             <CloseIcon />
+//           </IconButton>
+//         </PopupHead>
+//         {/* Log in/Sign up actions */}
+//         <Box sx={{ display: "flex", gap: 1.5, py: 1.5, px: 2.5 }}>
+//           <DrawerMenuAction onClick={() => { setOpen(false); }}>Log In</DrawerMenuAction>
+//           <DrawerMenuAction
+//             onClick={() => { setOpen(false); }}
+//             sx={{ fontWeight: 500, border: "1px solid #FFD700", color: "#FFD700", background: "rgba(255,222,90,0.09)" }}
+//           >
+//             Sign Up
+//           </DrawerMenuAction>
+//         </Box>
+//         <Divider sx={{ bgcolor: "rgba(255,255,255,0.11)" }} />
+//         <DrawerNavList>
+//           {menuItems.map(({ icon, label }, i) => (
+//             <NavButton
+//               key={label}
+//               startIcon={icon}
+//               fullWidth
 //               onClick={() => setOpen(false)}
-//               sx={{ color: "#fff", bgcolor: "rgba(255,255,255,0.06)" }}
+//               sx={{
+//                 justifyContent: "flex-start",
+//                 fontWeight: i === 0 ? 700 : 500,
+//                 bgcolor: i === 0 ? "rgba(255,255,255,0.045)" : "transparent",
+//                 borderRadius: 10,
+//                 px: 2.2,
+//                 mb: 0.5,
+//                 color: "#fff",
+//                 "&:hover": { bgcolor: "rgba(255,255,255,0.11)" },
+//               }}
 //             >
-//               <CloseIcon />
-//             </IconButton>
-//           </PopupHead>
-//           {/* Log in/Sign up actions */}
-//           <Box sx={{ display: "flex", gap: 1.5, py: 1.5, px: 2.5 }}>
-//             <DrawerMenuAction onClick={() => { setOpen(false); }}>Log In</DrawerMenuAction>
-//             <DrawerMenuAction
-//               onClick={() => { setOpen(false); }}
-//               sx={{ fontWeight: 500, border: "1px solid #FFD700", color: "#FFD700", background: "rgba(255,222,90,0.09)" }}
-//             >
-//               Sign Up
-//             </DrawerMenuAction>
-//           </Box>
-
-//           {/* Divider */}
-//           <Divider sx={{ bgcolor: "rgba(255,255,255,0.11)" }} />
-
-//           {/* Navigation List */}
-//           <DrawerNavList>
-//             {menuItems.map(({ icon, label }, i) => (
-//               <NavButton
-//                 key={label}
-//                 startIcon={icon}
-//                 fullWidth
-//                 onClick={() => setOpen(false)}
-//                 sx={{
-//                   justifyContent: "flex-start",
-//                   fontWeight: i === 0 ? 700 : 500,
-//                   bgcolor: i === 0 ? "rgba(255,255,255,0.045)" : "transparent",
-//                   borderRadius: 10,
-//                   px: 2.2,
-//                   mb: 0.5,
-//                   color: "#fff",
-//                   "&:hover": { bgcolor: "rgba(255,255,255,0.11)" },
-//                 }}
-//               >
-//                 {label}
-//               </NavButton>
-//             ))}
-//           </DrawerNavList>
-//         </Drawer>
-//       </StyledAppBar>
+//               {label}
+//             </NavButton>
+//           ))}
+//         </DrawerNavList>
+//       </Drawer>
+//     </StyledAppBar>
 //   );
 // }
-
 
 
 import React, { useState } from "react";
@@ -451,6 +403,7 @@ import {
   styled,
   alpha,
   useMediaQuery,
+  useTheme,
   Typography,
   Divider,
   Drawer,
@@ -470,9 +423,8 @@ import {
   Menu as MenuIcon,
   Close as CloseIcon,
 } from "@mui/icons-material";
-import { useTheme } from "@mui/material/styles";
 
-// -------- Styled components remain the same, except minor addition below! --------
+import NavHoverDropdown from "../dropdown/NavHoverDropdown";
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   backgroundColor: "#44170D",
@@ -655,29 +607,34 @@ export default function Header() {
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const [open, setOpen] = useState(false);
 
+  // State for dropdown
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [hoveredMenu, setHoveredMenu] = useState(null);
+
+  // IDs of menu items with dropdown
+  const hasDropdown = ["category", "price", "gender", "occasion"];
+
+  // Add ids for dropdown control corresponding to categories
   const menuItems = [
-    { icon: <Star sx={{ fontSize: "16px" }} />, label: "All Jewellery" },
-    { icon: <Circle sx={{ fontSize: "16px", color: "#FFD700" }} />, label: "Gold" },
-    { icon: <DiamondOutlined sx={{ fontSize: "16px" }} />, label: "Diamond" },
-    { icon: <Circle sx={{ fontSize: "16px", color: "#d8d7d0ff" }} />, label: "Silver" },
-    { icon: <Circle sx={{ fontSize: "16px" }} />, label: "Earrings" },
-    { icon: <Circle sx={{ fontSize: "16px" }} />, label: "Rings" },
-    { icon: <Star sx={{ fontSize: "16px" }} />, label: "Daily Wear" },
-    { icon: <LocalMallOutlined sx={{ fontSize: "16px" }} />, label: "Collections" },
-    { icon: <Favorite sx={{ fontSize: "16px" }} />, label: "Wedding" },
-    { icon: <CardGiftcard sx={{ fontSize: "16px" }} />, label: "Gifting" },
-    { icon: <MoreHoriz sx={{ fontSize: "16px" }} />, label: "More" },
+    { id: "category", icon: <Star sx={{ fontSize: "16px" }} />, label: "All Jewellery" },
+    { id: "price", icon: <Circle sx={{ fontSize: "16px", color: "#FFD700" }} />, label: "Gold" },
+    { id: "gender", icon: <DiamondOutlined sx={{ fontSize: "16px" }} />, label: "Diamond" },
+    { id: "occasion", icon: <Circle sx={{ fontSize: "16px", color: "#d8d7d0ff" }} />, label: "Silver" },
+    // The rest without dropdown can have null id or just omit id
+    { id: null, icon: <Circle sx={{ fontSize: "16px" }} />, label: "Earrings" },
+    { id: null, icon: <Circle sx={{ fontSize: "16px" }} />, label: "Rings" },
+    { id: null, icon: <Star sx={{ fontSize: "16px" }} />, label: "Daily Wear" },
+    { id: null, icon: <LocalMallOutlined sx={{ fontSize: "16px" }} />, label: "Collections" },
+    { id: null, icon: <Favorite sx={{ fontSize: "16px" }} />, label: "Wedding" },
+    { id: null, icon: <CardGiftcard sx={{ fontSize: "16px" }} />, label: "Gifting" },
+    { id: null, icon: <MoreHoriz sx={{ fontSize: "16px" }} />, label: "More" },
   ];
 
   return (
-    <StyledAppBar sx={{ position: "fixed", padding: "4px" }} >
-      {/* Topbar */}
+    <StyledAppBar sx={{ position: "fixed", padding: "4px" }}>
+      {/* Topbar — remains unchanged */}
       <HeaderToolbar disableGutters>
-        {/* Hamburger menu (always left on mobile) */}
-        <div className="topbar-left" style={{
-          display: "flex",
-          alignItems: "center"
-        }}>
+        <div className="topbar-left" style={{ display: "flex", alignItems: "center" }}>
           {!isMdUp && (
             <IconButton
               onClick={() => setOpen(true)}
@@ -694,7 +651,6 @@ export default function Header() {
           </LogoContainer>
         </div>
 
-        {/* Only show search bar between logo and icons on md+ screens */}
         {isMdUp && (
           <Box sx={{ flex: 1, px: 2, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <SearchContainer>
@@ -709,7 +665,6 @@ export default function Header() {
           </Box>
         )}
 
-        {/* Icons row (align right) */}
         <IconsRow>
           <TopIconButton size="small">
             <DiamondOutlined sx={{ fontSize: 20 }} />
@@ -729,7 +684,6 @@ export default function Header() {
         </IconsRow>
       </HeaderToolbar>
 
-      {/* Search bar below the AppBar for small screens */}
       {!isMdUp && (
         <SearchBarWrap>
           <SearchContainer>
@@ -744,10 +698,11 @@ export default function Header() {
         </SearchBarWrap>
       )}
 
-      {/* Navigation Bar & Drawer remain unchanged */}
+      {/* Navigation Bar with hover dropdown integration */}
       <NavigationBar>
         <Container maxWidth="xl" sx={{ position: "relative" }}>
           {isMdUp ? (
+            // Wrapping navigation buttons and dropdown in container with onMouseLeave
             <Box
               sx={{
                 display: "flex",
@@ -755,19 +710,57 @@ export default function Header() {
                 justifyContent: { xs: "space-between", md: "center" },
                 flexWrap: "wrap",
                 gap: 1,
+                position: "relative",
+              }}
+              onMouseLeave={() => {
+                setDropdownOpen(false);
+                setHoveredMenu(null);
               }}
             >
-              {menuItems.map(({ icon, label }) => (
-                <NavButton key={label} startIcon={icon}>
+              {menuItems.map(({ id, icon, label }) => (
+                <NavButton
+                  key={label}
+                  startIcon={icon}
+                  onMouseEnter={() => {
+                    if (id && hasDropdown.includes(id)) {
+                      setHoveredMenu(id);
+                      setDropdownOpen(true);
+                    } else {
+                      setHoveredMenu(null);
+                      setDropdownOpen(false);
+                    }
+                  }}
+                >
                   {label}
                 </NavButton>
               ))}
+
+              {/* Dropdown menu */}
+              {dropdownOpen && hoveredMenu && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: "100%",
+                    left: 0,
+                    right: 0,
+                    zIndex: 1200,
+                  }}
+                >
+                  <NavHoverDropdown
+                    hoveredFilter={hoveredMenu}
+                    onClose={() => {
+                      setDropdownOpen(false);
+                      setHoveredMenu(null);
+                    }}
+                  />
+                </Box>
+              )}
             </Box>
           ) : null}
         </Container>
       </NavigationBar>
 
-      {/* Drawer for mobile menu */}
+      {/* Drawer Code (unchanged) */}
       <Drawer
         anchor="left"
         open={open}
@@ -793,12 +786,16 @@ export default function Header() {
             <CloseIcon />
           </IconButton>
         </PopupHead>
-        {/* Log in/Sign up actions */}
         <Box sx={{ display: "flex", gap: 1.5, py: 1.5, px: 2.5 }}>
-          <DrawerMenuAction onClick={() => { setOpen(false); }}>Log In</DrawerMenuAction>
+          <DrawerMenuAction onClick={() => setOpen(false)}>Log In</DrawerMenuAction>
           <DrawerMenuAction
-            onClick={() => { setOpen(false); }}
-            sx={{ fontWeight: 500, border: "1px solid #FFD700", color: "#FFD700", background: "rgba(255,222,90,0.09)" }}
+            onClick={() => setOpen(false)}
+            sx={{
+              fontWeight: 500,
+              border: "1px solid #FFD700",
+              color: "#FFD700",
+              background: "rgba(255,222,90,0.09)",
+            }}
           >
             Sign Up
           </DrawerMenuAction>
@@ -830,3 +827,5 @@ export default function Header() {
     </StyledAppBar>
   );
 }
+
+
