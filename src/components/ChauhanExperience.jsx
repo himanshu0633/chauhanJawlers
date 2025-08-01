@@ -107,6 +107,49 @@ const ExpTitle = styled(Typography)(({ theme }) => ({
     marginTop: 0,
   },
 }));
+const DigiGoldCard = styled(Card)(() => ({
+  borderRadius: 19,
+  background: "#44170D",
+  color: "#fff",
+  minHeight: 210,
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  position: "relative",
+  textAlign: "center",
+  boxShadow: "0 2px 15px 0 rgba(45,32,11,0.11)",
+  padding: 0,
+  width: "100%",
+  // Sizes SAME as regular CardWrap
+}));
+
+const DigiLogo = styled("img")(({ theme }) => ({
+  width: 58,
+  height: 58,
+  marginBottom: 7,
+  marginTop: 10,
+  objectFit: "contain",
+  [theme.breakpoints.down("sm")]: { width: 36, height: 36, marginTop: 8, marginBottom: 4 }
+}));
+
+const DigiHeading = styled(Typography)({
+  fontFamily: "serif",
+  fontSize: 23,
+  fontWeight: 700,
+  color: "#fff",
+  margin: "5px 0",
+  lineHeight: 1.1,
+  letterSpacing: 0.3,
+});
+
+const DigiPowered = styled(Typography)({
+  fontSize: 13,
+  color: "#fff",
+  marginTop: 7,
+  letterSpacing: 0.2,
+  fontWeight: 400,
+});
 
 
 const ExperienceCards = [
@@ -122,7 +165,6 @@ const ExperienceCards = [
   },
   {
     key: "digigold",
-    image: "/experImg3.png",
     title: "DIGI GOLD",
   },
   {
@@ -136,34 +178,46 @@ const ExperienceCards = [
     title: "TALK TO AN EXPERT",
   },
   {
-    key: "blogs",
-    image: "/experImg6.png",
-    title: "BLOGS",
+    key: "silver",
+    title: "SILVER"
   },
 ];
 
 export default function ChauhanExperience() {
   return (
-    <>
-      <Title>Chauhan Son’s Experience</Title>
+    <Box sx={{ mb: 2 }}>
+      < Title > Chauhan Son’s Experience</Title >
       <Subtitle>Find a Boutique or Book a Consultation</Subtitle>
       <GridWrap>
         {ExperienceCards.map(card => (
-          <div>
-            {/* <ExpCard key={card.key}> */}
-            <ExpMedia
-              component="img"
-              image={card.image}
-              alt={card.title}
-              onError={(e) => {
-                e.target.src = "/placeholder-exp.jpg";
-              }}
-            />
-            {/* </ExpCard> */}
-            <ExpTitle>{card.title}</ExpTitle>
-          </div>
+          card.key === "digigold" ? (
+            <DigiGoldCard key="digigold" elevation={0}>
+              <img src="/logo.svg" alt="Digi Gold Logo" />
+              <DigiHeading>DIGITAL GOLD</DigiHeading>
+              <DigiPowered>POWERED BY SAFE GOLD</DigiPowered>
+            </DigiGoldCard>
+          ) : card.key === "silver" ? (
+            <DigiGoldCard key="silver" elevation={0}>
+              <img src="/logo.svg" alt="Digi silver Logo" />
+              <DigiHeading>DIGITAL Silver</DigiHeading>
+              <DigiPowered>POWERED BY SAFE Silver</DigiPowered>
+            </DigiGoldCard>
+          ) : (
+            <div>
+              {/* <ExpCard key={card.key}> */}
+              <ExpMedia
+                component="img"
+                image={card.image}
+                alt={card.title}
+                onError={(e) => {
+                  e.target.src = "/placeholder-exp.jpg";
+                }}
+              />
+              {/* </ExpCard> */}
+              <ExpTitle>{card.title}</ExpTitle>
+            </div>)
         ))}
       </GridWrap>
-    </>
+    </Box >
   );
 }
