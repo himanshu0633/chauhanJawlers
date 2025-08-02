@@ -212,7 +212,7 @@ export default function ExchangeOffer() {
                         onPause={handleVideoPause}
                         poster="/videoPlaceholderImg.png"
                     >
-                        <source src="/public/video/homeVideo.mp4" type="video/mp4" />
+                        <source src="/video/homeVideo.mp4" type="video/mp4" />
                         Your browser does not support the video tag.
                     </VideoElement>
 

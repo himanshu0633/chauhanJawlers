@@ -119,18 +119,18 @@ const sidenavTabs = [
 ];
 
 const categories = [
-    { img: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=200&fit=crop", name: "All Jewellery" },
-    { img: "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=200&fit=crop", name: "Earrings" },
-    { img: "https://images.unsplash.com/photo-1617877461465-d774fc0de898?w=200&fit=crop", name: "Pendants" },
-    { img: "https://images.unsplash.com/photo-1603974372038-9b6ff566d7d6?w=200&fit=crop", name: "Finger Rings" },
-    { img: "https://images.unsplash.com/photo-1623741400142-b6b9a3c0a005?w=200&fit=crop", name: "Mangalsutra" },
-    { img: "https://images.unsplash.com/photo-1591912761520-9a900203be54?w=200&fit=crop", name: "Chains" },
-    { img: "https://images.unsplash.com/photo-1620055526323-97d8e87d9df4?w=200&fit=crop", name: "Nose Pin" },
-    { img: "https://images.unsplash.com/photo-1611591437281-f581a6f128a8?w=200&fit=crop", name: "Necklaces" },
-    { img: "https://images.unsplash.com/photo-1673540124401-e68ce3d1cb9c?w=200&fit=crop", name: "Necklaces Set" },
-    { img: "https://images.unsplash.com/photo-1623828380394-6e2501b90879?w=200&fit=crop", name: "Bracelets" },
-    { img: "https://images.unsplash.com/photo-1611591437281-f581a6f128a8?w=200&fit=crop", name: "Bangles" },
-    { img: "https://images.unsplash.com/photo-1690205624191-58db137eedb4?w=200&fit=crop", name: "Pendants & Earring Set" },
+    { img: "/small_icons/popup_img1.png", name: "All Jewellery" },
+    { img: "/small_icons/popup_img2.png", name: "Earrings" },
+    { img: "/small_icons/popup_img1.png", name: "Pendants" },
+    { img: "/small_icons/popup_img1.png", name: "Finger Rings" },
+    { img: "/small_icons/popup_img1.png", name: "Mangalsutra" },
+    { img: "/small_icons/popup_img1.png", name: "Chains" },
+    { img: "/small_icons/popup_img1.png", name: "Nose Pin" },
+    { img: "/small_icons/popup_img1.png", name: "Necklaces" },
+    { img: "/small_icons/popup_img1.png", name: "Necklaces Set" },
+    { img: "/small_icons/popup_img1.png", name: "Bracelets" },
+    { img: "/small_icons/popup_img1.png", name: "Bangles" },
+    { img: "/small_icons/popup_img1.png", name: "Pendants & Earring Set" },
 ];
 
 const priceRanges = [
