@@ -1,11 +1,13 @@
-import { Box, Typography, Grid, Button, Chip, IconButton } from '@mui/material';
+import { Box, Typography, Grid, Button, Chip, IconButton, Container } from '@mui/material';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
+import { useState } from 'react';
 
 const jewelleryData = [
     {
-        img: 'https://www.tanishq.co.in/on/demandware.static/-/Library-Sites-TanishqSharedLibrary/default/dw3bc42dcf/plp/14-kt-jewellery.jpg',
+        img: 'https://www.tanishq.co.in/on/demandware.static/-/Library-Sites-TanishqSharedLibrary/default/dw53b65f59/plp/18-kt-jewellery.jpg',
         label: '14 Kt',
     },
     {
@@ -13,7 +15,7 @@ const jewelleryData = [
         label: '18 Kt',
     },
     {
-        img: 'https://www.tanishq.co.in/on/demandware.static/-/Library-Sites-TanishqSharedLibrary/default/dw3bc42dcf/plp/14-kt-jewellery.jpg',
+        img: 'https://www.tanishq.co.in/on/demandware.static/-/Library-Sites-TanishqSharedLibrary/default/dwbc8afd33/plp/22-kt-jewellery.jpg',
         label: '22 Kt',
     },
 ];
@@ -39,8 +41,35 @@ const products = [
         oldPrice: '₹ 39,845',
         liked: false,
     },
+    {
+        img: 'https://www.tanishq.co.in/dw/image/v2/BKCK_PRD/on/demandware.static/-/Sites-Tanishq-product-catalog/default/dw8d8c0a6b/images/hi-res/50D3I3SZTABA09_1.jpg?sw=480&sh=480',
+        title: 'Everyday Charm Diamond Stud Earrings',
+        price: '₹ 36,903',
+        oldPrice: '₹ 39,845',
+        liked: false,
+    },
+    {
+        img: 'https://www.tanishq.co.in/dw/image/v2/BKCK_PRD/on/demandware.static/-/Sites-Tanishq-product-catalog/default/dw8d8c0a6b/images/hi-res/50D3I3SZTABA09_1.jpg?sw=480&sh=480',
+        title: 'Everyday Charm Diamond Stud Earrings',
+        price: '₹ 36,903',
+        oldPrice: '₹ 39,845',
+        liked: false,
+    },
 ];
-
+const assuranceData = [
+    {
+        img: 'https://i.imgur.com/XZiQnRx.png',
+        label: 'Exchange Offers'
+    },
+    {
+        img: 'https://www.tanishq.co.in/on/demandware.static/-/Library-Sites-TanishqSharedLibrary/default/dweee090e8/assurance/assurance-bis-logo.png',
+        label: 'Purity Guarantee'
+    },
+    {
+        img: 'https://i.imgur.com/3JJd6Ux.png',
+        label: 'Easy Replacements'
+    },
+]
 function JewelleryHeader() {
     return (
         <Box
@@ -48,7 +77,7 @@ function JewelleryHeader() {
                 width: '100%',
                 pt: 4,
                 pb: 4,
-                background: 'linear-gradient(to bottom, #fafafa 0%, #fff 100%)',
+                background: '#fff',
                 minHeight: '60vh',
             }}
         >
@@ -168,6 +197,7 @@ function FiltersAndSort() {
                     fontWeight: 400,
                     fontSize: 15,
                     backgroundColor: '#fafbfc',
+                    /*************  ✨ Windsurf Command 🌟  *************/
                     color: 'text.primary',
                     borderColor: '#ddd',
                     boxShadow: '0 .5px 0 #eee',
@@ -181,7 +211,13 @@ function FiltersAndSort() {
     );
 }
 
+/**
+ * A single Jewellery card component.
+ * @param {Object} product - The product data.
+ * @returns {React.ReactElement}
+ */
 function JewelleryCard({ product }) {
+    const [liked, setLiked] = useState(false);
     return (
         <Box sx={{ pb: 2 }}>
             <Box
@@ -189,7 +225,7 @@ function JewelleryCard({ product }) {
                     position: 'relative',
                     borderRadius: 2,
                     boxShadow: 1,
-                    background: '#fff',
+                    // background: '#fff',
                     overflow: 'hidden',
                     mb: 2,
                     width: { xs: 220, sm: 260 },
@@ -209,6 +245,7 @@ function JewelleryCard({ product }) {
                     }}
                 />
                 <IconButton
+                    onClick={() => setLiked(!liked)}
                     aria-label="like"
                     sx={{
                         position: 'absolute',
@@ -221,7 +258,12 @@ function JewelleryCard({ product }) {
                     }}
                     size="small"
                 >
-                    <FavoriteBorderIcon sx={{ fontSize: 20, color: '#bbb' }} />
+                    {liked ? (
+                        <FavoriteIcon sx={{ fontSize: 20, color: 'red' }} />
+                    ) : (
+                        <FavoriteBorderIcon sx={{ fontSize: 20, color: '#bbb' }} />
+                    )}
+                    {/* <FavoriteBorderIcon sx={{ fontSize: 20, color: '#bbb' }} /> */}
                 </IconButton>
             </Box>
             <Typography
@@ -257,7 +299,7 @@ function JewelleryCard({ product }) {
     );
 }
 
-export default function JewelleryGrid() {
+export function JewelleryGrid() {
     return (
         <>
             <JewelleryHeader />
@@ -294,3 +336,106 @@ export default function JewelleryGrid() {
         </>
     );
 }
+
+export function JewelAssurance() {
+    return (
+        <Box
+            sx={{
+                width: '100%',
+                background: '#fff',
+                border: '1px solid #e8e4e2',
+                borderRadius: '28px',
+                py: { xs: 4, sm: 6 },
+                // px: { xs: 2, sm: 6 },
+                // maxWidth: '1000px',
+                mx: 'auto',
+                my: 5,
+                boxShadow: '0 2px 8px rgba(190,165,140,0.04)',
+                position: 'relative',
+            }}
+        >
+            <Typography
+                variant="h5"
+                align="center"
+                sx={{
+                    fontFamily: 'serif',
+                    fontWeight: 600,
+                    color: '#3d1822',
+                    mb: 0.5,
+                }}
+            >
+                The Chauhan Sons Assurance
+            </Typography>
+            <Typography
+                variant="subtitle1"
+                align="center"
+                sx={{
+                    color: '#8f8f8f',
+                    mb: { xs: 3, sm: 6 },
+                    fontWeight: 400,
+                    fontSize: 18,
+                }}
+            >
+                Crafted by experts, cherished by you.
+            </Typography>
+            <Grid container spacing={1} justifyContent="center" gap={{ xs: 2, sm: 5 }}>
+                {assuranceData.map((item, idx) => (
+                    <Grid
+                        key={item.label}
+                        item
+                        xs={12}
+                        sm={4}
+                        sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: { xs: 3, sm: 0 } }}
+                    >
+                        <Box
+                            sx={{
+                                width: 90,
+                                height: 80,
+                                mb: 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            <img
+                                src={item.img}
+                                alt={item.label}
+                                style={{ maxWidth: '90%', maxHeight: '90%' }}
+                            />
+                        </Box>
+                        <Typography
+                            variant="subtitle1"
+                            align="center"
+                            sx={{
+                                fontFamily: 'serif',
+                                color: '#3d1822',
+                                fontWeight: 500,
+                                mt: 0.5,
+                                fontSize: 17,
+                                lineHeight: 1.25
+                            }}
+                        >
+                            {item.label}
+                        </Typography>
+                    </Grid>
+                ))}
+            </Grid>
+        </Box>
+    );
+}
+
+
+export default function AllJewelleryPage() {
+    return (
+        <Box sx={{ backgroundColor: '#f9f9f9' }}>
+            <Container maxWidth="xl">
+                <JewelleryGrid />
+                <JewelAssurance />
+            </Container>
+        </Box>
+    );
+}
+
+
+
+

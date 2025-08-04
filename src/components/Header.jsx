@@ -648,8 +648,8 @@ export default function Header() {
               <MenuIcon />
             </IconButton>
           )}
-          <LogoContainer sx={{ ml: !isMdUp ? 0.5 : 0, flex: "none" }}>
-            <img src="/logo.svg" alt="logo" />
+          <LogoContainer sx={{ ml: !isMdUp ? 0.5 : 0, flex: "none", cursor: "pointer" }}>
+            <img onClick={() => navigate("/")} src="/logo.svg" alt="logo" />
           </LogoContainer>
         </div>
 
