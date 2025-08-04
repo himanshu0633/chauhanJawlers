@@ -425,6 +425,7 @@ import {
 } from "@mui/icons-material";
 
 import NavHoverDropdown from "../dropdown/NavHoverDropdown";
+import { useNavigate } from "react-router-dom";
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   backgroundColor: "#44170D",
@@ -606,6 +607,7 @@ export default function Header() {
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   // State for dropdown
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -616,7 +618,7 @@ export default function Header() {
 
   // Add ids for dropdown control corresponding to categories
   const menuItems = [
-    { id: "category", icon: <Star sx={{ fontSize: "16px" }} />, label: "All Jewellery" },
+    { id: "category", icon: <Star sx={{ fontSize: "16px" }} />, label: "All Jewellery", navigate: () => navigate("/allJewellery") },
     { id: "price", icon: <Circle sx={{ fontSize: "16px", color: "#FFD700" }} />, label: "Gold" },
     { id: "gender", icon: <DiamondOutlined sx={{ fontSize: "16px" }} />, label: "Diamond" },
     { id: "occasion", icon: <Circle sx={{ fontSize: "16px", color: "#d8d7d0ff" }} />, label: "Silver" },
@@ -717,10 +719,11 @@ export default function Header() {
                 setHoveredMenu(null);
               }}
             >
-              {menuItems.map(({ id, icon, label }) => (
+              {menuItems.map(({ id, icon, label, navigate }) => (
                 <NavButton
                   key={label}
                   startIcon={icon}
+                  onClick={navigate}
                   onMouseEnter={() => {
                     if (id && hasDropdown.includes(id)) {
                       setHoveredMenu(id);
