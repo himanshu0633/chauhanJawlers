@@ -92,21 +92,22 @@ export default function LoginPage() {
     return (
         <Box
             sx={{
-                minHeight: '100vh',
+                // minHeight: '100vh',
                 background: `linear-gradient(135deg, #e6d3bf 0%, #ffffff 100%)`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontFamily: '"Montserrat", "Roboto", sans-serif',
                 overflow: "auto",
+                py:5
             }}
         >
             <Paper
                 elevation={10}
                 sx={{
                     borderRadius: 6,
-                    minWidth: matches ? '93vw' : '400px',
-                    maxWidth: 410,
+                    minWidth: matches ? '80vw' : '400px',
+                    // maxWidth: 410,
                     px: matches ? 1.2 : 5,
                     py: matches ? 2.5 : 4.5,
                     background: themeColors.glass,

@@ -7,6 +7,8 @@ import Header from './common components/Header'
 import Footer from './common components/Footer'
 import { MobileBottomNav } from './common components/MobileBottomNav'
 import LoginPage from './common components/LoginPage'
+import WishlistPage from './common components/WishlistPage'
+import AccountPopup from './popUp/AccountPopup'
 function App() {
 
   return (
@@ -17,6 +19,8 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/allJewellery" element={<AllJewelleryPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/wishlist" element={<WishlistPage />} />
+        <Route path="/account" element={<AccountPopup />} />
       </Routes>
 
       <Footer />
