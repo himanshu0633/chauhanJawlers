@@ -1,11 +1,12 @@
 import './App.css'
-import Header from './components/Header'
-import Footer from './components/Footer'
 import HomePage from './pages/HomePage'
 import { Route, Routes } from 'react-router-dom'
-import { MobileBottomNav } from './components/MobileBottomNav'
 import { Box } from '@mui/material'
 import AllJewelleryPage from './dropdownPages/AllJewelleryPage'
+import Header from './common components/Header'
+import Footer from './common components/Footer'
+import { MobileBottomNav } from './common components/MobileBottomNav'
+import LoginPage from './common components/LoginPage'
 function App() {
 
   return (
@@ -15,6 +16,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/allJewellery" element={<AllJewelleryPage />} />
+        <Route path="/login" element={<LoginPage />} />
       </Routes>
 
       <Footer />

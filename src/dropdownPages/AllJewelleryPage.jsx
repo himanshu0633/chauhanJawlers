@@ -211,11 +211,6 @@ function FiltersAndSort() {
     );
 }
 
-/**
- * A single Jewellery card component.
- * @param {Object} product - The product data.
- * @returns {React.ReactElement}
- */
 function JewelleryCard({ product }) {
     const [liked, setLiked] = useState(false);
     return (
