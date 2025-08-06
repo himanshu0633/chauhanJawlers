@@ -1,256 +1,3 @@
-// import React, { useState } from "react";
-// import {
-//     Box,
-//     Paper,
-//     Typography,
-//     Button,
-//     Divider,
-//     Collapse,
-//     IconButton,
-//     Chip,
-//     Grid,
-//     Tabs,
-//     Tab
-// } from "@mui/material";
-// import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
-// import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
-// import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-// import DiamondIcon from "@mui/icons-material/Diamond";
-// import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
-
-// const product = {
-//     name: "Brilliant Diamond Nose Ring",
-//     price: "₹14,855",
-//     oldPrice: "₹16,955",
-//     karat: "18 Karat",
-//     diamondCt: "0.06 ct",
-//     gold: "Gold",
-//     color: "Yellow",
-//     grossWeight: "0.57g",
-//     images: [
-//         "https://www.tanishq.co.in/dw/image/v2/BKCK_PRD/on/demandware.static/-/Sites-Tanishq-product-catalog/default/dw3458e37b/images/hi-res/502117OFBAAA02_1.jpg?sw=640&sh=640",      // set to your front-view image
-//         "https://www.tanishq.co.in/dw/image/v2/BKCK_PRD/on/demandware.static/-/Sites-Tanishq-product-catalog/default/dw5b94105e/images/hi-res/502117OFBAAA02_2.jpg?sw=640&sh=640"        // set to your side-view image
-//     ]
-// };
-
-// const infoTabs = [
-//     { label: "Product Details" },
-//     { label: "Price Breakup" }
-// ];
-
-// export default function SingleProductDetail() {
-//     const [tab, setTab] = useState(0);
-//     const [expanded, setExpanded] = useState(true);
-
-//     return (
-//         <Box sx={{ bgcolor: "#f9f6f4", minHeight: "100vh", p: { xs: 1.2, md: 3 }, py: 6 }}>
-//             {/* Main layout */}
-//             <Grid container spacing={4} justifyContent="center">
-//                 {/* Images Area */}
-//                 <Grid item xs={12} md={6} sx={{ display: "flex", justifyContent: "center" }}>
-//                     <Box sx={{ display: "flex", gap: 4, justifyContent: "center", alignItems: "center" }}>
-//                         <Paper
-//                             sx={{
-//                                 width: 108, minWidth: 92, aspectRatio: "1/2",
-//                                 bgcolor: "#fff", boxShadow: "0 2px 16px #fde5c9", display: "flex", alignItems: "center",
-//                                 justifyContent: "center", borderRadius: 2
-//                             }}
-//                             elevation={0}
-//                         >
-//                             <img
-//                                 src={product.images[0]}
-//                                 alt="front"
-//                                 style={{ maxWidth: 62, maxHeight: 120, margin: "auto" }}
-//                                 onError={e => e.target.style.opacity = "0.3"}
-//                             />
-//                         </Paper>
-//                         <Paper
-//                             sx={{
-//                                 width: 156, minWidth: 120, aspectRatio: "1/1",
-//                                 bgcolor: "#fff", boxShadow: "0 4px 28px #fbdbc6", display: "flex", alignItems: "center",
-//                                 justifyContent: "center", borderRadius: 6
-//                             }}
-//                             elevation={0}
-//                         >
-//                             <img
-//                                 src={product.images[1]}
-//                                 alt="side"
-//                                 style={{ maxWidth: 124, maxHeight: 124, margin: "auto" }}
-//                                 onError={e => e.target.style.opacity = "0.3"}
-//                             />
-//                         </Paper>
-//                     </Box>
-//                 </Grid>
-
-//                 {/* Product info, price, action */}
-//                 <Grid item xs={12} md={6} sx={{ display: "flex", alignItems: "center" }}>
-//                     <Paper
-//                         sx={{
-//                             borderRadius: 4,
-//                             width: "100%",
-//                             p: { xs: 3, md: 4 },
-//                             background: "#fff",
-//                             boxShadow: "0 6px 52px #f4ecd0"
-//                         }}
-//                         elevation={0}
-//                     >
-//                         {/* Title + wishlist/share */}
-//                         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-//                             <Typography
-//                                 variant="h5"
-//                                 sx={{
-//                                     fontWeight: 600,
-//                                     fontFamily: "serif",
-//                                     color: "#572c18",
-//                                     fontSize: { xs: "1.3rem", sm: "1.65rem" },
-//                                     lineHeight: 1.21
-//                                 }}>
-//                                 {product.name}
-//                             </Typography>
-//                             <Box>
-//                                 <IconButton disableRipple sx={{ color: "#a47b69" }}><FavoriteBorderOutlinedIcon /></IconButton>
-//                                 <IconButton disableRipple sx={{ color: "#a47b69", ml: "2px" }}><ShareOutlinedIcon /></IconButton>
-//                             </Box>
-//                         </Box>
-//                         <Divider sx={{ mb: 2 }} />
-
-//                         {/* Price Row */}
-//                         <Box sx={{
-//                             display: "flex", alignItems: "center", gap: 2, mb: 2, flexWrap: "wrap"
-//                         }}>
-//                             <Typography variant="h6" sx={{ fontWeight: 700, color: "#93201a", fontSize: { xs: "1.4rem", sm: "1.71rem" }, mr: 2 }}>
-//                                 {product.price}
-//                             </Typography>
-//                             {product.oldPrice && (
-//                                 <Typography sx={{ color: "#bda79a", fontSize: "1.11rem", textDecoration: "line-through" }}>
-//                                     {product.oldPrice}
-//                                 </Typography>
-//                             )}
-//                             <Chip
-//                                 size="small"
-//                                 label="Best Seller"
-//                                 sx={{
-//                                     bgcolor: "#ffd6b4", color: "#83340a",
-//                                     fontWeight: 600, fontSize: "0.91rem", ml: 1
-//                                 }}
-//                             />
-//                         </Box>
-
-//                         {/* Specifications */}
-//                         <Box sx={{ display: "flex", alignItems: "center", gap: 2.5, mb: 3, flexWrap: "wrap" }}>
-//                             <Chip
-//                                 icon={<DiamondIcon sx={{ color: "#bd8e7a" }} />}
-//                                 label={product.karat}
-//                                 sx={{ bgcolor: "#f5e3db", color: "#864f25" }}
-//                             />
-//                             <Chip
-//                                 label={product.diamondCt}
-//                                 sx={{ bgcolor: "#f5e3db", color: "#864f25" }}
-//                             />
-//                             <Chip
-//                                 label={`${product.grossWeight} • ${product.color} gold`}
-//                                 sx={{ bgcolor: "#faede3", color: "#876329" }}
-//                             />
-//                         </Box>
-
-//                         {/* Add to Cart and Delivery */}
-//                         <Button
-//                             variant="contained"
-//                             startIcon={<ShoppingCartCheckoutIcon />}
-//                             sx={{
-//                                 width: "100%",
-//                                 borderRadius: "18px",
-//                                 py: 1.28,
-//                                 fontWeight: 700,
-//                                 textTransform: "none",
-//                                 fontSize: "1.13rem",
-//                                 background: "linear-gradient(91deg, #e8c8ad 5%, #b88775 100%)",
-//                                 color: "#624116",
-//                                 boxShadow: "0 3px 28px #f8eedd",
-//                                 mb: 2,
-//                                 "&:hover": {
-//                                     background: "linear-gradient(91deg,#fad9bb 7%,#b77e68 95%)"
-//                                 }
-//                             }}
-//                         >
-//                             Add to Cart
-//                         </Button>
-//                         <Typography sx={{ color: "#6a462d", fontSize: "0.99rem", mb: 1 }}>Delivery: Select location for estimate</Typography>
-//                     </Paper>
-//                 </Grid>
-//             </Grid>
-
-//             {/* Product Tabs (Details/Breakup) */}
-//             <Box
-//                 sx={{
-//                     mt: { xs: 5, md: 9 },
-//                     maxWidth: 820,
-//                     mx: "auto"
-//                 }}
-//             >
-//                 <Paper
-//                     sx={{
-//                         borderRadius: 4,
-//                         bgcolor: "#fff",
-//                         py: { xs: 2.1, md: 3.4 },
-//                         px: { xs: 2, sm: 5 },
-//                         boxShadow: "0 4px 32px #f2e3d5"
-//                     }}
-//                     elevation={0}
-//                 >
-//                     <Tabs
-//                         value={tab}
-//                         onChange={(_, t) => setTab(t)}
-//                         sx={{
-//                             minHeight: 36,
-//                             "& .MuiTab-root": {
-//                                 fontWeight: 600,
-//                                 fontSize: ".99rem",
-//                                 color: "#916a4b"
-//                             },
-//                             "& .Mui-selected": { color: "#925737" }
-//                         }}
-//                         TabIndicatorProps={{
-//                             style: { background: "#e1ae98", height: 3, borderRadius: 2 }
-//                         }}
-//                     >
-//                         {infoTabs.map((t, idx) => (
-//                             <Tab key={t.label} label={t.label} disableRipple sx={{ minWidth: 120 }} />
-//                         ))}
-//                     </Tabs>
-//                     <Divider />
-//                     <Collapse in={tab === 0} timeout="auto" unmountOnExit>
-//                         {/* Product Details */}
-//                         <Box sx={{ mt: 2 }}>
-//                             <Typography sx={{ color: "#7f5947", fontWeight: 600, mb: 1.5 }}>
-//                                 Metal: {product.karat} {product.color} Gold
-//                             </Typography>
-//                             <Typography sx={{ color: "#7e5441", mb: 0.7 }}>
-//                                 Gross Weight: {product.grossWeight}
-//                             </Typography>
-//                             <Typography sx={{ color: "#7e5441" }}>
-//                                 Diamonds: {product.diamondCt}, brilliant cut, superior clarity.
-//                             </Typography>
-//                         </Box>
-//                     </Collapse>
-//                     <Collapse in={tab === 1} timeout="auto" unmountOnExit>
-//                         {/* Price Breakup Example */}
-//                         <Box sx={{ mt: 2 }}>
-//                             <Typography sx={{ color: "#7f5947", mb: 1 }}>
-//                                 Price includes gold, diamond, making charges, GST.
-//                             </Typography>
-//                             <Typography sx={{ color: "#7e5441" }}><b>Gold: </b>₹12,000</Typography>
-//                             <Typography sx={{ color: "#7e5441" }}><b>Diamond: </b>₹2,000</Typography>
-//                             <Typography sx={{ color: "#7e5441" }}><b>Other: </b>₹855</Typography>
-//                         </Box>
-//                     </Collapse>
-//                 </Paper>
-//             </Box>
-//         </Box>
-//     );
-// }
-
-
 import React, { useState } from 'react';
 import {
     Box,
@@ -283,6 +30,7 @@ import {
     ShoppingCart,
 } from '@mui/icons-material';
 import ScaleRoundedIcon from "@mui/icons-material/ScaleRounded";
+import { useNavigate } from 'react-router-dom';
 
 export default function SingleProductPage() {
     const theme = useTheme();
@@ -290,11 +38,12 @@ export default function SingleProductPage() {
     const [weight, setWeight] = React.useState("0.57");
     const [activeTab, setActiveTab] = useState('details');
     const [pincode, setPincode] = useState('');
+    const navigate = useNavigate()
     const weightOptions = [
         { value: "0.57", label: "0.57 g" },
         { value: "0.80", label: "0.80 g" },
     ];
-    // As per original UI country selector is hidden, so removed for now
+
 
     const handleTabChange = (tab) => setActiveTab(tab);
 
@@ -330,7 +79,7 @@ Diamond Shape: Round`,
     };
 
     return (
-        <Box bgcolor="#fff" minHeight="100vh" px={{ xs: 1, sm: 3, md: 6 }} py={6}>
+        <Box bgcolor="#fff" px={{ xs: 1, sm: 3, md: 6 }} py={6}>
             <Container maxWidth="xl" sx={{ maxWidth: 1140 }}>
                 {/* View Similar Button */}
                 <Box sx={{ textAlign: 'center', mb: { xs: 2, sm: 3 } }}>
@@ -450,6 +199,7 @@ Diamond Shape: Round`,
                 {/* Action Buttons */}
                 <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: { xs: 4, sm: 6 } }}>
                     <IconButton
+                        onClick={() => navigate('/wishlist')}
                         size="large"
                         aria-label="Add to wishlist"
                         sx={{
@@ -980,6 +730,7 @@ Diamond Shape: Round`,
 
                     {/* Add to Cart Button */}
                     <Button
+                        onClick={() => navigate('/cart')}
                         variant="contained"
                         disableElevation
                         sx={{
