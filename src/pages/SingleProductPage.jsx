@@ -282,13 +282,18 @@ import {
     Visibility,
     ShoppingCart,
 } from '@mui/icons-material';
+import ScaleRoundedIcon from "@mui/icons-material/ScaleRounded";
 
 export default function SingleProductPage() {
     const theme = useTheme();
     const isSm = useMediaQuery(theme.breakpoints.down('sm'));
-
+    const [weight, setWeight] = React.useState("0.57");
     const [activeTab, setActiveTab] = useState('details');
     const [pincode, setPincode] = useState('');
+    const weightOptions = [
+        { value: "0.57", label: "0.57 g" },
+        { value: "0.80", label: "0.80 g" },
+    ];
     // As per original UI country selector is hidden, so removed for now
 
     const handleTabChange = (tab) => setActiveTab(tab);
@@ -328,7 +333,7 @@ Diamond Shape: Round`,
         <Box bgcolor="#fff" minHeight="100vh" px={{ xs: 1, sm: 3, md: 6 }} py={6}>
             <Container maxWidth="xl" sx={{ maxWidth: 1140 }}>
                 {/* View Similar Button */}
-                <Box sx={{ textAlign: 'center', mb: { xs: 3, sm: 5 } }}>
+                <Box sx={{ textAlign: 'center', mb: { xs: 2, sm: 3 } }}>
                     <Button
                         variant="outlined"
                         startIcon={<Visibility />}
@@ -352,7 +357,7 @@ Diamond Shape: Round`,
                 </Box>
 
                 {/* Specs Chips */}
-                <Box sx={{ textAlign: 'center', mb: { xs: 3, sm: 5 } }}>
+                <Box sx={{ textAlign: 'center', mb: { xs: 2, sm: 3 } }}>
                     <Chip
                         icon={<Diamond sx={{ color: '#E65100' }} />}
                         label={product.karatage}
@@ -437,7 +442,7 @@ Diamond Shape: Round`,
                     variant="caption"
                     display="block"
                     textAlign="center"
-                    sx={{ fontSize: 13, color: '#666', mb: { xs: 3, sm: 5 } }}
+                    sx={{ fontSize: 13, color: '#666', mb: { xs: 2, sm: 3 } }}
                 >
                     incl taxes and charges
                 </Typography>
@@ -812,7 +817,7 @@ Diamond Shape: Round`,
                                 <Box
                                     sx={{
                                         flex: '1 1 40%', // approx 4/12 = 33%, a bit less for spacing
-                                        minWidth: { xs: '100%', md: '280px' },
+                                        minWidth: { xs: '100%', sm: '320px', md: '400px' },
                                         display: 'flex',
                                         justifyContent: 'center',
                                         alignItems: 'center',
@@ -823,7 +828,7 @@ Diamond Shape: Round`,
                                         src={product.sideImage}
                                         alt="Product side view"
                                         sx={{
-                                            maxWidth: { xs: '280px', md: '200px', lg: '400px' },
+                                            maxWidth: { xs: '280px', sm: '300px', md: '400px' },
                                             width: '100%',
                                             height: 'auto',
                                             objectFit: 'contain',
@@ -899,6 +904,106 @@ Diamond Shape: Round`,
                         </Box>
                     )}
                 </Box>
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        alignItems: "center",
+                        justifyContent: { xs: "stretch", sm: "space-between" },
+                        gap: { xs: 2, sm: 2 },
+                        bgcolor: "#fff",
+                        borderRadius: "14px",
+                        boxShadow: "0 2px 14px #ede4dc, 0 0px 2px #f6f1ec",
+                        p: { xs: 1, sm: "10px 18px" },
+                        mt: { xs: 2, sm: 3 },
+                        width: "100%",
+                        maxWidth: 420,
+                        mx: "auto",
+                        minHeight: 45,
+                    }}
+                >
+                    {/* Price */}
+                    <Typography
+                        sx={{
+                            fontFamily: 'serif',
+                            fontSize: { xs: "1.18rem", sm: "1.24rem" },
+                            fontWeight: 600,
+                            color: "#37200e",
+                            minWidth: 94,
+                            letterSpacing: "0.01em",
+                        }}
+                    >
+                        ₹14,955
+                    </Typography>
+
+                    {/* Weight Select */}
+                    <Select
+                        value={weight}
+                        onChange={e => setWeight(e.target.value)}
+                        displayEmpty
+                        inputProps={{ "aria-label": "Weight" }}
+                        sx={{
+                            fontWeight: 500,
+                            fontFamily: "serif",
+                            fontSize: "15px",
+                            color: "#222",
+                            bgcolor: "#faf5ee",
+                            borderRadius: "24px",
+                            px: 2,
+                            py: 0.3,
+                            minWidth: 92,
+                            boxShadow: "0 2px 10px #f1e7dd",
+                            "& .MuiSelect-icon": {
+                                color: "#82705a",
+                                fontSize: "1.2em"
+                            },
+                        }}
+                        startAdornment={
+                            <InputAdornment position="start" sx={{ mr: 1 }}>
+                                <ScaleRoundedIcon sx={{ color: "#8c7154", fontSize: 20 }} />
+                            </InputAdornment>
+                        }
+                        MenuProps={{
+                            PaperProps: {
+                                sx: {
+                                    borderRadius: 2
+                                }
+                            }
+                        }}
+                    >
+                        {weightOptions.map(opt => (
+                            <MenuItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                            </MenuItem>
+                        ))}
+                    </Select>
+
+                    {/* Add to Cart Button */}
+                    <Button
+                        variant="contained"
+                        disableElevation
+                        sx={{
+                            minWidth: 120,
+                            bgcolor: "#7e232a",
+                            color: "#fff",
+                            fontWeight: 600,
+                            fontFamily: "inherit",
+                            fontSize: "1.03rem",
+                            px: 2.5,
+                            py: 1,
+                            borderRadius: "28px",
+                            textTransform: "none",
+                            boxShadow: "0 3px 20px #e7cfc8, 0 0px 2px #f6f1ec",
+                            whiteSpace: "nowrap",
+                            "&:hover": {
+                                bgcolor: "#9d2531",
+                            },
+                        }}
+                    >
+                        Add to Cart
+                    </Button>
+                </Box>
+
             </Container>
         </Box>
     );
