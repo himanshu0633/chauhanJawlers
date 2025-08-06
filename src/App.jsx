@@ -10,6 +10,7 @@ import LoginPage from './pages/LoginPage'
 import WishlistPage from './pages/WishlistPage'
 import CartPage from './pages/CartPage'
 import SingleProductPage from './pages/SingleProductPage'
+import CollectionPage from './dropdownPages/CollectionPage'
 function App() {
 
   return (
@@ -23,6 +24,8 @@ function App() {
         <Route path="/wishlist" element={<WishlistPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/singleProduct" element={<SingleProductPage />} />
+        <Route path="/collection" element={<CollectionPage />} />
+
 
       </Routes>
 
