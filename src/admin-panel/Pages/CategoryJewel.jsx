@@ -194,11 +194,15 @@ const CategoryJewel = () => {
     };
 
     return (
-        <Container maxWidth="lg">
+        <Container maxWidth="xl">
             <Box sx={{ my: 4 }}>
-                <Typography variant="h4" component="h1" gutterBottom>
-                     Categories
-                </Typography>
+             <Typography
+                    variant="h4"
+                    gutterBottom
+                    sx={{ fontWeight: 700, color: 'text.primary', mb: 4 }}
+                  >
+                    Category
+                  </Typography>
 
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', my: 3 }}>
                     <Button

@@ -122,8 +122,10 @@ const ProductsJewel = () => {
   return (
     <Container maxWidth="xl">
       <Box sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom className='fontSize25sml'>
-          Pharma Products
+        <Typography variant="h4"
+          gutterBottom
+          sx={{ fontWeight: 700, color: 'text.primary', mb: 4 }}>
+           Products
         </Typography>
         <Box sx={{
           display: 'flex',

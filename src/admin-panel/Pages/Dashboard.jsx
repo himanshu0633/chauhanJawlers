@@ -150,12 +150,7 @@ const Dashboard = () => {
                     <Typography
                         variant="h4"
                         gutterBottom
-                        className='fontSize25sml'
-                        sx={{
-                            fontWeight: 700,
-                            color: 'black',
-                            mb: 4,
-                        }}
+                        sx={{ fontWeight: 700, color: 'text.primary', mb: 4 }}
                     >
                         Admin Dashboard
                     </Typography>

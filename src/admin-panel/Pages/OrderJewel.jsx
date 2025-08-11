@@ -116,7 +116,9 @@ const OrderJewel = () => {
   return (
     <Container maxWidth="xl">
       <Box sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" className='fontSize25sml' gutterBottom sx={{ fontWeight: 'bold' }}>
+        <Typography variant="h4"
+          gutterBottom
+          sx={{ fontWeight: 700, color: 'text.primary', mb: 4 }}>
           Orders
         </Typography>
 

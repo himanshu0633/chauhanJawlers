@@ -134,7 +134,9 @@ const UsersJewel = () => {
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" className='fontSize25sml'>
+        <Typography variant="h4"
+          gutterBottom
+          sx={{ fontWeight: 700, color: 'text.primary', mb: 4 }}>
           User Management
         </Typography>
       </Box>
