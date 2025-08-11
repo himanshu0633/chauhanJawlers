@@ -23,6 +23,7 @@ import WeddingPage from './dropdownPages/WeddingPage';
 import GiftingPage from './dropdownPages/GiftingPage';
 import OrderJewel from './admin-panel/Pages/OrderJewel';
 import Banners from './admin-panel/Pages/Banners';
+import UsersJewel from './admin-panel/Pages/UsersJewel';
 
 function App() {
   const location = useLocation();
@@ -71,6 +72,7 @@ function App() {
             <Route path="addNewProduct" element={<AddNewProduct />} />
             <Route path="orders" element={<OrderJewel />} />
             <Route path="banners" element={<Banners />} />
+            <Route path="user" element={<UsersJewel />} />
           </Route>
         </Route>
       </Routes>
