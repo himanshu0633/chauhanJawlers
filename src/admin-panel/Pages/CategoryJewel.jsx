@@ -196,13 +196,13 @@ const CategoryJewel = () => {
     return (
         <Container maxWidth="xl">
             <Box sx={{ my: 4 }}>
-             <Typography
+                <Typography
                     variant="h4"
                     gutterBottom
                     sx={{ fontWeight: 700, color: 'text.primary', mb: 4 }}
-                  >
+                >
                     Category
-                  </Typography>
+                </Typography>
 
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', my: 3 }}>
                     <Button
@@ -312,57 +312,59 @@ const CategoryJewel = () => {
                             <Close />
                         </IconButton>
                     </DialogTitle>
+
                     <DialogContent dividers>
                         <form onSubmit={handleSubmit}>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12}>
-                                    <FormControl fullWidth required>
-                                        <InputLabel id="variety-label">Variety</InputLabel>
-                                        <Select
-                                            labelId="variety-label"
-                                            id="variety"
-                                            name="variety"
-                                            value={newCategory.variety}
-                                            label="Variety"
-                                            onChange={handleInputChange}
-                                        >
-                                            <MenuItem value="selectVariety" disabled>
-                                                Select Variety
-                                            </MenuItem>
-                                            <MenuItem value="Human">Human</MenuItem>
-                                            <MenuItem value="Veterinary">Veterinary</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        required
-                                        label="Category Name"
-                                        name="name"
-                                        value={newCategory.name}
+                            {/* Row 1: Variety | Category Name */}
+                            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'nowrap' }}>
+                                <FormControl required sx={{ flex: 1 }}>
+                                    <InputLabel id="variety-label">Variety</InputLabel>
+                                    <Select
+                                        labelId="variety-label"
+                                        id="variety"
+                                        name="variety"
+                                        value={newCategory.variety}
+                                        label="Variety"
                                         onChange={handleInputChange}
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        required
-                                        label="Description"
-                                        name="description"
-                                        value={newCategory.description}
-                                        onChange={handleInputChange}
-                                        multiline
-                                        rows={3}
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
+                                    >
+                                        <MenuItem value="selectVariety" disabled>
+                                            Select Variety
+                                        </MenuItem>
+                                        <MenuItem value="Human">Human</MenuItem>
+                                        <MenuItem value="Veterinary">Veterinary</MenuItem>
+                                    </Select>
+                                </FormControl>
+
+                                <TextField
+                                    required
+                                    label="Category Name"
+                                    name="name"
+                                    value={newCategory.name}
+                                    onChange={handleInputChange}
+                                    sx={{ flex: 1 }}
+                                />
+                            </Box>
+
+                            {/* Row 2: Description | Upload Image */}
+                            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'nowrap', mt: 2 }}>
+                                <TextField
+                                    required
+                                    label="Description"
+                                    name="description"
+                                    value={newCategory.description}
+                                    onChange={handleInputChange}
+                                    multiline
+                                    rows={4}
+                                    sx={{ flex: 1 }}
+                                />
+
+                                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                                     <UploadButton
                                         component="label"
                                         variant="outlined"
                                         color="primary"
-                                        fullWidth
                                         startIcon={<CloudUpload />}
+                                        sx={{ alignSelf: 'stretch' }}
                                     >
                                         Upload Image
                                         <input
@@ -373,6 +375,7 @@ const CategoryJewel = () => {
                                             hidden
                                         />
                                     </UploadButton>
+
                                     {imagePreview && (
                                         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
                                             <Avatar
@@ -383,18 +386,23 @@ const CategoryJewel = () => {
                                             />
                                         </Box>
                                     )}
-                                </Grid>
-                            </Grid>
+                                </Box>
+                            </Box>
+
+                            <DialogActions sx={{ mt: 1 }}>
+                                <Button onClick={handleCloseModal} color="secondary">
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    color="primary"
+                                    variant="contained"
+                                >
+                                    {isEditing ? 'Update' : 'Save'}
+                                </Button>
+                            </DialogActions>
                         </form>
                     </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleCloseModal} color="secondary">
-                            Cancel
-                        </Button>
-                        <Button onClick={handleSubmit} color="primary" variant="contained">
-                            {isEditing ? 'Update' : 'Save'}
-                        </Button>
-                    </DialogActions>
                 </Dialog>
             </Box>
         </Container>

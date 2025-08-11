@@ -357,7 +357,7 @@ const SubCategoryJewel = () => {
 
       {/* Add/Edit Sub-Category Dialog */}
       <Dialog open={openModal} onClose={handleCloseModal} maxWidth="sm" fullWidth>
-        <DialogTitle>
+        <DialogTitle sx={{ position: 'relative' }}>
           {editingId ? 'Edit Sub-Category' : 'Add New Sub-Category'}
           <IconButton
             aria-label="close"
@@ -372,73 +372,79 @@ const SubCategoryJewel = () => {
             <Close />
           </IconButton>
         </DialogTitle>
+
         <DialogContent dividers>
           <form onSubmit={handleCreateOrUpdate}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <FormControl fullWidth required>
-                  <InputLabel id="variety-label">Variety</InputLabel>
-                  <Select
-                    labelId="variety-label"
-                    id="subCategoryvariety"
-                    name="subCategoryvariety"
-                    value={formData.subCategoryvariety}
-                    label="Variety"
-                    onChange={handleInputChange}
-                  >
-                    <MenuItem value="" disabled>Select Variety</MenuItem>
-                    <MenuItem value="Human">Human</MenuItem>
-                    <MenuItem value="Veterinary">Veterinary</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-                <FormControl fullWidth required>
-                  <InputLabel id="category-label">Category</InputLabel>
-                  <Select
-                    labelId="category-label"
-                    id="category_id"
-                    name="category_id"
-                    value={formData.category_id}
-                    label="Category"
-                    onChange={handleInputChange}
-                    disabled={!formData.subCategoryvariety}
-                  >
-                    <MenuItem value="">Select Category</MenuItem>
-                    {filteredCategories.map(cat => (
-                      <MenuItem key={cat._id} value={cat._id}>{cat.name}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  required
-                  label="Sub-Category Name"
-                  name="name"
-                  value={formData.name}
+            {/* Row 1: Variety | Category | Sub-Category Name */}
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'nowrap' }}>
+              <FormControl required sx={{ flex: 1 }}>
+                <InputLabel id="variety-label">Variety</InputLabel>
+                <Select
+                  labelId="variety-label"
+                  id="subCategoryvariety"
+                  name="subCategoryvariety"
+                  value={formData.subCategoryvariety}
+                  label="Variety"
                   onChange={handleInputChange}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Description"
-                  name="description"
-                  value={formData.description}
+                  fullWidth={false} // remove forced full width
+                >
+                  <MenuItem value="" disabled>Select Variety</MenuItem>
+                  <MenuItem value="human">Diamond</MenuItem>
+                  <MenuItem value="gold">Gold</MenuItem>
+                  <MenuItem value="silver">Silver</MenuItem>
+                </Select>
+              </FormControl>
+
+              <FormControl required sx={{ flex: 1 }}>
+                <InputLabel id="category-label">Category</InputLabel>
+                <Select
+                  labelId="category-label"
+                  id="category_id"
+                  name="category_id"
+                  value={formData.category_id}
+                  label="Category"
                   onChange={handleInputChange}
-                  multiline
-                  rows={3}
-                />
-              </Grid>
-              <Grid item xs={12}>
+                  disabled={!formData.subCategoryvariety}
+                  fullWidth={false}
+                >
+                  <MenuItem value="">Select Category</MenuItem>
+                  {filteredCategories.map((cat) => (
+                    <MenuItem key={cat._id} value={cat._id}>{cat.name}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <TextField
+                required
+                label="Sub-Category Name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                fullWidth={false}
+                sx={{ flex: 1 }}
+              />
+            </Box>
+
+            {/* Row 2: Description | Upload */}
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'nowrap', mt: 2 }}>
+              <TextField
+                label="Description"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                multiline
+                rows={4}
+                fullWidth={false}
+                sx={{ flex: 1 }}
+              />
+
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <UploadButton
                   component="label"
                   variant="outlined"
                   color="primary"
-                  fullWidth
                   startIcon={<CloudUpload />}
+                  sx={{ flexShrink: 0 }}
                 >
                   Upload Image
                   <input
@@ -449,6 +455,7 @@ const SubCategoryJewel = () => {
                     hidden
                   />
                 </UploadButton>
+
                 {imagePreview && (
                   <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
                     <Avatar
@@ -459,17 +466,18 @@ const SubCategoryJewel = () => {
                     />
                   </Box>
                 )}
-              </Grid>
-            </Grid>
-            <DialogActions>
-              <Button onClick={handleCloseModal} color="secondary">
-                Cancel
-              </Button>
+              </Box>
+            </Box>
+
+            <DialogActions sx={{ mt: 1 }}>
+              <Button onClick={handleCloseModal} color="secondary">Cancel</Button>
               <Button
                 type="submit"
                 color="primary"
                 variant="contained"
-                disabled={submitting || !formData.name || !formData.category_id || !formData.subCategoryvariety}
+                disabled={
+                  submitting || !formData.name || !formData.category_id || !formData.subCategoryvariety
+                }
               >
                 {submitting ? <CircularProgress size={24} /> : editingId ? 'Update' : 'Save'}
               </Button>
@@ -477,6 +485,7 @@ const SubCategoryJewel = () => {
           </form>
         </DialogContent>
       </Dialog>
+
     </Container>
   );
 };
