@@ -1,22 +1,3 @@
-// import { createTheme } from '@mui/material/styles';
-
-// const Theme = createTheme({
-//   palette: {
-//     primary: {
-//       main: '#44170D',
-//       contrastText: '#fff',
-//     },
-//     background: {
-//       default: '#fff',
-//       contrastText: '#44170D'
-//     },
-//   },
-// });
-
-// export default Theme;
-
-
-
 import { createTheme } from '@mui/material/styles';
 
 const Theme = createTheme({

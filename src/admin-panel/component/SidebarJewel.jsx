@@ -29,7 +29,7 @@ const SidebarJewel = ({ onClose }) => {
         { to: '/AdminPanel/subCategory', label: 'Sub Category', icon: Users },
         { to: '/AdminPanel/products', label: 'Products', icon: Package },
         { to: '/AdminPanel/orders', label: 'Orders', icon: Package },
-        { to: '/AdminPanel/banner', label: 'Banner', icon: Image },
+        { to: '/AdminPanel/banners', label: 'Banner', icon: Image },
         { to: '/AdminPanel/user', label: 'User', icon: Users },
         // { to: '/AdminPanel/wholesale', label: 'Wholesale User', icon: Users },
         // { to: '/AdminPanel/prescriptions', label: 'Prescriptions', icon: Users },
