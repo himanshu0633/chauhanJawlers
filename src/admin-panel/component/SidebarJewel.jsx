@@ -24,7 +24,7 @@ const SidebarJewel = ({ onClose }) => {
     const isMobile = useMediaQuery('(max-width:760px)');
 
     const navItems = [
-        { to: '/AdminPanel/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { to: '/AdminPanel', label: 'Dashboard', icon: LayoutDashboard },
         { to: '/AdminPanel/Category', label: 'Category', icon: Users },
         { to: '/AdminPanel/subCategory', label: 'Sub Category', icon: Users },
         { to: '/AdminPanel/products', label: 'Products', icon: Package },

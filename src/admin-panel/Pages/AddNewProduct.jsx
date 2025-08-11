@@ -3,59 +3,59 @@ import axiosInstance from '../../common components/AxiosInstance';
 import { toast } from 'react-toastify';
 import { useParams, useNavigate } from 'react-router-dom';
 
+// MUI
 import {
   Box,
-  Button,
+  Grid,
+  Card,
+  CardContent,
   Typography,
   TextField,
   Select,
   MenuItem,
-  FormControl,
-  InputLabel,
-  FormHelperText,
+  Button,
   Stack,
   IconButton,
-  Card,
-  CardMedia,
-  CardContent,
+  Chip,
+  Divider,
 } from '@mui/material';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
+import { FormControl, InputLabel, InputAdornment } from '@mui/material';
 
 const AddNewProduct = () => {
   const { id } = useParams();
   const isEditMode = !!id;
   const navigate = useNavigate();
-  const fileInputRef = useRef(null);
 
   const [categoryList, setCategoryList] = useState([]);
   const [subCategoryList, setSubCategoryList] = useState([]);
+  const [errors, setErrors] = useState({});
+  const fileInputRef = useRef(null);
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     media: [],
-    retail_price: '',
-    consumer_price: '',
-    discount: '',
     mrp: '',
+    discount: '',
     gst: '',
+    consumer_price: '',
     stock: 'yes',
     quantity: [],
     category: '',
     productvariety: '',
     sub_category: '',
-    expires_on: '',
     created_at: new Date().toISOString(),
     deleted_at: null,
   });
 
-  const [errors, setErrors] = useState({});
-  const [isSubmitted, setIsSubmitted] = useState(false);
-
+  // init: categories + product (if edit)
   useEffect(() => {
     const init = async () => {
       try {
         const categoriesResponse = await axiosInstance.get('/user/allcategories');
-        setCategoryList(categoriesResponse.data);
+        setCategoryList(categoriesResponse.data || []);
 
         if (isEditMode) {
           const productResponse = await axiosInstance.get(`/user/product/${id}`);
@@ -65,61 +65,81 @@ const AddNewProduct = () => {
             const subCategoryResponse = await axiosInstance.get(
               `/user/allSubcategories?category=${encodeURIComponent(product.category)}`
             );
-            setSubCategoryList(subCategoryResponse.data);
+            setSubCategoryList(subCategoryResponse.data || []);
           }
 
-          setFormData({
+          setFormData(prev => ({
+            ...prev,
             ...product,
-            expires_on: product.expires_on?.split('T')[0] || '',
             media: (product.media || []).map(m => ({
               ...m,
-              url: m.url.startsWith('http') ? m.url : `${m.url}`,
-              type: m.type.includes('video') ? 'video' : 'image',
+              url: m.url?.startsWith('http') ? m.url : `${m.url}`,
+              type: m.type?.includes('video') ? 'video' : 'image',
               file: null,
+              name: m.name || m.url?.split('/').pop() || 'media',
+              size: m.size || 0,
             })),
             quantity: Array.isArray(product.quantity)
               ? product.quantity
-              : typeof product.quantity === 'string' && product.quantity.length > 0
-                ? [product.quantity]
-                : [],
-            stock: (product.stock ?? '').toLowerCase().trim() === 'no' ? 'no' : 'yes',
-          });
+              : (typeof product.quantity === 'string' && product.quantity.length > 0 ? [product.quantity] : []),
+            stock: (() => {
+              const s = (product.stock ?? '').toLowerCase().trim();
+              return s === 'yes' ? 'yes' : s === 'no' ? 'no' : 'yes';
+            })(),
+          }));
         }
-      } catch (error) {
-        console.error('Error during initialization:', error);
+      } catch (err) {
+        console.error('Error during initialization:', err);
+        toast.error('Failed to load initial data.');
       }
     };
     init();
   }, [id, isEditMode]);
 
-  const fetchSubCategories = async category => {
+  const fetchSubCategories = async (category) => {
     try {
       const response = await axiosInstance.get(
         `/user/allSubcategories?category=${encodeURIComponent(category)}`
       );
-      setSubCategoryList(response.data);
+      setSubCategoryList(response.data || []);
     } catch (error) {
       console.error('Error fetching subcategories:', error);
     }
   };
 
-  const handleChange = e => {
+  // helpers
+  const formatFileSize = (bytes) => {
+    if (!bytes && bytes !== 0) return '';
+    if (bytes < 1024) return bytes + ' bytes';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+    return (bytes / 1048576).toFixed(2) + ' MB';
+  };
+
+  // field change + price calc
+  const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData(prev => {
       const updated = { ...prev, [name]: value };
+
       const mrp = parseFloat(updated.mrp);
       const discount = parseFloat(updated.discount);
       const gst = parseFloat(updated.gst);
 
       let discountedPrice = 0;
       if (!isNaN(mrp) && !isNaN(discount)) {
-        discountedPrice = mrp - (mrp * discount) / 100;
+        discountedPrice = mrp - (mrp * (discount / 100));
+      } else if (!isNaN(mrp) && (isNaN(discount) || discount === 0)) {
+        discountedPrice = mrp;
       }
 
-      if (!isNaN(gst) && gst > 0) {
-        updated.consumer_price = (discountedPrice + (discountedPrice * gst) / 100).toFixed(2);
-      } else {
-        updated.consumer_price = discountedPrice > 0 ? discountedPrice.toFixed(2) : '';
+      if (!isNaN(discountedPrice)) {
+        if (!isNaN(gst) && gst > 0) {
+          const finalPrice = discountedPrice + (discountedPrice * (gst / 100));
+          updated.consumer_price = isFinite(finalPrice) && finalPrice > 0 ? finalPrice.toFixed(2) : '';
+        } else {
+          updated.consumer_price = isFinite(discountedPrice) && discountedPrice > 0 ? discountedPrice.toFixed(2) : '';
+        }
       }
 
       if (name === 'category') {
@@ -131,103 +151,124 @@ const AddNewProduct = () => {
     });
   };
 
-  const handleMediaChange = e => {
-    const files = Array.from(e.target.files);
+  // media
+  const handleMediaChange = (e) => {
+    const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    Promise.all(
-      files.map(
-        file =>
-          new Promise(resolve => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              resolve({
-                url: reader.result,
-                type: file.type.startsWith('video') ? 'video' : 'image',
-                name: file.name,
-                size: file.size,
-                file,
-              });
-            };
-            reader.readAsDataURL(file);
-          })
-      )
-    ).then(newMedia => {
+    const mediaPromises = files.map(file => new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        resolve({
+          url: reader.result,
+          type: file.type.startsWith('video') ? 'video' : 'image',
+          name: file.name,
+          size: file.size,
+          file
+        });
+      };
+      reader.readAsDataURL(file);
+    }));
+
+    Promise.all(mediaPromises).then(newMedia => {
       setFormData(prev => ({ ...prev, media: [...prev.media, ...newMedia] }));
     });
   };
 
-  const removeMedia = index => {
+  const removeMedia = (index) => {
     setFormData(prev => {
-      const updated = [...prev.media];
-      updated.splice(index, 1);
-      return { ...prev, media: updated };
+      const updatedMedia = [...prev.media];
+      updatedMedia.splice(index, 1);
+      return { ...prev, media: updatedMedia };
     });
   };
 
-  const triggerFileInput = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.value = null;
-      fileInputRef.current.click();
-    }
+  // quantity controls
+  const handleQuantityChange = (index, value) => {
+    setFormData(prev => {
+      const list = [...prev.quantity];
+      list[index] = value;
+      return { ...prev, quantity: list };
+    });
   };
 
+  const addQuantityField = () => {
+    setFormData(prev => ({ ...prev, quantity: [...prev.quantity, ''] }));
+  };
+
+  const removeQuantityField = (index) => {
+    setFormData(prev => {
+      const list = [...prev.quantity];
+      list.splice(index, 1);
+      return { ...prev, quantity: list };
+    });
+  };
+
+  // validation (trimmed to current fields)
   const validateForm = () => {
     const newErrors = {};
-    const requiredFields = [
-      'name',
-      'description',
-      'retail_price',
-      'consumer_price',
-      'quantity',
-      'category',
-      'expires_on',
-      'dosage',
-      'productvariety',
-    ];
+    const required = ['name', 'description', 'category', 'productvariety', 'stock'];
 
-    requiredFields.forEach(field => {
-      if (!formData[field] || (Array.isArray(formData[field]) && formData[field].length === 0)) {
-        newErrors[field] = `${field.replace('_', ' ')} is required`;
+    required.forEach(field => {
+      const v = formData[field];
+      if (v === undefined || v === null || (typeof v === 'string' && v.trim() === '')) {
+        newErrors[field] = 'Required';
       }
     });
+
+    const hasAtLeastOneQty = Array.isArray(formData.quantity) && formData.quantity.some(q => (q || '').trim() !== '');
+    if (!hasAtLeastOneQty) newErrors.quantity = 'Add at least one quantity';
+
+    // consumer_price is derived; ensure it exists if MRP was provided
+    if ((formData.mrp?.toString().length || 0) > 0 && (formData.consumer_price || '').trim() === '') {
+      newErrors.consumer_price = 'Final price could not be calculated';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async e => {
+  // submit
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     try {
-      const formPayload = new FormData();
+      const payload = new FormData();
+
       Object.entries(formData).forEach(([key, value]) => {
         if (key === 'media') return;
-        if (Array.isArray(value)) {
-          value.forEach(val => formPayload.append(`${key}[]`, val));
-        } else if (value !== null && value !== undefined) {
-          formPayload.append(key, value);
+        if (value !== null && value !== undefined) {
+          if (Array.isArray(value)) {
+            // send quantities as repeated key or a JSON string (adjust to your API)
+            payload.append(key, JSON.stringify(value));
+          } else {
+            payload.append(key, value);
+          }
         }
       });
+
       formData.media.forEach(item => {
-        if (item?.file) formPayload.append('media', item.file);
-        else formPayload.append('existingMedia', item.url);
+        if (item?.file) {
+          payload.append('media', item.file);
+        } else if (item?.url) {
+          payload.append('existingMedia', item.url);
+        }
       });
 
       if (isEditMode) {
-        await axiosInstance.put(`/user/updateProduct/${id}`, formPayload, {
+        await axiosInstance.put(`/user/updateProduct/${id}`, payload, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
         toast.success('Product updated successfully!');
       } else {
-        await axiosInstance.post('/user/createProduct', formPayload, {
+        await axiosInstance.post('/user/createProduct', payload, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
         toast.success('Product added successfully!');
       }
+
       navigate('/pharma-admin/products');
-      setIsSubmitted(true);
     } catch (error) {
       console.error('Submit Error:', error);
       toast.error('Something went wrong. Please try again.');
@@ -239,412 +280,549 @@ const AddNewProduct = () => {
       name: '',
       description: '',
       media: [],
-      retail_price: '',
-      consumer_price: '',
-      discount: '',
       mrp: '',
+      discount: '',
       gst: '',
+      consumer_price: '',
       stock: 'yes',
       quantity: [],
       category: '',
       productvariety: '',
       sub_category: '',
-      expires_on: '',
       created_at: new Date().toISOString(),
       deleted_at: null,
     });
     setErrors({});
-    setIsSubmitted(false);
-  };
-
-  const handleQuantityChange = (index, value) => {
-    setFormData(prev => {
-      const newQuantities = [...prev.quantity];
-      newQuantities[index] = value;
-      return { ...prev, quantity: newQuantities };
-    });
-  };
-
-  const addQuantityField = () => {
-    setFormData(prev => ({
-      ...prev,
-      quantity: [...prev.quantity, ''],
-    }));
-  };
-
-  const removeQuantityField = index => {
-    setFormData(prev => {
-      const newQuantities = [...prev.quantity];
-      newQuantities.splice(index, 1);
-      return { ...prev, quantity: newQuantities };
-    });
-  };
-
-  const formatFileSize = bytes => {
-    if (bytes < 1024) return `${bytes} bytes`;
-    if (bytes < 1048576) return `${(bytes / 1024).toFixed(2)} KB`;
-    return `${(bytes / 1048576).toFixed(2)} MB`;
   };
 
   return (
-    <Box maxWidth="1000px" mx="auto" p={3}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4">{isEditMode ? 'Edit Product' : 'Add New Product'}</Typography>
-        <Button variant="outlined" onClick={() => navigate('/pharma-admin/products')}>
-          Cancel
-        </Button>
-      </Box>
+    <Box component="form" onSubmit={handleSubmit} sx={{ p: { xs: 2, md: 3 }, maxWidth: 1200, mx: 'auto' }}>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
+        <Typography variant="h5" fontWeight={700}>
+          {isEditMode ? 'Edit Product' : 'Add New Product'}
+        </Typography>
+        <Button variant="outlined" onClick={() => navigate('/AdminPanel/products')}>Cancel</Button>
+      </Stack>
 
-      {isSubmitted ? (
-        <Box textAlign="center" mt={4}>
-          <Typography variant="h6" mb={2} color="success.main">
-            Product submitted successfully!
-          </Typography>
-          <Button variant="contained" onClick={handleReset}>
-            Add Another Product
-          </Button>
-        </Box>
-      ) : (
-        <form onSubmit={handleSubmit} noValidate>
-          {/* Basic Information */}
-          <Box mb={4}>
-            <Typography variant="h6" gutterBottom>
-              Basic Information
-            </Typography>
-            <Box display="flex" gap={2} mb={2}>
-              {/* Product Name Input */}
+      {/* Basic Info */}
+      {/* <Box sx={{ mb: 3 }}>
+        <div>
+          <Typography variant="h6" sx={{ mb: 2 }}>Basic Information</Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
               <TextField
-                label="Product Name *"
+                label="Product Name"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
                 fullWidth
                 error={!!errors.name}
                 helperText={errors.name}
-                required
               />
+            </Grid>
 
-              {/* Add Media Button and Help Text */}
-              <Box flex={1} display="flex" flexDirection="column" justifyContent="flex-end">
-                <input
-                  multiple
-                  accept="image/*,video/*"
-                  ref={fileInputRef}
-                  type="file"
-                  style={{ display: 'none' }}
-                  onChange={handleMediaChange}
-                />
-                <Button
-                  variant="contained"
-                  fullWidth
-                  onClick={triggerFileInput}
-                  sx={{ mb: 0.5 }}
-                >
-                  Add Media
-                </Button>
-                <Typography
-                  variant="caption"
-                  color="textSecondary"
-                  textAlign="center"
-                  sx={{ minHeight: 18 }}
-                >
-                  Supports JPG, PNG, GIF, MP4 (Max 10MB each)
-                </Typography>
-                {/* This next Typography is always shown when no media is uploaded */}
-                {formData.media.length === 0 && (
-                  <Typography
-                    variant="caption"
-                    color="textSecondary"
-                    textAlign="center"
-                    sx={{ minHeight: 18 }}
-                  >
-                    No media selected
-                  </Typography>
-                )}
-              </Box>
-            </Box>
-
-            {/* Media Preview: ONLY displayed if media.length > 0. Each shown on a card row with X. */}
-            {formData.media.length > 0 && (
-              <Box display="flex" gap={2} flexWrap="wrap" mb={2}>
-                {formData.media.map((media, index) => (
-                  <Card
-                    key={index}
-                    sx={{
-                      maxWidth: 150,
-                      minWidth: 120,
-                      position: 'relative',
-                      p: 0,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
+            <Grid item xs={12} md={6}>
+              <Stack spacing={1}>
+                <Typography variant="subtitle2">Product Media (Images/Videos)</Typography>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*,video/*"
+                    multiple
+                    onChange={handleMediaChange}
+                    style={{ display: 'none' }}
+                  />
+                  <Button
+                    variant="contained"
+                    startIcon={<AddPhotoAlternateIcon />}
+                    onClick={() => {
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = null;
+                        fileInputRef.current.click();
+                      }
                     }}
                   >
-                    {media.type === 'video' ? (
-                      <CardMedia
-                        component="video"
-                        controls
-                        src={media.url}
-                        sx={{ height: 100, width: '100%' }}
-                      />
-                    ) : (
-                      <CardMedia
-                        component="img"
-                        image={media.url}
-                        alt={`Media preview ${index}`}
-                        sx={{ height: 100, objectFit: 'cover', width: '100%' }}
-                      />
-                    )}
+                    Add Media
+                  </Button>
+                  <Typography variant="body2" color="text.secondary">
+                    Supports JPG, PNG, GIF, MP4 (Max 10MB each)
+                  </Typography>
+                </Stack>
+
+                <Grid container spacing={2}>
+                  {formData.media.length === 0 ? (
+                    <Grid item xs={12}>
+                      <Box
+                        sx={{
+                          border: '1px dashed',
+                          borderColor: 'divider',
+                          p: 3,
+                          textAlign: 'center',
+                          borderRadius: 1,
+                          color: 'text.secondary',
+                        }}
+                      >
+                        No media selected
+                      </Box>
+                    </Grid>
+                  ) : (
+                    formData.media.map((m, idx) => (
+                      <Grid item xs={12} sm={6} md={4} lg={3} key={idx}>
+                        <Box
+                          sx={{
+                            position: 'relative',
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            borderRadius: 1,
+                            overflow: 'hidden',
+                            width: '150px'
+                          }}
+                        >
+                          <IconButton
+                            size="small"
+                            onClick={() => removeMedia(idx)}
+                            sx={{
+                              position: 'absolute',
+                              top: 4,
+                              right: 4,
+                              bgcolor: 'background.paper',
+                              '&:hover': { bgcolor: 'background.default' },
+                            }}
+                            aria-label="Remove media"
+                          >
+                            <CloseIcon fontSize="small" />
+                          </IconButton>
+
+                          {m.type === 'video' ? (
+                            <Box component="video" controls sx={{ width: '100%', height: 180, objectFit: 'cover' }}>
+                              <source src={m.url} />
+                              Your browser does not support the video tag.
+                            </Box>
+                          ) : (
+                            <Box component="img" src={m.url} alt={m.name || `media-${idx}`} sx={{ width: '100%', height: 140, objectFit: 'cover' }} />
+                          )}
+
+                          <Box sx={{ p: 1 }}>
+                            <Typography variant="body2" noWrap title={m.name}>{m.name}</Typography>
+                            <Typography variant="caption" color="text.secondary">{formatFileSize(m.size)}</Typography>
+                          </Box>
+                        </Box>
+                      </Grid>
+                    ))
+                  )}
+                </Grid>
+              </Stack>
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                label="Description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                fullWidth
+                multiline
+                minRows={3}
+                error={!!errors.description}
+                helperText={errors.description}
+              />
+            </Grid>
+          </Grid>
+        </div>
+      </Box> */}
+
+      {/* Basic Info */}
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>Basic Information</Typography>
+
+        <Box
+          sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 2,
+          }}
+        >
+          {/* Product Name */}
+          <TextField
+            label="Product Name"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            fullWidth
+            error={!!errors.name}
+            helperText={errors.name}
+            sx={{ flex: { xs: '1 1 100%', md: '1 1 calc(50% - 8px)' }, minWidth: 0 }}
+          />
+
+          {/* Product Media */}
+          <Box
+            sx={{
+              flex: { xs: '1 1 100%', md: '1 1 calc(50% - 8px)' },
+              minWidth: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1,
+            }}
+          >
+            <Typography variant="subtitle2">Product Media (Images/Videos)</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*,video/*"
+                multiple
+                onChange={handleMediaChange}
+                style={{ display: 'none' }}
+              />
+              <Button
+                variant="contained"
+                startIcon={<AddPhotoAlternateIcon />}
+                onClick={() => {
+                  if (fileInputRef.current) {
+                    fileInputRef.current.value = null;
+                    fileInputRef.current.click();
+                  }
+                }}
+              >
+                Add Media
+              </Button>
+              <Typography variant="body2" color="text.secondary">
+                Supports JPG, PNG, GIF, MP4 (Max 10MB each)
+              </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 2,
+              }}
+            >
+              {formData.media.length === 0 ? (
+                <Box
+                  sx={{
+                    border: '1px dashed',
+                    borderColor: 'divider',
+                    p: 3,
+                    textAlign: 'center',
+                    borderRadius: 1,
+                    color: 'text.secondary',
+                    flex: '1 1 100%',
+                  }}
+                >
+                  No media selected
+                </Box>
+              ) : (
+                formData.media.map((m, idx) => (
+                  <Box
+                    key={idx}
+                    sx={{
+                      position: 'relative',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      borderRadius: 1,
+                      overflow: 'hidden',
+                      width: 150,
+                    }}
+                  >
                     <IconButton
-                      aria-label="Remove media"
-                      onClick={() => removeMedia(index)}
                       size="small"
+                      onClick={() => removeMedia(idx)}
                       sx={{
                         position: 'absolute',
-                        top: 2,
-                        right: 2,
-                        bgcolor: 'rgba(255,255,255,0.7)',
+                        top: 4,
+                        right: 4,
+                        bgcolor: 'background.paper',
+                        '&:hover': { bgcolor: 'background.default' },
                       }}
+                      aria-label="Remove media"
                     >
                       <CloseIcon fontSize="small" />
                     </IconButton>
-                    <CardContent sx={{ p: 1, pb: '8px!important' }}>
-                      <Typography variant="body2" noWrap>
-                        {media.name}
-                      </Typography>
-                      <Typography variant="caption" color="textSecondary" noWrap>
-                        {formatFileSize(media.size)}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                ))}
-              </Box>
-            )}
 
-            <TextField
-              label="Description *"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              multiline
-              minRows={3}
-              fullWidth
-              error={!!errors.description}
-              helperText={errors.description}
-              required
-              sx={{ mt: 2 }}
-            />
-          </Box>
-
-
-          {/* Pricing Information */}
-          <Box mb={4}>
-            <Typography variant="h6" gutterBottom>
-              Pricing Information
-            </Typography>
-            <Box display="flex" gap={2} mb={2}>
-              <TextField
-                label="MRP"
-                name="mrp"
-                type="number"
-                value={formData.mrp}
-                onChange={handleChange}
-                placeholder="Enter maximum retail price"
-                inputProps={{ min: 0, step: 0.01 }}
-                fullWidth
-              />
-              <TextField
-                label="Discount (%)"
-                name="discount"
-                type="number"
-                value={formData.discount}
-                onChange={handleChange}
-                placeholder="Enter discount percentage"
-                inputProps={{ min: 0, max: 100 }}
-                fullWidth
-              />
-              <TextField
-                label="Discounted Price"
-                name="consumer_price"
-                type="number"
-                value={formData.consumer_price}
-                InputProps={{ readOnly: true }}
-                placeholder="Calculated consumer price"
-                fullWidth
-              />
-            </Box>
-
-            <Box display="flex" gap={2} mb={2}>
-              <TextField
-                label="GST"
-                name="gst"
-                type="number"
-                value={formData.gst}
-                onChange={handleChange}
-                placeholder="Enter GST %"
-                inputProps={{ min: 0, step: 0.01 }}
-                fullWidth
-              />
-              <TextField
-                label="WholesalePartner Price (MRP) *"
-                name="retail_price"
-                type="number"
-                value={formData.retail_price}
-                onChange={handleChange}
-                placeholder="Enter retail price"
-                inputProps={{ min: 0, step: 0.01 }}
-                error={!!errors.retail_price}
-                helperText={errors.retail_price}
-                fullWidth
-                required
-              />
-              {/* Empty box to keep last row consistent width */}
-              <Box flex={1} />
-            </Box>
-
-            <Box display="flex" gap={2} alignItems="flex-start">
-              <Box flex={1}>
-                <Typography variant="subtitle1" gutterBottom>
-                  Quantities *
-                </Typography>
-                {formData.quantity.length === 0 && (
-                  <Typography variant="caption" color="textSecondary" gutterBottom>
-                    No quantities added yet. Click 'Add Quantity' to start.
-                  </Typography>
-                )}
-                <Stack spacing={1}>
-                  {formData.quantity.map((qty, idx) => (
-                    <Box key={idx} display="flex" alignItems="center">
-                      <TextField
-                        placeholder="Enter quantity"
-                        value={qty}
-                        onChange={e => handleQuantityChange(idx, e.target.value)}
-                        fullWidth
-                        size="small"
-                      />
-                      <IconButton
-                        color="error"
-                        aria-label="Remove quantity"
-                        onClick={() => removeQuantityField(idx)}
+                    {m.type === 'video' ? (
+                      <Box
+                        component="video"
+                        controls
+                        sx={{ width: '100%', height: 180, objectFit: 'cover' }}
                       >
-                        <CloseIcon />
-                      </IconButton>
+                        <source src={m.url} />
+                        Your browser does not support the video tag.
+                      </Box>
+                    ) : (
+                      <Box
+                        component="img"
+                        src={m.url}
+                        alt={m.name || `media-${idx}`}
+                        sx={{ width: '100%', height: 140, objectFit: 'cover' }}
+                      />
+                    )}
+
+                    <Box sx={{ p: 1 }}>
+                      <Typography variant="body2" noWrap title={m.name}>
+                        {m.name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {formatFileSize(m.size)}
+                      </Typography>
                     </Box>
-                  ))}
-                  <Button variant="contained" color="success" onClick={addQuantityField}>
-                    Add Quantity
-                  </Button>
-                  {errors.quantity && <FormHelperText error>{errors.quantity}</FormHelperText>}
-                </Stack>
-              </Box>
-
-              <Box flex={1}>
-                <FormControl fullWidth>
-                  <InputLabel id="stock-label">Stock</InputLabel>
-                  <Select
-                    labelId="stock-label"
-                    name="stock"
-                    value={formData.stock}
-                    onChange={handleChange}
-                    label="Stock"
-                  >
-                    <MenuItem value="yes">Yes</MenuItem>
-                    <MenuItem value="no">No</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
+                  </Box>
+                ))
+              )}
             </Box>
           </Box>
+        </Box>
 
-          {/* Category Information */}
-          <Box mb={4}>
-            <Typography variant="h6" gutterBottom>
-              Category Information
-            </Typography>
-            <Box display="flex" gap={2}>
-              <FormControl fullWidth required error={!!errors.productvariety}>
-                <InputLabel id="variety-label">Variety *</InputLabel>
-                <Select
-                  labelId="variety-label"
-                  name="productvariety"
-                  value={formData.productvariety}
-                  onChange={e => {
-                    const selectedVariety = e.target.value;
-                    setFormData(prev => ({
-                      ...prev,
-                      productvariety: selectedVariety,
-                      category: '',
-                      sub_category: '',
-                    }));
-                  }}
-                  label="Variety *"
-                >
-                  <MenuItem value="">
-                    <em>Select Variety</em>
-                  </MenuItem>
-                  <MenuItem value="Human">Human</MenuItem>
-                  <MenuItem value="Veterinary">Veterinary</MenuItem>
-                </Select>
-                {errors.productvariety && <FormHelperText>{errors.productvariety}</FormHelperText>}
-              </FormControl>
-              <FormControl fullWidth required error={!!errors.category}>
-                <InputLabel id="category-label">Category *</InputLabel>
-                <Select
-                  labelId="category-label"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  label="Category *"
-                >
-                  <MenuItem value="">
-                    <em>Select Category</em>
-                  </MenuItem>
-                  {categoryList
-                    .filter(cat => cat.variety === formData.productvariety)
-                    .map((sub, idx) => (
-                      <MenuItem key={idx} value={sub.name}>
-                        {sub.name}
-                      </MenuItem>
-                    ))}
-                </Select>
-                {errors.category && <FormHelperText>{errors.category}</FormHelperText>}
-              </FormControl>
-              <FormControl fullWidth error={!!errors.sub_category}>
-                <InputLabel id="subcategory-label">Sub Category</InputLabel>
-                <Select
-                  labelId="subcategory-label"
-                  name="sub_category"
-                  value={formData.sub_category}
-                  onChange={handleChange}
-                  label="Sub Category"
-                >
-                  <MenuItem value="">
-                    <em>Select subcategory</em>
-                  </MenuItem>
-                  {subCategoryList.map((sub, idx) => (
-                    <MenuItem key={idx} value={sub.name}>
-                      {sub.name}
-                    </MenuItem>
+        {/* Description full width */}
+        <TextField
+          label="Description"
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+          fullWidth
+          multiline
+          minRows={3}
+          error={!!errors.description}
+          helperText={errors.description}
+          sx={{ mt: 2 }}
+        />
+      </Box>
+
+
+      {/* Pricing */}
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>Pricing</Typography>
+
+        <Box
+          sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 2,
+          }}
+        >
+          <TextField
+            type="number"
+            label="MRP"
+            name="mrp"
+            value={formData.mrp}
+            onChange={handleChange}
+            fullWidth
+            inputProps={{ min: 0, step: 0.01 }}
+            sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 8px)', md: '1 1 calc(33.333% - 12px)' }, minWidth: 0 }}
+          />
+
+          <TextField
+            type="number"
+            label="Discount (%)"
+            name="discount"
+            value={formData.discount}
+            onChange={handleChange}
+            fullWidth
+            inputProps={{ min: 0, max: 100, step: 0.01 }}
+            sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 8px)', md: '1 1 calc(33.333% - 12px)' }, minWidth: 0 }}
+          />
+
+          <TextField
+            type="number"
+            label="GST (%)"
+            name="gst"
+            value={formData.gst}
+            onChange={handleChange}
+            fullWidth
+            inputProps={{ min: 0, step: 0.01 }}
+            sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 8px)', md: '1 1 calc(33.333% - 12px)' }, minWidth: 0 }}
+          />
+
+          <TextField
+            type="number"
+            label="Final Consumer Price"
+            name="consumer_price"
+            value={formData.consumer_price}
+            fullWidth
+            InputProps={{ readOnly: true }}
+            error={!!errors.consumer_price}
+            helperText={errors.consumer_price}
+            sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 8px)', md: '1 1 calc(50% - 10px)' }, minWidth: 0 }}
+          />
+
+          <FormControl
+            fullWidth
+            sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 8px)', md: '1 1 calc(50% - 10px)' }, minWidth: 0 }}
+          >
+            <InputLabel id="stock-label">Stock</InputLabel>
+            <Select
+              labelId="stock-label"
+              label="Stock"
+              name="stock"
+              value={formData.stock}
+              onChange={handleChange}
+            >
+              <MenuItem value="yes">Yes</MenuItem>
+              <MenuItem value="no">No</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+      </Box>
+
+
+      {/* Category */}
+      <Box sx={{ mb: 3 }}>
+        <div>
+          <Typography variant="h6" sx={{ mb: 2 }}>Category</Typography>
+
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 2,
+              flexWrap: 'wrap',
+            }}
+          >
+            {/* Variety */}
+            <FormControl
+              fullWidth
+              error={!!errors.productvariety}
+              sx={{ flex: '1 1 300px', minWidth: 0 }}
+            >
+              <InputLabel id="variety-label">Variety</InputLabel>
+              <Select
+                labelId="variety-label"
+                label="Variety"
+                name="productvariety"
+                value={formData.productvariety}
+                onChange={(e) => {
+                  const selectedVariety = e.target.value;
+                  setFormData(prev => ({
+                    ...prev,
+                    productvariety: selectedVariety,
+                    category: '',
+                    sub_category: ''
+                  }));
+                }}
+              >
+                <MenuItem value=""><em>Select Variety</em></MenuItem>
+                {/* your real options here */}
+                <MenuItem value="gold">Gold</MenuItem>
+                <MenuItem value="diamond">Diamond</MenuItem>
+                <MenuItem value="silver">Silver</MenuItem>
+              </Select>
+              {errors.productvariety && (
+                <Typography variant="caption" color="error" sx={{ mt: .5 }}>
+                  {errors.productvariety}
+                </Typography>
+              )}
+            </FormControl>
+
+            {/* Category */}
+            <FormControl
+              fullWidth
+              error={!!errors.category}
+              sx={{ flex: '1 1 300px', minWidth: 0 }}
+            >
+              <InputLabel id="category-label">Category</InputLabel>
+              <Select
+                labelId="category-label"
+                label="Category"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+              >
+                <MenuItem value=""><em>Select Category</em></MenuItem>
+                {categoryList
+                  .filter(cat => cat.variety === formData.productvariety)
+                  .map((cat, i) => (
+                    <MenuItem key={i} value={cat.name}>{cat.name}</MenuItem>
                   ))}
-                </Select>
-                {errors.sub_category && <FormHelperText>{errors.sub_category}</FormHelperText>}
-              </FormControl>
-              {/* Spacer Box to keep flex aligned */}
-              <Box flex={1} />
-            </Box>
-          </Box>
+              </Select>
+              {errors.category && (
+                <Typography variant="caption" color="error" sx={{ mt: .5 }}>
+                  {errors.category}
+                </Typography>
+              )}
+            </FormControl>
 
-          {/* Form actions */}
-          <Stack direction="row" spacing={2} justifyContent="flex-end">
-            <Button variant="outlined" onClick={handleReset}>
-              Reset
-            </Button>
-            <Button variant="contained" color="primary" type="submit">
-              {isEditMode ? 'Update Product' : 'Submit Product'}
-            </Button>
+            {/* Sub Category */}
+            <FormControl
+              fullWidth
+              sx={{ flex: '1 1 300px', minWidth: 0 }}
+            >
+              <InputLabel id="subcategory-label">Sub Category</InputLabel>
+              <Select
+                labelId="subcategory-label"
+                label="Sub Category"
+                name="sub_category"
+                value={formData.sub_category}
+                onChange={handleChange}
+              >
+                <MenuItem value=""><em>Select subcategory</em></MenuItem>
+                {subCategoryList.map((sub, i) => (
+                  <MenuItem key={i} value={sub.name}>{sub.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+        </div>
+      </Box>
+
+
+      {/* Quantities */}
+      <Box sx={{ mb: 3 }}>
+        <div>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+            <Typography variant="h6">Quantities</Typography>
+            <Button variant="contained" onClick={addQuantityField}>Add Quantity</Button>
           </Stack>
-        </form>
-      )}
+
+          {(!formData.quantity || formData.quantity.length === 0) && (
+            <Chip label="No quantities added yet" variant="outlined" sx={{ mb: 2 }} />
+          )}
+
+          {/* equal width items in rows */}
+          <Grid container spacing={2}>
+            {formData.quantity?.map((qty, index) => (
+              <Grid key={index} item xs={12} sm={6} md={4}>
+                <TextField
+                  fullWidth
+                  label={`Quantity #${index + 1}`}
+                  value={qty}
+                  onChange={(e) => handleQuantityChange(index, e.target.value)}
+                  placeholder="e.g., 100ml, 50g"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          color="error"
+                          onClick={() => removeQuantityField(index)}
+                          aria-label="Remove quantity"
+                          edge="end"
+                        >
+                          <CloseIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }}
+                />
+              </Grid>
+            ))}
+          </Grid>
+
+          {errors.quantity && (
+            <>
+              <Divider sx={{ my: 2 }} />
+              <Typography variant="caption" color="error">{errors.quantity}</Typography>
+            </>
+          )}
+        </div>
+      </Box>
+
+
+      {/* Actions */}
+      <Stack direction="row" spacing={2} justifyContent="flex-end">
+        <Button variant="outlined" onClick={handleReset}>Reset</Button>
+        <Button type="submit" variant="contained">
+          {isEditMode ? 'Update Product' : 'Submit Product'}
+        </Button>
+      </Stack>
     </Box>
   );
 };
