@@ -438,7 +438,7 @@ const AddNewProduct = () => {
 
         <Box
           sx={{
-            display: 'flex',
+            display: 'flex',  
             flexWrap: 'wrap',
             gap: 2,
           }}

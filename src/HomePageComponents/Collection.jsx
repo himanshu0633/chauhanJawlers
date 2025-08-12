@@ -1,5 +1,7 @@
 import { Box, Typography, Container, styled } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { publicUrl } from "../common components/PublicUrl";
+import axiosInstance from "../common components/AxiosInstance";
 
 const SectionContainer = styled(Box)({
     backgroundColor: "#F2EDED",
@@ -115,32 +117,33 @@ const FallbackImage = ({ src, alt, fallbackSrc, ...props }) => {
     );
 };
 
-const collections = [
-    {
-        id: 1,
-        image: "/collection1.png",
-        name: "Shimmering",
-        script: "circles",
-        description: "of charm",
-    },
-    {
-        id: 2,
-        image: "/collection2.png",
-        name: "Graceful",
-        script: "Ear",
-        description: "Glam",
-    },
-    {
-        id: 3,
-        image: "/collection3.png",
-        name: "Casual",
-        script: "Chic",
-        description: "Chain",
-    },
-];
-
-// === Main Component using Box/flex ===
 function Collection() {
+    const [banners, setBanners] = useState([]);
+
+    const fetchData = async () => {
+        try {
+            const response = await axiosInstance.get("/user/allBanners");
+            const bannerData = response.data;
+
+            // Filter the banners by type "MiddleSlider" without adding duplicates
+            const mainBanners = bannerData.filter(
+                (banner) =>
+                    banner.type === "MiddleSlider" &&
+                    Array.isArray(banner.slider_image) &&
+                    banner.slider_image.length > 0
+            );
+
+            setBanners(mainBanners); // Directly set banners without adding duplicates
+
+        } catch (error) {
+            console.error("Error fetching banners:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
     return (
         <SectionContainer>
             <Container maxWidth="xl">
@@ -156,25 +159,28 @@ function Collection() {
                 >
                     {/* Left Large Card */}
                     <Box flex={1} minWidth={0} mb={{ xs: 3, md: 0 }}>
-                        <Card height="500px">
-                            <FallbackImage
-                                src={collections[0].image}
-                                alt={collections[0].name}
-                                fallbackSrc="/placeholder.svg?height=500&width=400&text=Image+Not+Found"
-                            />
-                            <ImageOverlay>
-                                <CollectionText>
-                                    <CollectionName>
-                                        {collections[0].name}{" "}
-                                        <CollectionScript>{collections[0].script}</CollectionScript>
-                                    </CollectionName>
-                                    <CollectionDescription>
-                                        {collections[0].description}
-                                    </CollectionDescription>
-                                </CollectionText>
-                            </ImageOverlay>
-                        </Card>
+                        {banners.length > 0 && (
+                            <Card height="500px">
+                                <FallbackImage
+                                    src={publicUrl(banners[0].slider_image[0])}
+                                    alt={banners[0].name}
+                                    fallbackSrc="/placeholder.svg?height=500&width=400&text=Image+Not+Found"
+                                />
+                                <ImageOverlay>
+                                    <CollectionText>
+                                        <CollectionName>
+                                            {banners[0].name}{" "}
+                                            <CollectionScript>{banners[0].script}</CollectionScript>
+                                        </CollectionName>
+                                        <CollectionDescription>
+                                            {banners[0].description}
+                                        </CollectionDescription>
+                                    </CollectionText>
+                                </ImageOverlay>
+                            </Card>
+                        )}
                     </Box>
+
                     {/* Right: Two vertically stacked cards */}
                     <Box
                         flex={1}
@@ -183,31 +189,30 @@ function Collection() {
                         gap={3}
                         minWidth={0}
                     >
-                        {[collections[1], collections[2]].map(
-                            ({ id, name, script, description, image }) => (
-                                <Card height="240px" key={id}>
-                                    <FallbackImage
-                                        src={image}
-                                        alt={name}
-                                        fallbackSrc="/placeholder.svg?height=240&width=400&text=Image+Not+Found"
-                                    />
-                                    <ImageOverlay>
-                                        <CollectionText>
-                                            <CollectionName>
-                                                {name} <CollectionScript>{script}</CollectionScript>
-                                            </CollectionName>
-                                            <CollectionDescription>{description}</CollectionDescription>
-                                        </CollectionText>
-                                    </ImageOverlay>
-                                </Card>
-                            )
-                        )}
+                        {banners.slice(1).map((item) => (
+                            <Card height="240px" key={item._id}>
+                                <FallbackImage
+                                    src={publicUrl(item.slider_image[0])}
+                                    alt={item.name}
+                                    fallbackSrc="/placeholder.svg?height=240&width=400&text=Image+Not+Found"
+                                />
+                                <ImageOverlay>
+                                    <CollectionText>
+                                        <CollectionName>
+                                            {item.name}{" "}
+                                            <CollectionScript>{item.script}</CollectionScript>
+                                        </CollectionName>
+                                    </CollectionText>
+                                </ImageOverlay>
+                            </Card>
+                        ))}
                     </Box>
                 </Box>
             </Container>
         </SectionContainer>
     );
 }
+
 
 export default Collection;
 
