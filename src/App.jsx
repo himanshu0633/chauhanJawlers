@@ -70,6 +70,7 @@ function App() {
             <Route path="subcategory" element={<SubCategoryJewel />} />
             <Route path="products" element={<ProductsJewel />} />
             <Route path="addNewProduct" element={<AddNewProduct />} />
+            <Route path="addNewProduct/:id" element={<AddNewProduct />} />
             <Route path="orders" element={<OrderJewel />} />
             <Route path="banners" element={<Banners />} />
             <Route path="user" element={<UsersJewel />} />

@@ -64,6 +64,14 @@ const ProductsJewel = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  const publicUrl = (p) =>
+    new URL(
+      String(p || '')
+        .replace(/\\/g, '/')        // windows → web slashes
+        .replace(/^\/+/, ''),       // strip leading slashes
+      API_URL                       // can end with or without '/'
+    ).toString();
+
   // Pagination handlers
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -125,7 +133,7 @@ const ProductsJewel = () => {
         <Typography variant="h4"
           gutterBottom
           sx={{ fontWeight: 700, color: 'text.primary', mb: 4 }}>
-           Products
+          Products
         </Typography>
         <Box sx={{
           display: 'flex',
@@ -156,11 +164,10 @@ const ProductsJewel = () => {
                   <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Image</TableCell>
                   <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Name</TableCell>
                   <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Category</TableCell>
-                  <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Price (Retail)</TableCell>
                   <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>MRP (Consumer)</TableCell>
                   <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Quantity</TableCell>
                   {/* <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Stock</TableCell> */}
-                  <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Status</TableCell>
+                  {/* <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Status</TableCell> */}
                   <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -170,7 +177,8 @@ const ProductsJewel = () => {
                     <TableCell>
                       {product.media && product.media.length > 0 ? (
                         <ProductImage
-                          src={`${API_URL}${product.media[0].url}`}
+                          // src={`${API_URL}${product.media[0].url}`}
+                          src={publicUrl(product.media[0].url)}
                           alt={product.name}
                           variant="rounded"
                         />
@@ -190,11 +198,6 @@ const ProductsJewel = () => {
                       <Typography>{product.category}</Typography>
                       <Typography variant="body2" color="textSecondary">
                         {product.sub_category}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography fontWeight="medium">
-                        ₹{product.retail_price}
                       </Typography>
                     </TableCell>
                     <TableCell>
@@ -222,13 +225,13 @@ const ProductsJewel = () => {
                         {product.stock}
                       </Typography>
                     </TableCell> */}
-                    <TableCell>
+                    {/* <TableCell>
                       <StatusChip
                         label={product.deleted_at ? 'Inactive' : 'Active'}
                         status={product.deleted_at ? 'inactive' : 'active'}
                         sx={{ pointerEvents: 'none' }}
                       />
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell>
                       <IconButton
                         color="info"

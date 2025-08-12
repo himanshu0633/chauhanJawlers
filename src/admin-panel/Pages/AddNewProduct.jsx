@@ -268,7 +268,7 @@ const AddNewProduct = () => {
         toast.success('Product added successfully!');
       }
 
-      navigate('/pharma-admin/products');
+      navigate('/AdminPanel/products');
     } catch (error) {
       console.error('Submit Error:', error);
       toast.error('Something went wrong. Please try again.');
