@@ -9,11 +9,13 @@ import ChauhanWorld from '../HomePageComponents/ChauhanWorld'
 import ExchangeOffer from '../HomePageComponents/ExchangeOffer'
 import Exclusive from '../HomePageComponents/Exclusive'
 import ChauhanExperience from '../HomePageComponents/ChauhanExperience'
+import VideoCardSlider from '../common components/VideoCardSlider'
 
 const HomePage = () => {
 
     return (
         <div>
+            <VideoCardSlider />
             <HeroSection />
             <ShopByCategories />
             <Collection />
