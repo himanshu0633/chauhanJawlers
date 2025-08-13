@@ -30,6 +30,7 @@ const AddNewProduct = () => {
 
   const [categoryList, setCategoryList] = useState([]);
   const [subCategoryList, setSubCategoryList] = useState([]);
+  const [occasionList, setOccasionList] = useState([]);
   const [errors, setErrors] = useState({});
   const fileInputRef = useRef(null);
 
@@ -44,6 +45,7 @@ const AddNewProduct = () => {
     stock: 'yes',
     quantity: [],
     category: '',
+    occasion: '',
     productvariety: '',
     sub_category: '',
     created_at: new Date().toISOString(),
@@ -438,7 +440,7 @@ const AddNewProduct = () => {
 
         <Box
           sx={{
-            display: 'flex',  
+            display: 'flex',
             flexWrap: 'wrap',
             gap: 2,
           }}
@@ -760,6 +762,27 @@ const AddNewProduct = () => {
                 ))}
               </Select>
             </FormControl>
+
+            {/* occasion */}
+              <FormControl
+              fullWidth
+              sx={{ flex: '1 1 300px', minWidth: 0 }}
+            >
+              <InputLabel id="occasion-label">Occasion</InputLabel>
+              <Select
+                labelId="occasion-label"
+                label="Occasion"
+                name="occasion"
+                value={formData.occasion}
+                onChange={handleChange}
+              >
+                <MenuItem value=""><em>Select occasion</em></MenuItem>
+                {occasionList.map((occasion, i) => (
+                  <MenuItem key={i} value={occasion.name}>{occasion.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
           </Box>
         </div>
       </Box>

@@ -24,6 +24,7 @@ import GiftingPage from './dropdownPages/GiftingPage';
 import OrderJewel from './admin-panel/Pages/OrderJewel';
 import Banners from './admin-panel/Pages/Banners';
 import UsersJewel from './admin-panel/Pages/UsersJewel';
+import Occasion from './admin-panel/Pages/Occasion';
 
 function App() {
   const location = useLocation();
@@ -69,6 +70,7 @@ function App() {
             <Route path="category" element={<CategoryJewel />} />
             <Route path="subcategory" element={<SubCategoryJewel />} />
             <Route path="products" element={<ProductsJewel />} />
+            <Route path="occasion" element={<Occasion />} />
             <Route path="addNewProduct" element={<AddNewProduct />} />
             <Route path="addNewProduct/:id" element={<AddNewProduct />} />
             <Route path="orders" element={<OrderJewel />} />
