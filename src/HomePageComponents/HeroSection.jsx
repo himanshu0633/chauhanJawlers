@@ -37,7 +37,6 @@ const SlideImage = styled("img")({
 
 const SlickArrowStyles = () => {
     const theme = useTheme()
-
     return (
         <GlobalStyles
             styles={{
@@ -81,11 +80,34 @@ const SlickArrowStyles = () => {
     )
 }
 
+const SlickDots = () => {
+    const theme = useTheme()
+    return (
+        <GlobalStyles
+            styles={{
+                ".slick-dots": {
+                    bottom: "5px",
+                    "& li": {
+                        width: "10px",
+                        height: "10px",
+                        borderRadius: "50%",
+                        backgroundColor: "#7A7469B0",
+                        transition: "all 0.3s ease",
+                    },
+                    "& li.slick-active": {
+                        backgroundColor: "#fff",
+                    },
+                },
+            }}
+        />
+    )
+}
+
 const slideImages = ["/hero_img.png", "/hero_img.png"]
 
 function HeroSection() {
     const settings = {
-        dots: false,
+        dots: true,
         infinite: true,
         speed: 500,
         slidesToShow: 1,
@@ -93,7 +115,7 @@ function HeroSection() {
         autoplay: true,
         autoplaySpeed: 4000,
         pauseOnHover: true,
-        arrows: true,
+        arrows: false,
     }
 
     return (
@@ -106,6 +128,7 @@ function HeroSection() {
                     </Slide>
                 ))}
             </Slider>
+            <SlickDots/>
         </SliderContainer>
     )
 }

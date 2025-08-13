@@ -15,7 +15,7 @@ const HomePage = () => {
 
     return (
         <div>
-            <VideoCardSlider />
+            {/* <VideoCardSlider /> */}
             <HeroSection />
             <ShopByCategories />
             <Collection />

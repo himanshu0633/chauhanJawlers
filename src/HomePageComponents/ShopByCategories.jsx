@@ -3,16 +3,6 @@ import { useEffect, useState } from "react";
 import axiosInstance from "../common components/AxiosInstance";
 import { publicUrl } from "../common components/PublicUrl";
 
-const categories = [
-    { id: 1, name: "EARRINGS", image: "/catgImg.png" },
-    { id: 2, name: "FINGER RINGS", image: "/matchImg1.png" },
-    { id: 3, name: "PENDANTS", image: "/matchImg2.png" },
-    { id: 4, name: "MANGALSUTRA", image: "/matchImg3.png" },
-    { id: 5, name: "BRACELETS", image: "/matchImg4.png" },
-    { id: 6, name: "BANGLES", image: "/matchImg5.png" },
-    { id: 7, name: "CHAINS", image: "/matchImg6.png" },
-];
-
 const ShopByCategories = () => {
     const [categoryName, setCategoryName] = useState([]);
 
