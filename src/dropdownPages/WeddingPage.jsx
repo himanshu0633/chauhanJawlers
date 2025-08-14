@@ -23,6 +23,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
 import TrendingKeywordsMarquee from "../common components/TrendingKeywordsMarquee";
 import WeddingOccasionSlider from "../common components/WeddingOccasionSlider";
+import FindMyCommunity from "../common components/FindMyCommunity";
 
 // Animation presets
 const shimmer = keyframes`
@@ -141,16 +142,19 @@ const WeddingPage = () => {
     position: "relative",
   };
 
+  const titleStyle = {
+    textAlign: "center",
+    mb: 6,
+    fontWeight: 500,
+    color: "#8B1538",
+    fontFamily: '"Playfair Display", serif'
+  };
+
   const categoryItemStyle = {
     borderRadius: 3,
     overflow: "hidden",
     boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
-    background: "linear-gradient(180deg, #fff 70%, #f8f0f5 100%)",
-    transition: "all 0.3s ease",
-    "&:hover": {
-      transform: "translateY(-4px)",
-      boxShadow: "0 6px 24px rgba(139,21,56,0.12)",
-    },
+    background: "#fff",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -159,131 +163,72 @@ const WeddingPage = () => {
     height: { xs: 180, sm: 200 },
     minWidth: { xs: 130, sm: 150, md: 170 },
     cursor: "pointer",
-    border: "1px solid rgba(139,21,56,0.08)",
-    position: "relative",
+    border: "1px solid rgba(139,21,56,0.08)"
   };
+
 
   return (
     <Box sx={{ backgroundColor: "#fff", overflowX: "hidden", position: "relative" }}>
       {/* Community Brides  */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Zoom in={trigger} timeout={500}>
-          <Typography variant="h4" component="h2" sx={sectionTitleStyle}>
-            For a sparkling new beginning
-          </Typography>
-        </Zoom>
+      <FindMyCommunity />
 
-        <Fade in={trigger} timeout={1200}>
-          <Box sx={{ display: "flex", justifyContent: "center", mb: 4, px: 2 }}>
-            <TextField
-              placeholder="Find my community"
-              variant="outlined"
-              sx={{
-                width: { xs: "100%", sm: "400px" },
-                "& .MuiOutlinedInput-root": {
-                  backgroundColor: "#fff",
-                  borderRadius: "25px",
-                  height: "50px",
-                  border: "2px solid #8B1538",
-                  "& fieldset": { border: "none" },
-                },
-              }}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      sx={{
-                        backgroundColor: "#8B1538",
-                        color: "#fff",
-                        width: "40px",
-                        height: "40px",
-                        mr: 0.5,
-                      }}
-                    >
-                      <Search />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Box>
-        </Fade>
+      {/* Handpicked for the Bride */}
+      <Container maxWidth="lg">
+        <Typography variant="h4" component="h2" sx={titleStyle}>
+          Handpicked for the Bride
+        </Typography>
 
-        <Grow in={trigger} timeout={800}>
-          <Typography variant="h5" component="h3" sx={{ textAlign: "center", mb: 6 }}>
-            Find my community
-          </Typography>
-        </Grow>
-
-        <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 3 }}>
-          {communityBrides.map((bride, index) => (
-            <Grow in={trigger} timeout={300 + index * 100} key={index}>
+        <Box sx={{
+          display: "flex",
+          justifyContent: "center",
+          flexWrap: "wrap",
+          gap: { xs: 1, sm: 2 },
+          px: { xs: 1, sm: 2 }
+        }}>
+          {brideCategories.map((category, index) => (
+            <Box sx={categoryItemStyle} key={index}>
               <Box
+                component="img"
+                src={category.image}
+                alt={category.name}
                 sx={{
-                  px: 3,
-                  py: 1.2,
-                  border: "2px solid #8B1538",
-                  borderRadius: 999,
-                  color: "#8B1538",
-                  fontWeight: 600,
-                  cursor: "pointer",
+                  width: "100%",
+                  height: { xs: 110, sm: 130 },
+                  objectFit: "cover",
+                  borderTopLeftRadius: 12,
+                  borderTopRightRadius: 12
                 }}
-              >
-                {bride}
+              />
+              <Box sx={{
+                position: "absolute",
+                top: 6,
+                right: 6,
+                zIndex: 2
+              }}>
+                <IconButton size="small" sx={{
+                  backgroundColor: "rgba(255,255,255,0.95)",
+                  width: 24,
+                  height: 24
+                }}>
+                  <FavoriteBorder sx={{ color: "#8B1538" }} />
+                </IconButton>
               </Box>
-            </Grow>
+              <Typography variant="body2" sx={{
+                mt: 1,
+                fontWeight: 600,
+                color: "#8B1538",
+                textAlign: "center",
+                fontSize: { xs: "0.85rem", sm: "0.9rem" },
+                px: 0.5
+              }}>
+                {category.name}
+              </Typography>
+            </Box>
           ))}
         </Box>
       </Container>
 
-      {/* Handpicked for the Bride */}
-      <Box sx={{ py: 8, backgroundColor: "#faf5f0" }}>
-        <Container maxWidth="lg">
-          <Fade in={trigger} timeout={1000}>
-            <Typography variant="h4" component="h2" sx={sectionTitleStyle}>
-              Handpicked for the Bride
-            </Typography>
-          </Fade>
 
-          <Box sx={{ display: "flex", gap: 2, overflowX: "auto" }}>
-            {brideCategories.map((category, index) => (
-              <Grow in={trigger} timeout={index * 200} key={index}>
-                <Box sx={categoryItemStyle}>
-                  <Box
-                    component="img"
-                    src={category.image}
-                    alt={category.name}
-                    sx={{
-                      width: "100%",
-                      height: 130,
-                      objectFit: "cover",
-                    }}
-                  />
-                  <Box sx={{ position: "absolute", top: 6, right: 6 }}>
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleWishlist(index);
-                      }}
-                      sx={{ backgroundColor: "rgba(255,255,255,0.95)" }}
-                    >
-                      {wishlist[index] ? (
-                        <Favorite sx={{ color: "#8B1538" }} />
-                      ) : (
-                        <FavoriteBorder sx={{ color: "#8B1538" }} />
-                      )}
-                    </IconButton>
-                  </Box>
-                  <Typography variant="body2" sx={{ mt: 1, fontWeight: 600 }}>
-                    {category.name}
-                  </Typography>
-                </Box>
-              </Grow>
-            ))}
-          </Box>
-        </Container>
-      </Box>
 
       {/* Trending Keywords */}
       <TrendingKeywordsMarquee
