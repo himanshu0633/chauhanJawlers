@@ -25,6 +25,7 @@ import OrderJewel from './admin-panel/Pages/OrderJewel';
 import Banners from './admin-panel/Pages/Banners';
 import UsersJewel from './admin-panel/Pages/UsersJewel';
 import Occasion from './admin-panel/Pages/Occasion';
+import DimandShowCase from './pages/DaimondPageNav/DimandShowCase';
 
 function App() {
   const location = useLocation();
@@ -53,6 +54,7 @@ function App() {
         <Route path="/cart" element={<CartPage />} />
         <Route path="/singleProduct" element={<SingleProductPage />} />
         <Route path="/collection" element={<CollectionPage />} />
+        <Route path="/diamond" element={<DimandShowCase />} />
 
         {/* admin panel  */}
         <Route>
