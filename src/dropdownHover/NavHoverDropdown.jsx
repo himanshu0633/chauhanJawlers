@@ -196,13 +196,6 @@ const genders = [
     { img: "https://images.unsplash.com/photo-1519764622345-23439dd774f7?w=240&fit=crop", name: "Kids & Teens" },
 ];
 
-const occasions = [
-    { img: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=240&fit=crop", name: "Wedding" },
-    { img: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=240&fit=crop", name: "Party" },
-    { img: "https://images.unsplash.com/photo-1499952127939-9bbf5af6c51c?w=240&fit=crop", name: "Office" },
-    { img: "https://images.unsplash.com/photo-1492106087820-71f1a00d2b11?w=240&fit=crop", name: "Casual" },
-];
-
 const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
     const theme = useTheme();
     const navigate = useNavigate();
@@ -217,6 +210,7 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
     const [categoryName, setCategoryName] = useState([]);
     const [isLoadingCats, setIsLoadingCats] = useState(false);
     const [catsError, setCatsError] = useState(null);
+    const [occasions, setOccasions] = useState([]);
 
     useEffect(() => {
         if (hoveredFilter) {
@@ -236,6 +230,25 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
             } catch (err) {
                 setCatsError(err?.response?.data?.message || err?.message || "Failed to load categories");
                 setCategoryName([]);
+            } finally {
+                setIsLoadingCats(false);
+            }
+        })();
+    }, []);
+
+    // Fetch occasions
+    useEffect(() => {
+        (async () => {
+            try {
+                setIsLoadingCats(true);
+                setCatsError(null);
+                const res = await axiosInstance.get("/user/allOccasions");
+                const subOccasions =
+                    res?.data?.categories ?? res?.data?.data ?? (Array.isArray(res?.data) ? res.data : []);
+                setOccasions(Array.isArray(subOccasions) ? subOccasions : []);
+            } catch (err) {
+                setCatsError(err?.response?.data?.message || err?.message || "Failed to load occasions");
+                setOccasions([]);
             } finally {
                 setIsLoadingCats(false);
             }
@@ -312,13 +325,13 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
             </CategoryGrid>
         ) : (
             <BigGrid>
-                {(tab === "price" ? priceRanges : tab === "gender" ? genders : occasions).map((option) => (
-                    <BigItem key={option.name}>
+                {(tab === "price" ? priceRanges : tab === "gender" ? genders : occasions).map((item) => (
+                    <BigItem key={item._id}>
                         <BigImageWrap>
-                            <img src={option.img} alt={option.name} />
+                            <img src={publicUrl(item.image)} alt={item.name} />
                         </BigImageWrap>
                         <Typography sx={{ color: "#fff", fontWeight: 600, fontSize: 16, mt: 0.5 }}>
-                            {option.name}
+                            {item.name}
                         </Typography>
                     </BigItem>
                 ))}
