@@ -172,7 +172,7 @@ const RightPanel = styled(Box)(({ theme }) => ({
     background: "none",
     padding: "20px 18px 0 18px",
     gap: 18,
-    [theme.breakpoints.down("lg")]: { display: "none" }, // hide right panel below 1200
+    [theme.breakpoints.down("lg")]: { display: "none" },
 }));
 
 /* ---------------- data for other tabs ---------------- */
@@ -211,6 +211,7 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
     const [isLoadingCats, setIsLoadingCats] = useState(false);
     const [catsError, setCatsError] = useState(null);
     const [occasions, setOccasions] = useState([]);
+
 
     useEffect(() => {
         if (hoveredFilter) {
@@ -328,7 +329,7 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
                 {(tab === "price" ? priceRanges : tab === "gender" ? genders : occasions).map((item) => (
                     <BigItem key={item._id}>
                         <BigImageWrap>
-                            <img src={publicUrl(item.image)} alt={item.name} />
+                            <img src={item.image ? publicUrl(item.image) : item.img} alt={item.name} />
                         </BigImageWrap>
                         <Typography sx={{ color: "#fff", fontWeight: 600, fontSize: 16, mt: 0.5 }}>
                             {item.name}
