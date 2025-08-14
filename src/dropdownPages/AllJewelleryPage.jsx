@@ -1,10 +1,23 @@
-import { Box, Typography, Grid, Button, Chip, IconButton, Container } from '@mui/material';
+import {
+    Box,
+    Typography,
+    Grid,
+    Chip,
+    IconButton,
+    Container,
+    Select,
+    MenuItem,
+    TextField,
+    FormControlLabel,
+    Checkbox,
+} from '@mui/material';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import SlickSlider from '../common components/SlickSlider';
+import axiosInstance from '../common components/AxiosInstance';
+import { useLocation, useParams } from 'react-router-dom';
+import { publicUrl } from '../common components/PublicUrl';
 
 const jewelleryData = [
     {
@@ -21,56 +34,21 @@ const jewelleryData = [
     },
 ];
 
-const products = [
-    {
-        img: 'https://www.tanishq.co.in/dw/image/v2/BKCK_PRD/on/demandware.static/-/Sites-Tanishq-product-catalog/default/dw8d8c0a6b/images/hi-res/50D3I3SZTABA09_1.jpg?sw=480&sh=480',
-        title: 'Dazzling Grace Drop Earrings',
-        price: '₹ 58,484',
-        liked: false,
-    },
-    {
-        img: 'https://www.tanishq.co.in/dw/image/v2/BKCK_PRD/on/demandware.static/-/Sites-Tanishq-product-catalog/default/dw8d8c0a6b/images/hi-res/50D3I3SZTABA09_1.jpg?sw=480&sh=480',
-        title: 'Captivating Grace Drop Earrings',
-        price: '₹ 56,605',
-        special: 'Only 1 left!',
-        liked: false,
-    },
-    {
-        img: 'https://www.tanishq.co.in/dw/image/v2/BKCK_PRD/on/demandware.static/-/Sites-Tanishq-product-catalog/default/dw8d8c0a6b/images/hi-res/50D3I3SZTABA09_1.jpg?sw=480&sh=480',
-        title: 'Everyday Charm Diamond Stud Earrings',
-        price: '₹ 36,903',
-        oldPrice: '₹ 39,845',
-        liked: false,
-    },
-    {
-        img: 'https://www.tanishq.co.in/dw/image/v2/BKCK_PRD/on/demandware.static/-/Sites-Tanishq-product-catalog/default/dw8d8c0a6b/images/hi-res/50D3I3SZTABA09_1.jpg?sw=480&sh=480',
-        title: 'Everyday Charm Diamond Stud Earrings',
-        price: '₹ 36,903',
-        oldPrice: '₹ 39,845',
-        liked: false,
-    },
-    {
-        img: 'https://www.tanishq.co.in/dw/image/v2/BKCK_PRD/on/demandware.static/-/Sites-Tanishq-product-catalog/default/dw8d8c0a6b/images/hi-res/50D3I3SZTABA09_1.jpg?sw=480&sh=480',
-        title: 'Everyday Charm Diamond Stud Earrings',
-        price: '₹ 36,903',
-        oldPrice: '₹ 39,845',
-        liked: false,
-    },
-];
 const assuranceData = [
     {
         img: 'https://i.imgur.com/XZiQnRx.png',
-        label: 'Exchange Offers'
+        label: 'Exchange Offers',
     },
     {
         img: 'https://www.tanishq.co.in/on/demandware.static/-/Library-Sites-TanishqSharedLibrary/default/dweee090e8/assurance/assurance-bis-logo.png',
-        label: 'Purity Guarantee'
+        label: 'Purity Guarantee',
     },
     {
         img: 'https://i.imgur.com/3JJd6Ux.png',
-        label: 'Easy Replacements'
+        label: 'Easy Replacements',
     },
-]
+];
+
 function JewelleryHeader() {
     return (
         <Box
@@ -133,7 +111,22 @@ function JewelleryHeader() {
     );
 }
 
-function FiltersAndSort() {
+function FiltersAndSort({
+    sortOption,
+    setSortOption,
+    filters,
+    setFilters,
+    priceBuckets,
+    subcategories,
+}) {
+    const handlePriceClick = (bucket) => {
+        setFilters((f) => ({
+            ...f,
+            priceRange:
+                f.priceRange && f.priceRange.label === bucket.label ? null : bucket,
+        }));
+    };
+
     return (
         <Box
             sx={{
@@ -145,69 +138,75 @@ function FiltersAndSort() {
                 mb: 4,
             }}
         >
-            <Button
-                startIcon={<FilterListIcon />}
-                variant="outlined"
+            {/* Search */}
+            <TextField
                 size="small"
-                sx={{
-                    borderRadius: 6,
-                    px: 2,
-                    textTransform: 'none',
-                    fontWeight: 400,
-                    color: 'text.primary',
-                    borderColor: '#ddd',
-                    backgroundColor: '#fff',
-                }}
+                placeholder="Search products"
+                value={filters.query}
+                onChange={(e) => setFilters((f) => ({ ...f, query: e.target.value }))}
+                sx={{ minWidth: 220, background: '#fff' }}
+            />
+
+            {/* Subcategory */}
+            <Select
+                size="small"
+                value={filters.subCategory}
+                onChange={(e) =>
+                    setFilters((f) => ({ ...f, subCategory: e.target.value }))
+                }
+                sx={{ minWidth: 200, background: '#fff' }}
             >
-                Filter
-            </Button>
-            <Chip
-                label="₹25,000 - ₹50,000"
-                size="small"
-                clickable
-                sx={{ fontWeight: 400, backgroundColor: '#fafbfc' }}
-                onDelete={() => { }}
+                <MenuItem value="all">All subcategories</MenuItem>
+                {subcategories.map((s) => (
+                    <MenuItem key={s} value={s}>
+                        {s}
+                    </MenuItem>
+                ))}
+            </Select>
+
+            {/* Price buckets */}
+            {priceBuckets.map((b) => {
+                const active = filters.priceRange?.label === b.label;
+                return (
+                    <Chip
+                        key={b.label}
+                        label={b.label}
+                        clickable
+                        color={active ? 'primary' : 'default'}
+                        variant={active ? 'filled' : 'outlined'}
+                        onClick={() => handlePriceClick(b)}
+                    />
+                );
+            })}
+
+            <FormControlLabel
+                sx={{ ml: 1 }}
+                control={
+                    <Checkbox
+                        checked={filters.inStockOnly}
+                        onChange={(e) =>
+                            setFilters((f) => ({ ...f, inStockOnly: e.target.checked }))
+                        }
+                    />
+                }
+                label="In stock only"
             />
-            <Chip
-                label="Gifts For Him"
-                size="small"
-                clickable
-                sx={{ fontWeight: 400, backgroundColor: '#fafbfc' }}
-                onDelete={() => { }}
-            />
-            <Chip
-                label="Women"
-                size="small"
-                clickable
-                sx={{ fontWeight: 400, backgroundColor: '#fafbfc' }}
-                onDelete={() => { }}
-            />
-            <Typography
-                variant="body2"
-                sx={{ fontWeight: 500, color: '#ae1046', ml: 1, cursor: 'pointer' }}
-            >
-                + Show More
-            </Typography>
+
             <Box sx={{ flex: 1 }} />
-            <Button
-                endIcon={<KeyboardArrowDownRoundedIcon />}
-                sx={{
-                    borderRadius: 8,
-                    px: 2,
-                    textTransform: 'none',
-                    fontWeight: 400,
-                    fontSize: 15,
-                    backgroundColor: '#fafbfc',
-                    /*************  ✨ Windsurf Command 🌟  *************/
-                    color: 'text.primary',
-                    borderColor: '#ddd',
-                    boxShadow: '0 .5px 0 #eee',
-                }}
-                variant="outlined"
+
+            {/* Sort */}
+            <Select
                 size="small"
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                sx={{ minWidth: 220, background: '#fff' }}
             >
-                Sort By: <span style={{ fontWeight: 700, marginLeft: 4 }}>Best Matches</span>
-            </Button>
+                <MenuItem value="relevance">Sort by: Best Matches</MenuItem>
+                <MenuItem value="price-asc">Price: Low to High</MenuItem>
+                <MenuItem value="price-desc">Price: High to Low</MenuItem>
+                <MenuItem value="discount-desc">Discount: High to Low</MenuItem>
+                <MenuItem value="newest">Newest First</MenuItem>
+            </Select>
         </Box>
     );
 }
@@ -221,7 +220,6 @@ function JewelleryCard({ product }) {
                     position: 'relative',
                     borderRadius: 2,
                     boxShadow: 1,
-                    // background: '#fff',
                     overflow: 'hidden',
                     mb: 2,
                     width: { xs: 220, sm: 260 },
@@ -230,13 +228,11 @@ function JewelleryCard({ product }) {
                 }}
             >
                 <img
-                    src={product.img}
+                    src={publicUrl(product.img)}
                     alt={product.title}
                     style={{
                         display: 'block',
                         margin: 'auto',
-                        maxWidth: '100%',
-                        maxHeight: '100%',
                         objectFit: 'contain',
                     }}
                 />
@@ -259,7 +255,6 @@ function JewelleryCard({ product }) {
                     ) : (
                         <FavoriteBorderIcon sx={{ fontSize: 20, color: '#bbb' }} />
                     )}
-                    {/* <FavoriteBorderIcon sx={{ fontSize: 20, color: '#bbb' }} /> */}
                 </IconButton>
             </Box>
             <Typography
@@ -296,9 +291,201 @@ function JewelleryCard({ product }) {
 }
 
 export function JewelleryGrid() {
+    const location = useLocation();
+    const { subCategoryName } = useParams();
+    const categoryId = location.state?.categoryId || null;
+
+    const [allProducts, setAllProducts] = useState([]);
+    const [categorySubNames, setCategorySubNames] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    // Sorting + filters
+    const [sortOption, setSortOption] = useState('relevance');
+    const [filters, setFilters] = useState({
+        priceRange: null,        // {min, max, label} or null
+        subCategory: 'all',      // subcategory name (lowercase) or 'all'
+        inStockOnly: false,
+        query: '',
+    });
+
+    // Static buckets (tweak as needed)
+    const priceBuckets = [
+        { label: 'Under ₹25k', min: 0, max: 25000 },
+        { label: '₹25k – ₹50k', min: 25000, max: 50000 },
+        { label: '₹50k – ₹1L', min: 50000, max: 100000 },
+        { label: 'Over ₹1L', min: 100000, max: Number.MAX_SAFE_INTEGER },
+    ];
+
+    const parseNum = (v) => {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : 0;
+    };
+
+    const formatINR = (n) =>
+        n.toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+
+    // Adapt API product -> shape JewelleryCard expects
+    const adaptProduct = (p) => {
+        const consumer = parseNum(p?.consumer_price ?? p?.mrp);
+        const retail = parseNum(p?.retail_price ?? p?.list_price);
+        const discount = Math.max(0, retail - consumer);
+
+        const img = p?.media?.[0]?.url || p?.imageUrl || p?.img || '';
+        const title = p?.name || p?.title || 'Untitled';
+        const oldPrice = retail > consumer ? formatINR(retail) : null;
+
+        let special;
+        const stockStr = String(p?.stock || '').toLowerCase();
+        if (stockStr === 'no') special = 'Out of stock';
+        else if (parseNum(p?.quantity) === 1) special = 'Only 1 left!';
+
+        const subCategoryId =
+            p?.sub_category?._id || p?.sub_category || null;
+
+        const subCategoryNameNorm =
+            (p?.sub_category?.name || p?.sub_categoryName || '')
+                .toString()
+                .toLowerCase();
+
+        return {
+            id: p?._id,
+            img,
+            title,
+            price: formatINR(consumer),
+            oldPrice,
+            special,
+
+            // raw fields for filtering/sorting
+            rawPrice: consumer,
+            rawDiscount: discount,
+            inStock: stockStr !== 'no',
+            createdAt: p?.createdAt ? new Date(p.createdAt).getTime() : 0,
+
+            // subcategory (name + id)
+            subCategoryId,
+            subCategoryName: subCategoryNameNorm,
+        };
+    };
+
+    const fetchAll = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const [prodRes, subsRes] = await Promise.all([
+                axiosInstance.get('/user/allproducts'),
+                axiosInstance.get('/user/allSubcategories'),
+            ]);
+
+            const rawProducts = prodRes?.data || [];
+            const subs = subsRes?.data || [];
+
+            // Build id->name map for subcategories
+            const subIdToName = new Map(
+                subs.map((s) => [String(s?._id), (s?.name || '').toLowerCase()])
+            );
+
+            // Adapt products, then fill missing subCategoryName via map
+            const adapted = rawProducts.map(adaptProduct).map((p) => ({
+                ...p,
+                subCategoryName:
+                    p.subCategoryName ||
+                    (p.subCategoryId && subIdToName.get(String(p.subCategoryId))) ||
+                    '',
+            }));
+
+            setAllProducts(adapted);
+
+            // Compute subcategory list for filter (prioritize by category if provided)
+            let subcats = [];
+            if (categoryId) {
+                subcats = subs
+                    .filter((sub) => String(sub?.category_id?._id) === String(categoryId))
+                    .map((sub) => (sub?.name || '').toLowerCase());
+            } else {
+                // union from products & all subs
+                const fromProducts = adapted.map((p) => p.subCategoryName).filter(Boolean);
+                const fromApi = subs.map((s) => (s?.name || '').toLowerCase());
+                subcats = Array.from(new Set([...fromProducts, ...fromApi]));
+            }
+            subcats = subcats.filter(Boolean).sort();
+            setCategorySubNames(subcats);
+        } catch (e) {
+            console.error(e);
+            setError('Could not load products. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchAll();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [categoryId]);
+
+    const displayedProducts = useMemo(() => {
+        let list = allProducts;
+
+        // 1) Subcategory via route param (/:subCategoryName)
+        if (subCategoryName) {
+            const target = subCategoryName.toLowerCase();
+            list = list.filter((p) => p.subCategoryName === target);
+        }
+
+        // 2) Subcategory via dropdown
+        if (filters.subCategory !== 'all') {
+            list = list.filter((p) => p.subCategoryName === filters.subCategory);
+        }
+
+        // 3) Price bucket
+        if (filters.priceRange) {
+            const { min, max } = filters.priceRange;
+            list = list.filter((p) => p.rawPrice >= min && p.rawPrice <= max);
+        }
+
+        // 4) In-stock
+        if (filters.inStockOnly) {
+            list = list.filter((p) => p.inStock);
+        }
+
+        // 5) Text query
+        if (filters.query.trim()) {
+            const q = filters.query.trim().toLowerCase();
+            list = list.filter((p) => p.title.toLowerCase().includes(q));
+        }
+
+        // 6) If on a category page, restrict to its subcategories (if any)
+        if (categoryId && categorySubNames.length) {
+            list = list.filter((p) => categorySubNames.includes(p.subCategoryName));
+        }
+
+        // Sorting
+        switch (sortOption) {
+            case 'price-asc':
+                return [...list].sort((a, b) => a.rawPrice - b.rawPrice);
+            case 'price-desc':
+                return [...list].sort((a, b) => b.rawPrice - a.rawPrice);
+            case 'discount-desc':
+                return [...list].sort((a, b) => b.rawDiscount - a.rawDiscount);
+            case 'newest':
+                return [...list].sort((a, b) => b.createdAt - a.createdAt);
+            case 'relevance':
+            default:
+                return list;
+        }
+    }, [
+        allProducts,
+        filters,
+        sortOption,
+        subCategoryName,
+        categoryId,
+        categorySubNames,
+    ]);
+
     return (
         <>
             <JewelleryHeader />
+
             <Box sx={{ py: 2, px: { xs: 2, sm: 6 } }}>
                 <Typography
                     variant="h5"
@@ -307,27 +494,51 @@ export function JewelleryGrid() {
                     All Jewellery
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ ml: 1, display: 'inline' }}>
-                    (19607 results)
+                    ({displayedProducts.length} results)
                 </Typography>
             </Box>
-            <FiltersAndSort />
+
+            <FiltersAndSort
+                sortOption={sortOption}
+                setSortOption={setSortOption}
+                filters={filters}
+                setFilters={setFilters}
+                priceBuckets={priceBuckets}
+                subcategories={categorySubNames}
+            />
+
             <Grid
                 container
                 spacing={2}
                 sx={{ px: { xs: 2, sm: 6 }, justifyContent: { xs: 'center', sm: 'flex-start' } }}
             >
-                {products.map((product, idx) => (
-                    <Grid
-                        key={idx}
-                        item
-                        xs={12}
-                        sm={6}
-                        md={4}
-                        sx={{ display: 'flex', justifyContent: 'center' }}
-                    >
-                        <JewelleryCard product={product} />
+                {loading && (
+                    <Grid item xs={12}>
+                        <Typography align="center">Loading products…</Typography>
                     </Grid>
-                ))}
+                )}
+                {error && (
+                    <Grid item xs={12}>
+                        <Typography align="center" color="error">
+                            {error}
+                        </Typography>
+                    </Grid>
+                )}
+
+                {!loading &&
+                    !error &&
+                    displayedProducts.map((product) => (
+                        <Grid
+                            key={product.id || `${product.title}-${product.img}`}
+                            item
+                            xs={12}
+                            sm={6}
+                            md={4}
+                            sx={{ display: 'flex', justifyContent: 'center' }}
+                        >
+                            <JewelleryCard product={product} />
+                        </Grid>
+                    ))}
             </Grid>
         </>
     );
@@ -339,11 +550,9 @@ export function JewelAssurance() {
             sx={{
                 width: '100%',
                 background: '#fff',
-                border: '1px solid #e8e4e2',
+                border: "1px solid '#e8e4e2'",
                 borderRadius: '28px',
                 py: { xs: 4, sm: 6 },
-                // px: { xs: 2, sm: 6 },
-                // maxWidth: '1000px',
                 mx: 'auto',
                 my: 5,
                 boxShadow: '0 2px 8px rgba(190,165,140,0.04)',
@@ -375,7 +584,7 @@ export function JewelAssurance() {
                 Crafted by experts, cherished by you.
             </Typography>
             <Grid container spacing={1} justifyContent="center" gap={{ xs: 2, sm: 5 }}>
-                {assuranceData.map((item, idx) => (
+                {assuranceData.map((item) => (
                     <Grid
                         key={item.label}
                         item
@@ -390,14 +599,10 @@ export function JewelAssurance() {
                                 mb: 1,
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center'
+                                justifyContent: 'center',
                             }}
                         >
-                            <img
-                                src={item.img}
-                                alt={item.label}
-                                style={{ maxWidth: '90%', maxHeight: '90%' }}
-                            />
+                            <img src={item.img} alt={item.label} style={{ maxWidth: '90%', maxHeight: '90%' }} />
                         </Box>
                         <Typography
                             variant="subtitle1"
@@ -408,7 +613,7 @@ export function JewelAssurance() {
                                 fontWeight: 500,
                                 mt: 0.5,
                                 fontSize: 17,
-                                lineHeight: 1.25
+                                lineHeight: 1.25,
                             }}
                         >
                             {item.label}
@@ -419,7 +624,6 @@ export function JewelAssurance() {
         </Box>
     );
 }
-
 
 export default function AllJewelleryPage() {
     return (
@@ -432,7 +636,3 @@ export default function AllJewelleryPage() {
         </Box>
     );
 }
-
-
-
-

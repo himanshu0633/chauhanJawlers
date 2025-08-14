@@ -195,8 +195,8 @@ function EmptyWishlist({ onContinueShopping }) {
       pt: { xs: 2, md: 4 }
     }}>
       {/* Empty wishlist illustration */}
-      <Box sx={{ 
-        minWidth: { xs: 150, md: 190 }, 
+      <Box sx={{
+        minWidth: { xs: 150, md: 190 },
         textAlign: 'center',
         order: { xs: 1, md: 1 }
       }}>
@@ -293,29 +293,29 @@ function EmptyWishlist({ onContinueShopping }) {
           </Box>
         </Box>
       </Box>
-      
+
       {/* Text content */}
-      <Box sx={{ 
-        textAlign: { xs: 'center', md: 'left' }, 
+      <Box sx={{
+        textAlign: { xs: 'center', md: 'left' },
         mt: { xs: 2, md: 10 },
         order: { xs: 2, md: 2 },
         maxWidth: { xs: '100%', md: '400px' }
       }}>
-        <Typography 
-          variant="h6" 
-          sx={{ 
-            color: '#702626', 
-            fontWeight: 600, 
+        <Typography
+          variant="h6"
+          sx={{
+            color: '#702626',
+            fontWeight: 600,
             mb: 0.75,
             fontSize: { xs: '18px', md: '20px' }
           }}
         >
           Your Wishlist Is Empty !
         </Typography>
-        <Typography 
-          variant="body2" 
-          sx={{ 
-            mb: 3, 
+        <Typography
+          variant="body2"
+          sx={{
+            mb: 3,
             color: '#702626',
             fontSize: { xs: '14px', md: '16px' }
           }}
@@ -361,7 +361,7 @@ function WishlistCard({ product, onRemove, onMoveToCart }) {
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
-      gap:1,
+      gap: 1,
       transition: 'transform 0.2s ease, box-shadow 0.2s ease',
       '&:hover': {
         transform: 'translateY(-2px)',
@@ -372,8 +372,8 @@ function WishlistCard({ product, onRemove, onMoveToCart }) {
       <IconButton
         size="small"
         onClick={() => onRemove(product.id)}
-        sx={{ 
-          position: 'absolute', 
+        sx={{
+          position: 'absolute',
           top: { xs: 4, sm: 6, md: 8 },
           right: { xs: 4, sm: 6, md: 8 },
           backgroundColor: '#fff',
@@ -387,12 +387,12 @@ function WishlistCard({ product, onRemove, onMoveToCart }) {
           }
         }}
       >
-        <DeleteOutlineIcon sx={{ 
-          color: '#bbb', 
+        <DeleteOutlineIcon sx={{
+          color: '#bbb',
           fontSize: { xs: '14px', sm: '16px', md: '18px' }
         }} />
       </IconButton>
-      
+
       {/* Product image container - responsive dimensions */}
       <Box sx={{
         width: '100%',
@@ -415,7 +415,7 @@ function WishlistCard({ product, onRemove, onMoveToCart }) {
           }}
         />
       </Box>
-      
+
       {/* Content section - flexible height */}
       <Box sx={{
         flex: 1,
@@ -442,7 +442,7 @@ function WishlistCard({ product, onRemove, onMoveToCart }) {
           >
             {product.title}
           </Typography>
-          
+
           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.3, sm: 0.5, md: 0.5 }, mb: { xs: 0.3, sm: 0.5, md: 0.5 } }}>
             <Typography
               sx={{
@@ -466,7 +466,7 @@ function WishlistCard({ product, onRemove, onMoveToCart }) {
             )}
           </Box>
         </Box>
-        
+
         {/* Move to cart button - fixed at bottom */}
         <Button
           variant="contained"
@@ -548,9 +548,9 @@ export default function WishlistPage() {
   const isEmpty = wishlistItems.length === 0;
 
   return (
-    <Box sx={{ 
-      px: { xs: 2, sm: 3, md: 5 }, 
-      py: { xs: 2, md: 3 }, 
+    <Box sx={{
+      px: { xs: 2, sm: 3, md: 5 },
+      py: { xs: 2, md: 3 },
       minHeight: '100vh',
       backgroundColor: '#fafafa'
     }}>
@@ -562,11 +562,11 @@ export default function WishlistPage() {
         gap: 2,
         flexWrap: 'wrap'
       }}>
-        <Typography 
-          variant="h6" 
-          sx={{ 
-            fontWeight: 400, 
-            color: '#222', 
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 400,
+            color: '#222',
             flex: 1,
             fontSize: { xs: '20px', md: '24px' }
           }}
@@ -598,32 +598,32 @@ export default function WishlistPage() {
           </Button>
         )}
       </Box>
-      
+
       {/* Content */}
       {isEmpty ? (
         <EmptyWishlist onContinueShopping={handleContinueShopping} />
       ) : (
-                          <Grid 
-           container 
-           spacing={{ xs: 1, sm: 1.5, md: 2, lg: 2.5 }}
-           justifyContent="center"
-         >
-           {wishlistItems.map((item) => (
-             <Grid
-               key={item.id}
-               item
-               xs={6}
-               sm={4}
-               md={3}
-               lg={3}
-               xl={2}
-               sx={{ 
-                 display: 'flex',
-                 justifyContent: 'center'
-               }}
-             >
-              <WishlistCard 
-                product={item} 
+        <Grid
+          container
+          spacing={{ xs: 1, sm: 1.5, md: 2, lg: 2.5 }}
+          justifyContent="center"
+        >
+          {wishlistItems.map((item) => (
+            <Grid
+              key={item.id}
+              item
+              xs={6}
+              sm={4}
+              md={3}
+              lg={3}
+              xl={2}
+              sx={{
+                display: 'flex',
+                justifyContent: 'center'
+              }}
+            >
+              <WishlistCard
+                product={item}
                 onRemove={handleRemoveFromWishlist}
                 onMoveToCart={handleMoveToCart}
               />
@@ -642,10 +642,10 @@ export default function WishlistPage() {
           bottom: { xs: 80, sm: 20, md: 20 }
         }}
       >
-        <Alert 
-          onClose={() => setShowSnackbar(false)} 
-          severity="success" 
-          sx={{ 
+        <Alert
+          onClose={() => setShowSnackbar(false)}
+          severity="success"
+          sx={{
             width: '100%',
             fontSize: { xs: '14px', sm: '16px' }
           }}
