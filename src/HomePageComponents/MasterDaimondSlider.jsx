@@ -299,7 +299,7 @@ const MasterDaimondSlider = () => {
                 sx={{
                     position: 'relative',
                     width: '100%',
-                    left: "-2%",
+                    // left: "-2%",
                     overflow: 'visible',
                     // overflow: 'hidden',
                     backgroundColor: '#2b0a07',

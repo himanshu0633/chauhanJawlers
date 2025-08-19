@@ -22,6 +22,7 @@ const HomePage = () => {
             <Treasure />
             <Trending />
             <MasterDaimondSlider />
+            <VideoCardSlider />
             <NewCollection />
             <ChauhanWorld />
             <ExchangeOffer />

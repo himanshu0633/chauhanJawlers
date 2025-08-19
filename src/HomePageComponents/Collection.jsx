@@ -153,7 +153,7 @@ function Collection() {
                 {/* Flex Row: Left Large Card, Right Two Stack Cards */}
                 <Box
                     display="flex"
-                    flexDirection={{ xs: "column", md: "row" }}
+                    flexDirection={{ xs: "column", sm: "row" }}
                     gap={3}
                     width="100%"
                 >

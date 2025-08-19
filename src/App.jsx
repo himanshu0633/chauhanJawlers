@@ -39,10 +39,9 @@ function App() {
       {!isAdminRoute && (
         <>
           <Header />
-          <Box sx={{ paddingTop: { xs: 13, md: 20, lg: 14.5 } }} />
+          <Box sx={{ paddingTop: { xs: 13, md: '124px', lg: 14.5 } }} />
         </>
       )}
-
 
       <Routes>
         <Route path="/" element={<HomePage />} />
