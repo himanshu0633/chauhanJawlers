@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Box,
     Typography,
@@ -30,15 +30,20 @@ import {
     ShoppingCart,
 } from '@mui/icons-material';
 import ScaleRoundedIcon from "@mui/icons-material/ScaleRounded";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import axiosInstance from '../common components/AxiosInstance';
 
 export default function SingleProductPage() {
+    const [product, setProduct] = useState(null);
+    const [loading, setLoading] = useState(false);
     const theme = useTheme();
     const isSm = useMediaQuery(theme.breakpoints.down('sm'));
     const [weight, setWeight] = React.useState("0.57");
     const [activeTab, setActiveTab] = useState('details');
     const [pincode, setPincode] = useState('');
     const navigate = useNavigate()
+    const { id } = useParams();
+    console.log(id,"yyyyyyyyyyy");
     const weightOptions = [
         { value: "0.57", label: "0.57 g" },
         { value: "0.80", label: "0.80 g" },
@@ -48,35 +53,66 @@ export default function SingleProductPage() {
     const handleTabChange = (tab) => setActiveTab(tab);
 
     // Product data based on the real product page reference
-    const product = {
-        name: 'Brilliant Diamond Nose Ring',
-        price: '₹14,955',
-        oldPrice: '₹16,955',
-        karatage: '18K',
-        diamondCarat: '0.06 ct',
-        materialColor: 'Yellow',
-        grossWeight: '0.57g',
-        metal: 'Gold',
-        skuId: 'GG2117GFBAAA022BB512A16',
-        ratingText: 'Bestsellers',
-        frontImage:
-            'https://www.tanishq.co.in/dw/image/v2/BKCK_PRD/on/demandware.static/-/Sites-Tanishq-product-catalog/default/dw3458e37b/images/hi-res/502117OFBAAA02_1.jpg?sw=640&sh=640',
-        sideImage:
-            'https://www.tanishq.co.in/dw/image/v2/BKCK_PRD/on/demandware.static/-/Sites-Tanishq-product-catalog/default/dw5b94105e/images/hi-res/502117OFBAAA02_2.jpg?sw=640&sh=640',
-        description:
-            'Studded with diamonds in an ethereal pattern, this nose ring is crafted in 18 Karat Yellow Gold. Stone Clarity SI2. Radiant with the charm and brilliance of diamonds, this nose ring is a delightful addition to your ensemble!',
-        diamondDetails: `Diamond Clarity: SI2
-Diamond Color: H
-No Of Diamonds: Multiple
-Diamond Setting: Prong
-Diamond Shape: Round`,
-        generalDetails: 'Crafted by Experts, Cherished by You. 100% Exchange Value on Precious Stones. The Purity Guarantee. Complete Transparency and Trust. Lifetime Maintenance.',
-        priceBreakup: {
-            gold: '₹12,000',
-            diamond: '₹2,000',
-            other: '₹955',
-        },
+    //     const product = {
+    //         name: 'Brilliant Diamond Nose Ring',
+    //         price: '₹14,955',
+    //         oldPrice: '₹16,955',
+    //         karatage: '18K',
+    //         diamondCarat: '0.06 ct',
+    //         materialColor: 'Yellow',
+    //         grossWeight: '0.57g',
+    //         metal: 'Gold',
+    //         skuId: 'GG2117GFBAAA022BB512A16',
+    //         ratingText: 'Bestsellers',
+    //         frontImage:
+    //             'https://www.tanishq.co.in/dw/image/v2/BKCK_PRD/on/demandware.static/-/Sites-Tanishq-product-catalog/default/dw3458e37b/images/hi-res/502117OFBAAA02_1.jpg?sw=640&sh=640',
+    //         sideImage:
+    //             'https://www.tanishq.co.in/dw/image/v2/BKCK_PRD/on/demandware.static/-/Sites-Tanishq-product-catalog/default/dw5b94105e/images/hi-res/502117OFBAAA02_2.jpg?sw=640&sh=640',
+    //         description:
+    //             'Studded with diamonds in an ethereal pattern, this nose ring is crafted in 18 Karat Yellow Gold. Stone Clarity SI2. Radiant with the charm and brilliance of diamonds, this nose ring is a delightful addition to your ensemble!',
+    //         diamondDetails: `Diamond Clarity: SI2
+    // Diamond Color: H
+    // No Of Diamonds: Multiple
+    // Diamond Setting: Prong
+    // Diamond Shape: Round`,
+    //         generalDetails: 'Crafted by Experts, Cherished by You. 100% Exchange Value on Precious Stones. The Purity Guarantee. Complete Transparency and Trust. Lifetime Maintenance.',
+    //         priceBreakup: {
+    //             gold: '₹12,000',
+    //             diamond: '₹2,000',
+    //             other: '₹955',
+    //         },
+    //     };
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            // console.log("Calling:", /user/product/${id});
+            const response = await axiosInstance.get(`/user/product/${id}`);
+            const p = response.data;
+            console.log("Fetched product:", p);
+
+            const fetchedProduct = {
+                ...p,
+                price: parseFloat(p.consumer_price),
+                originalPrice: parseFloat(p.retail_price),
+            };
+
+            setProduct(fetchedProduct);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        } finally {
+            setLoading(false);
+        }
     };
+
+    useEffect(() => {
+        if (!id) {
+            console.warn('Product ID is undefined!');
+            return;
+        }
+        fetchData();
+    }, [id]);
+
 
     return (
         <Box bgcolor="#fff" px={{ xs: 1, sm: 3, md: 6 }} py={6}>
@@ -109,7 +145,7 @@ Diamond Shape: Round`,
                 <Box sx={{ textAlign: 'center', mb: { xs: 2, sm: 3 } }}>
                     <Chip
                         icon={<Diamond sx={{ color: '#E65100' }} />}
-                        label={product.karatage}
+                        // label={product.karatage}
                         sx={{
                             bgcolor: '#FFF3E0',
                             color: '#E65100',
@@ -122,7 +158,7 @@ Diamond Shape: Round`,
                         }}
                     />
                     <Chip
-                        label={product.diamondCarat}
+                        // label={product.diamondCarat}
                         sx={{
                             bgcolor: '#FFF3E0',
                             color: '#E65100',
@@ -149,7 +185,7 @@ Diamond Shape: Round`,
                         letterSpacing: '0.03em',
                     }}
                 >
-                    {product.name}
+                    {/* {product.name} */}
                 </Typography>
 
                 {/* Price with old price */}
@@ -171,7 +207,7 @@ Diamond Shape: Round`,
                             fontFamily: 'serif',
                         }}
                     >
-                        {product.price}
+                        {/* {product.price} */}
                     </Typography>
                     <Typography
                         sx={{
@@ -183,7 +219,7 @@ Diamond Shape: Round`,
                             ml: { xs: 0, sm: 2 },
                         }}
                     >
-                        {product.oldPrice}
+                        {/* {product.oldPrice} */}
                     </Typography>
                 </Box>
 
@@ -247,7 +283,7 @@ Diamond Shape: Round`,
                     }}
                 >
                     <Chip
-                        label={product.ratingText}
+                        // label={product.ratingText}
                         sx={{
                             position: 'absolute',
                             top: 16,
@@ -266,7 +302,7 @@ Diamond Shape: Round`,
                     />
                     <Box
                         component="img"
-                        src={product.frontImage}
+                        // src={product.frontImage}
                         alt="Front view"
                         sx={{
                             maxHeight: 400,
@@ -280,7 +316,7 @@ Diamond Shape: Round`,
                     />
                     <Box
                         component="img"
-                        src={product.sideImage}
+                        // src={product.sideImage}
                         alt="Side view"
                         sx={{
                             maxHeight: 400,
@@ -446,7 +482,7 @@ Diamond Shape: Round`,
                                     letterSpacing: 0.3,
                                 }}
                             >
-                                SKU ID : {product.skuId}
+                                {/* SKU ID : {product.skuId} */}
                             </Typography>
 
                             {/* Replace your Grid container with Box flexbox */}
@@ -485,10 +521,10 @@ Diamond Shape: Round`,
                                                 }}
                                             >
                                                 {[
-                                                    { label: 'Karatage', value: product.karatage },
-                                                    { label: 'Material Colour', value: product.materialColor },
-                                                    { label: 'Gross Weight', value: product.grossWeight },
-                                                    { label: 'Metal', value: product.metal },
+                                                    // { label: 'Karatage', value: product.karatage },
+                                                    // { label: 'Material Colour', value: product.materialColor },
+                                                    // { label: 'Gross Weight', value: product.grossWeight },
+                                                    // { label: 'Metal', value: product.metal },
                                                 ].map(({ label, value }) => (
                                                     <Box
                                                         key={label}
@@ -520,11 +556,11 @@ Diamond Shape: Round`,
                                             </Box>
                                         </AccordionSummary>
                                         <AccordionDetails>
-                                            {product.diamondDetails.split('\n').map((line, idx) => (
+                                            {/* {product.diamondDetails.split('\n').map((line, idx) => (
                                                 <Typography key={idx} gutterBottom fontSize={14} sx={{ color: '#5a4a45', whiteSpace: 'pre-line' }}>
                                                     {line}
                                                 </Typography>
-                                            ))}
+                                            ))} */}
                                         </AccordionDetails>
                                     </Accordion>
 
@@ -540,7 +576,7 @@ Diamond Shape: Round`,
                                         </AccordionSummary>
                                         <AccordionDetails>
                                             <Typography sx={{ color: '#5a4a45', fontSize: 14, whiteSpace: 'pre-line' }}>
-                                                {product.generalDetails}
+                                                {/* {product.generalDetails} */}
                                             </Typography>
                                         </AccordionDetails>
                                     </Accordion>
@@ -557,7 +593,7 @@ Diamond Shape: Round`,
                                         </AccordionSummary>
                                         <AccordionDetails>
                                             <Typography sx={{ color: '#5a4a45', fontSize: 14, whiteSpace: 'pre-line' }}>
-                                                {product.description}
+                                                {/* {product.description} */}
                                             </Typography>
                                         </AccordionDetails>
                                     </Accordion>
@@ -575,7 +611,7 @@ Diamond Shape: Round`,
                                 >
                                     <Box
                                         component="img"
-                                        src={product.sideImage}
+                                        // src={product.sideImage}
                                         alt="Product side view"
                                         sx={{
                                             maxWidth: { xs: '280px', sm: '300px', md: '400px' },

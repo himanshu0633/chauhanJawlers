@@ -243,6 +243,7 @@ const jewelryProducts = [
     { id: 6, name: "Sapphire Stud Earrings", image: "/masterSlider4.jpg", category: "Earrings" }
 ];
 
+
 const MasterDaimondSlider = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
