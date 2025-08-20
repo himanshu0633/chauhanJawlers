@@ -985,14 +985,32 @@ const AddNewProduct = () => {
           setFormData(prev => ({
             ...prev,
             ...product,
+            // // 1:
+            // media: (product.media || []).map(m => ({
+            //   ...m,
+            //   url: m.url?.startsWith('http') ? m.url : `${m.url}`,
+            //   type: m.type?.includes('video') ? 'video' : 'image',
+            //   file: null,
+            //   name: m.name || m.url?.split('/').pop() || 'media',
+            //   size: m.size || 0,
+            // })),
+
+            // // 2:
+            // media: (product.media || []).map(m => ({
+            //   ...m,                         // <— keeps _id, url, type, size, name
+            //   url: m.url?.startsWith('http') ? m.url : `${m.url}`,
+            //   type: m.type?.includes('video') ? 'video' : 'image',
+            //   file: null,                   // marks existing media (no new file)
+            // })),
+
             media: (product.media || []).map(m => ({
               ...m,
               url: m.url?.startsWith('http') ? m.url : `${m.url}`,
               type: m.type?.includes('video') ? 'video' : 'image',
-              file: null,
-              name: m.name || m.url?.split('/').pop() || 'media',
-              size: m.size || 0,
+              file: null
             })),
+
+
             quantity: normalizedQuantity,
             stock: (() => {
               const s = (product.stock ?? '').toLowerCase().trim();
@@ -1243,51 +1261,123 @@ const AddNewProduct = () => {
   };
 
   // submit
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   if (!validateForm()) return;
+
+  //   try {
+  //     const payload = new FormData();
+
+  //     Object.entries(formData).forEach(([key, value]) => {
+  //       if (key === 'media') return;
+  //       if (value !== null && value !== undefined) {
+  //         if (Array.isArray(value)) {
+  //           // send quantities as repeated key or a JSON string (adjust to your API)
+  //           payload.append(key, JSON.stringify(value));
+  //         } else {
+  //           payload.append(key, value);
+  //         }
+  //       }
+  //     });
+
+  //     // formData.media.forEach(item => {
+  //     //   if (item?.file) {
+  //     //     payload.append('media', item.file);
+  //     //   } else if (item?.url) {
+  //     //     payload.append('existingMedia', item.url);
+  //     //   }
+  //     // });
+
+  //     if (isEditMode) {
+  //       //   await axiosInstance.put(`/user/updateProduct/${id}`, payload, {
+  //       //     headers: { 'Content-Type': 'multipart/form-data' },
+  //       //   });
+  //       //   toast.success('Product updated successfully!');
+  //       // } else {
+  //       //   await axiosInstance.post('/user/createProduct', payload, {
+  //       //     headers: { 'Content-Type': 'multipart/form-data' },
+  //       //   });
+  //       //   toast.success('Product added successfully!');
+
+  //       // IDs of existing media you did NOT delete in the UI
+  //       const existingMediaIds = formData.media
+  //         .filter(m => !m.file && (m._id || m.id))
+  //         .map(m => m._id || m.id);
+
+  //       // send IDs to keep (server replaces media with: keep + new uploads)
+  //       payload.append('existingMediaIds', JSON.stringify(existingMediaIds));
+
+  //       // send only the new files
+  //       formData.media
+  //         .filter(m => m.file)
+  //         .forEach(m => payload.append('media', m.file));
+  //     } else {
+  //       // create mode — same as before
+  //       formData.media.forEach(m => {
+  //         if (m?.file) payload.append('media', m.file);
+  //       });
+  //     }
+  //     navigate('/AdminPanel/products');
+
+  //   } catch (error) {
+  //     console.error('Submit Error:', error);
+  //     toast.error('Something went wrong. Please try again.');
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     try {
-      const payload = new FormData();
+      const fd = new FormData();
 
-      Object.entries(formData).forEach(([key, value]) => {
+      // non-media fields
+      Object.entries(formData).forEach(([key, val]) => {
         if (key === 'media') return;
-        if (value !== null && value !== undefined) {
-          if (Array.isArray(value)) {
-            // send quantities as repeated key or a JSON string (adjust to your API)
-            payload.append(key, JSON.stringify(value));
-          } else {
-            payload.append(key, value);
-          }
-        }
-      });
-
-      formData.media.forEach(item => {
-        if (item?.file) {
-          payload.append('media', item.file);
-        } else if (item?.url) {
-          payload.append('existingMedia', item.url);
-        }
+        if (val === null || val === undefined) return;
+        fd.append(key, Array.isArray(val) ? JSON.stringify(val) : val);
       });
 
       if (isEditMode) {
-        await axiosInstance.put(`/user/updateProduct/${id}`, payload, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+        // 1) tell backend which existing media to KEEP
+        const keep = formData.media
+          .filter(m => !m.file) // items already on server
+          .map(m => ({
+            _id: m._id || m.id || undefined,
+            url: m.url,            // include url too (some backends use this)
+            name: m.name,
+            type: m.type,
+            size: m.size
+          }));
+        fd.append('existingMedia', JSON.stringify(keep));
+
+        // 2) send ONLY new files (field name must match your multer config)
+        formData.media
+          .filter(m => m.file)
+          .forEach((m, i) => fd.append('media', m.file, m.name || `media-${i}`));
+
+        // let axios set the correct multipart boundary
+        await axiosInstance.put(`/user/updateProduct/${id}`, fd);
         toast.success('Product updated successfully!');
       } else {
-        await axiosInstance.post('/user/createProduct', payload, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+        // create: send all selected files
+        formData.media
+          .filter(m => m.file)
+          .forEach((m, i) => fd.append('media', m.file, m.name || `media-${i}`));
+
+        await axiosInstance.post('/user/createProduct', fd);
         toast.success('Product added successfully!');
       }
 
       navigate('/AdminPanel/products');
-    } catch (error) {
-      console.error('Submit Error:', error);
+    } catch (err) {
+      console.error('Submit Error:', err);
       toast.error('Something went wrong. Please try again.');
     }
   };
+
+
 
   const handleReset = () => {
     setFormData({
@@ -1303,6 +1393,7 @@ const AddNewProduct = () => {
       category: '',
       productvariety: '',
       sub_category: '',
+      occasion: '',
       created_at: new Date().toISOString(),
       deleted_at: null,
     });
