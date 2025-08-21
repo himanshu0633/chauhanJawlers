@@ -312,8 +312,8 @@ export default function Header() {
               }}
             >
 
-              {/* {categories.slice(0, 9).filter(cat => cat._id === cat._id).map(item => ( */}
-               {categories.filter(cat => cat._id === cat._id).map(item => (
+              {/* {categories.filter(cat => cat._id === cat._id).map(item => ( */}
+              {categories.slice(0, 8).filter(cat => cat._id === cat._id).map(item => (
                 <NavButton
                   key={item.apiId}
                   startIcon={item.icon}
@@ -399,8 +399,12 @@ export default function Header() {
               startIcon={item.icon}
               fullWidth
               onClick={() => {
-                setOpen(false);
-                navigate(`/category/${item.apiId}`);
+                const route = assignedRouteToPath[item.assignedRoute];
+                if (route) {
+                  navigate(route);
+                } else {
+                  navigate(`/category/${item.apiId}`);
+                }
               }}
               sx={{
                 justifyContent: "flex-start",

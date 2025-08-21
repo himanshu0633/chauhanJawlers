@@ -10,6 +10,9 @@ import {
     TextField,
     FormControlLabel,
     Checkbox,
+    FormControl,
+    InputLabel,
+    Button,
 } from '@mui/material';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -126,26 +129,30 @@ function JewelleryCard({ product }) {
     }
 
     return (
-        <Box sx={{ pb: 2 }}>
+        <Box sx={{ pb: 1 }}>
             <Box
                 sx={{
                     position: 'relative',
                     borderRadius: 2,
                     boxShadow: 1,
                     overflow: 'hidden',
-                    mb: 2,
-                    width: { xs: 220, sm: 260 },
-                    height: { xs: 220, sm: 260 },
+                    mb: 1,
+                    width: { xs: 170, sm: 200 },
+                    height: { xs: 200},
                     mx: 'auto',
+                    bgcolor: 'transparent',
+                    boxShadow: 'none'
                 }}
             >
                 <img
-                    src={imgUrl}  // Ensure the URL is properly processed
-                    alt={product.name}  // Use product name as alt text
+                    src={imgUrl}
+                    alt={product.name}
                     style={{
-                        display: 'block',
+                        // display: 'block',
                         margin: 'auto',
-                        objectFit: 'contain',
+                        objectFit: 'cover',
+                        width: '100%',
+                        height: '100%',
                     }}
                 />
                 <IconButton
@@ -209,11 +216,17 @@ export function JewelleryGrid() {
     const [allProducts, setAllProducts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [shownCount, setShownCount] = useState(10);
     const [filters, setFilters] = useState({
         query: '',
         priceRange: 'all',
     });
     const [sortOption, setSortOption] = useState('relevance');
+
+      const loadMoreProducts = () => {
+        const newCount = shownCount + 10;
+        setShownCount(newCount); // Increment the shown count
+    };
 
     // Price buckets for filtering
     const priceBuckets = [
@@ -262,23 +275,27 @@ export function JewelleryGrid() {
         fetchAllProducts();
     }, []);
 
+
+     const productsToDisplay = sortedProducts.slice(0, shownCount);
+
     return (
         <Box>
             <JewelleryHeader />
 
             <Box sx={{ pt: 5 }}>
 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', mb: 3, gap: 1 }}>
                     <TextField
                         label="Search"
                         value={filters.query}
                         onChange={(e) => setFilters({ ...filters, query: e.target.value })}
-                        sx={{ width: '45%' }}
+                        sx={{ width: { xs: '48%', sm: '30%' } }}
                     />
                     <Select
                         value={filters.priceRange}
                         onChange={(e) => setFilters({ ...filters, priceRange: e.target.value })}
-                        sx={{ width: '45%' }}
+                        // sx={{ width: '30%' }}
+                        sx={{ width: { xs: '48%', sm: '30%' } }}
                     >
                         <MenuItem value="all">All Prices</MenuItem>
                         {priceBuckets.map(bucket => (
@@ -287,18 +304,21 @@ export function JewelleryGrid() {
                             </MenuItem>
                         ))}
                     </Select>
+
+                    <Select
+                        value={sortOption}
+                        onChange={(e) => setSortOption(e.target.value)}
+                        // sx={{ width: '30%'}}
+                        sx={{ width: { xs: '48%', sm: '30%' } }}
+                    >
+                        <MenuItem value="relevance">Sort by: Relevance</MenuItem>
+                        <MenuItem value="price-asc">Price: Low to High</MenuItem>
+                        <MenuItem value="price-desc">Price: High to Low</MenuItem>
+                        <MenuItem value="newest">Newest First</MenuItem>
+                    </Select>
                 </Box>
 
-                <Select
-                    value={sortOption}
-                    onChange={(e) => setSortOption(e.target.value)}
-                    sx={{ width: '100%', mb: 3 }}
-                >
-                    <MenuItem value="relevance">Sort by: Relevance</MenuItem>
-                    <MenuItem value="price-asc">Price: Low to High</MenuItem>
-                    <MenuItem value="price-desc">Price: High to Low</MenuItem>
-                    <MenuItem value="newest">Newest First</MenuItem>
-                </Select>
+
             </Box>
 
             {/* Product List */}
@@ -307,8 +327,20 @@ export function JewelleryGrid() {
             ) : error ? (
                 <Typography align="center" color="error">{error}</Typography>
             ) : (
-                <Grid container spacing={2}>
-                    {sortedProducts.map((product) => (
+                // <Box display="flex" flexWrap="wrap">
+                //     {sortedProducts.map((product) => (
+                //         // console.log(product._id, "product id"),
+                //         <Link to={`/singleProduct/${product._id}`} key={product._id}>
+                //             <Box sx={{ p: 1, boxSizing: 'border-box', 
+                //                     width: { xs: '220px' } }}
+                //                 >
+                //                 <JewelleryCard product={product} />
+                //             </Box>
+                //         </Link>
+                //     ))}
+                // </Box>
+                <Grid container spacing={2} justifyContent="center">
+                    {productsToDisplay.map((product) => (
                         // console.log(product._id, "product id"),
                         <Link to={`/singleProduct/${product._id}`} key={product._id}>
                             <Grid item xs={12} sm={6} md={4}>
@@ -317,6 +349,11 @@ export function JewelleryGrid() {
                         </Link>
                     ))}
                 </Grid>
+            )}
+             {shownCount < sortedProducts.length && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                    <Button variant="outlined" onClick={loadMoreProducts}>View More</Button>
+                </Box>
             )}
         </Box>
     );
@@ -406,7 +443,7 @@ export function JewelAssurance() {
 
 export default function AllJewelleryPage() {
     return (
-        <Box sx={{ backgroundColor: '#f9f9f9' }}>
+        <Box sx={{ backgroundColor: '#f9f9f9', overflow: 'hidden' }}>
             <Container maxWidth="xl">
                 <JewelleryGrid />
                 <JewelAssurance />
@@ -415,3 +452,487 @@ export default function AllJewelleryPage() {
         </Box>
     );
 }
+
+// // 2:
+// import {
+//     Box,
+//     Typography,
+//     Chip,
+//     IconButton,
+//     Container,
+//     Select,
+//     MenuItem,
+//     TextField,
+//     Pagination,
+// } from '@mui/material';
+// import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+// import FavoriteIcon from '@mui/icons-material/Favorite';
+// import { useEffect, useState } from 'react';
+// import SlickSlider from '../common components/SlickSlider';
+// import axiosInstance from '../common components/AxiosInstance';
+// import { Link } from 'react-router-dom';
+// import { publicUrl } from '../common components/PublicUrl';
+
+// const jewelleryData = [
+//     {
+//         img: 'https://www.tanishq.co.in/on/demandware.static/-/Library-Sites-TanishqSharedLibrary/default/dw53b65f59/plp/18-kt-jewellery.jpg',
+//         label: '14 Kt',
+//     },
+//     {
+//         img: 'https://www.tanishq.co.in/on/demandware.static/-/Library-Sites-TanishqSharedLibrary/default/dw3bc42dcf/plp/14-kt-jewellery.jpg',
+//         label: '18 Kt',
+//     },
+//     {
+//         img: 'https://www.tanishq.co.in/on/demandware.static/-/Library-Sites-TanishqSharedLibrary/default/dwbc8afd33/plp/22-kt-jewellery.jpg',
+//         label: '22 Kt',
+//     },
+// ];
+
+// const assuranceData = [
+//     {
+//         img: 'https://i.imgur.com/XZiQnRx.png',
+//         label: 'Exchange Offers',
+//     },
+//     {
+//         img: 'https://www.tanishq.co.in/on/demandware.static/-/Library-Sites-TanishqSharedLibrary/default/dweee090e8/assurance/assurance-bis-logo.png',
+//         label: 'Purity Guarantee',
+//     },
+//     {
+//         img: 'https://i.imgur.com/3JJd6Ux.png',
+//         label: 'Easy Replacements',
+//     },
+// ];
+ 
+// function JewelleryHeader() {
+//     return (
+//         <Box
+//             sx={{
+//                 width: '100%',
+//                 pt: 4,
+//                 pb: 4,
+//                 background: '#fff',
+//             }}
+//         >
+//             <Typography
+//                 variant="h4"
+//                 align="center"
+//                 sx={{ fontWeight: 700, my: 4, fontFamily: 'serif' }}
+//             >
+//                 All Jewellery
+//             </Typography>
+//             <Box display="flex" gap={4} flexWrap="wrap" justifyContent="center">
+//                 {jewelleryData.map((item, idx) => (
+//                     <Box
+//                         key={idx}
+//                         sx={{
+//                             display: 'flex',
+//                             flexDirection: 'column',
+//                             alignItems: 'center',
+//                             width: 200,
+//                             mb: 2,
+//                         }}
+//                     >
+//                         <Box
+//                             sx={{
+//                                 width: 160,
+//                                 height: 160,
+//                                 mb: 1,
+//                                 borderRadius: 2,
+//                                 backgroundColor: '#fff',
+//                                 boxShadow: 1,
+//                                 display: 'flex',
+//                                 alignItems: 'center',
+//                                 justifyContent: 'center',
+//                                 overflow: 'hidden',
+//                             }}
+//                         >
+//                             <img
+//                                 src={item.img}
+//                                 alt={item.label}
+//                                 style={{
+//                                     maxWidth: '100%',
+//                                     maxHeight: '100%',
+//                                     display: 'block',
+//                                     objectFit: 'cover',
+//                                 }}
+//                             />
+//                         </Box>
+//                         <Typography
+//                             variant="subtitle1"
+//                             align="center"
+//                             sx={{ fontWeight: 400, mt: 0.5, letterSpacing: '0.5px' }}
+//                         >
+//                             {item.label}
+//                         </Typography>
+//                     </Box>
+//                 ))}
+//             </Box>
+//         </Box>
+//     );
+// }
+
+// function JewelleryCard({ product }) {
+//     const [liked, setLiked] = useState(false);
+//     const imgUrl = publicUrl(product.media?.[0]?.url) || "/no-img.jpg";
+//     let finalPrice = "Not Available";
+//     try {
+//         const quantityData = JSON.parse(product.quantity);
+//         finalPrice = quantityData.length > 0 ? quantityData?.finalPrice : "Not Available";
+//     } catch (e) { /* ignore */ }
+
+//     return (
+//         <Box
+//             sx={{
+//                 width: { xs: 200, sm: 220, md: 240 },
+//                 minHeight: 380,
+//                 bgcolor: '#fff',
+//                 borderRadius: 3,
+//                 boxShadow: 2,
+//                 mx: 'auto',
+//                 mb: 2,
+//                 overflow: 'hidden',
+//                 display: 'flex',
+//                 flexDirection: 'column',
+//                 transition: '0.2s box-shadow',
+//                 '&:hover': { boxShadow: 6 },
+//             }}
+//         >
+//             <Box
+//                 sx={{
+//                     width: '100%',
+//                     height: { xs: 200, sm: 220, md: 240 },
+//                     bgcolor: '#f7f7f7',
+//                     position: 'relative',
+//                     display: 'flex',
+//                     alignItems: 'center',
+//                     justifyContent: 'center',
+//                 }}
+//             >
+//                 <img
+//                     src={imgUrl}
+//                     alt={product.name}
+//                     style={{
+//                         width: '100%',
+//                         height: '100%',
+//                         objectFit: 'contain',
+//                         transition: 'transform .25s',
+//                         background: 'white',
+//                     }}
+//                 />
+//                 <IconButton
+//                     onClick={() => setLiked(!liked)}
+//                     aria-label="like"
+//                     sx={{
+//                         position: 'absolute',
+//                         top: 10,
+//                         right: 10,
+//                         background: '#fff',
+//                         boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+//                         '&:hover': { background: '#f7f7f7' },
+//                         p: '5px',
+//                     }}
+//                     size="small"
+//                 >
+//                     {liked ? (
+//                         <FavoriteIcon sx={{ fontSize: 22, color: 'red' }} />
+//                     ) : (
+//                         <FavoriteBorderIcon sx={{ fontSize: 22, color: '#bbb' }} />
+//                     )}
+//                 </IconButton>
+//             </Box>
+//             <Box px={1.9} py={1.1} flexGrow={1}>
+//                 <Typography
+//                     variant="subtitle1"
+//                     sx={{
+//                         fontSize: 17,
+//                         fontWeight: 500,
+//                         fontFamily: 'serif',
+//                         color: '#222',
+//                         mb: 0.2,
+//                         whiteSpace: "nowrap",
+//                         overflow: "hidden",
+//                         textOverflow: "ellipsis",
+//                     }}
+//                     title={product.name}
+//                 >
+//                     {product.name}
+//                 </Typography>
+//                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+//                     <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: 17, color: '#222' }}>
+//                         ₹{product.finalPrice}
+//                     </Typography>
+//                     {product.mrp && (
+//                         <Typography
+//                             variant="body2"
+//                             sx={{ color: '#bdbdbd', textDecoration: 'line-through', fontWeight: 400, fontSize: 14 }}
+//                         >
+//                             ₹{product.mrp}
+//                         </Typography>
+//                     )}
+//                 </Box>
+//                 {product.special && (
+//                     <Typography sx={{ fontSize: 13.5, color: '#be1222', fontWeight: 500 }}>
+//                         {product.special}
+//                     </Typography>
+//                 )}
+//             </Box>
+//         </Box>
+//     );
+// }
+
+// export function JewelleryGrid() {
+//     const [allProducts, setAllProducts] = useState([]);
+//     const [loading, setLoading] = useState(false);
+//     const [error, setError] = useState(null);
+//     const [filters, setFilters] = useState({
+//         query: '',
+//         priceRange: 'all',
+//     });
+//     const [sortOption, setSortOption] = useState('relevance');
+//     const [page, setPage] = useState(1);
+//     const [productsPerPage, setProductsPerPage] = useState(9); // Change default as desired
+
+//     const priceBuckets = [
+//         { label: 'Under ₹25k', min: 0, max: 25000 },
+//         { label: '₹25k – ₹50k', min: 25000, max: 50000 },
+//         { label: '₹50k – ₹1L', min: 50000, max: 100000 },
+//         { label: 'Over ₹1L', min: 100000, max: Number.MAX_SAFE_INTEGER },
+//     ];
+
+//     useEffect(() => {
+//         setLoading(true);
+//         axiosInstance.get('/user/allproducts')
+//             .then(response => setAllProducts(response.data))
+//             .catch(() => setError('Could not load products. Please try again.'))
+//             .finally(() => setLoading(false));
+//     }, []);
+
+//     // Filtering
+//     const filteredProducts = allProducts.filter(product => {
+//         const isInPriceRange =
+//             filters.priceRange === 'all' ||
+//             (product.consumer_price >= priceBuckets.find(b => b.label === filters.priceRange)?.min &&
+//                 product.consumer_price <= priceBuckets.find(b => b.label === filters.priceRange)?.max);
+
+//         const isMatchingQuery = product.name && product.name.toLowerCase().includes(filters.query.toLowerCase());
+
+//         return isInPriceRange && isMatchingQuery;
+//     });
+
+//     // Sorting
+//     const sortedProducts = [...filteredProducts].sort((a, b) => {
+//         switch (sortOption) {
+//             case 'price-asc':
+//                 return a.consumer_price - b.consumer_price;
+//             case 'price-desc':
+//                 return b.consumer_price - a.consumer_price;
+//             case 'newest':
+//                 return new Date(b.createdAt) - new Date(a.createdAt);
+//             default:
+//                 return 0;
+//         }
+//     });
+
+//     // Pagination logic
+//     const pageCount = Math.ceil(sortedProducts.length / productsPerPage);
+//     const displayedProducts = sortedProducts.slice(
+//         (page - 1) * productsPerPage,
+//         page * productsPerPage
+//     );
+
+//     // Reset page on filter/sort/perPage changes
+//     useEffect(() => { setPage(1); }, [filters, sortOption, productsPerPage]);
+
+//     return (
+//         <Box>
+//             <JewelleryHeader />
+//             <Box sx={{ pt: 5 }}>
+//                 <Box sx={{
+//                     display: 'flex',
+//                     justifyContent: 'space-between',
+//                     alignItems: 'center',
+//                     flexWrap: 'wrap',
+//                     mb: 3,
+//                     gap: 1,
+//                 }}>
+//                     <TextField
+//                         label="Search"
+//                         value={filters.query}
+//                         onChange={(e) => setFilters({ ...filters, query: e.target.value })}
+//                         sx={{ width: { xs: '100%', sm: '32%' } }}
+//                     />
+//                     <Select
+//                         value={filters.priceRange}
+//                         onChange={(e) => setFilters({ ...filters, priceRange: e.target.value })}
+//                         sx={{ width: { xs: '100%', sm: '22%' } }}
+//                     >
+//                         <MenuItem value="all">All Prices</MenuItem>
+//                         {priceBuckets.map(bucket => (
+//                             <MenuItem key={bucket.label} value={bucket.label}>
+//                                 {bucket.label}
+//                             </MenuItem>
+//                         ))}
+//                     </Select>
+//                     <Select
+//                         value={sortOption}
+//                         onChange={(e) => setSortOption(e.target.value)}
+//                         sx={{ width: { xs: '100%', sm: '22%' } }}
+//                     >
+//                         <MenuItem value="relevance">Sort by: Relevance</MenuItem>
+//                         <MenuItem value="price-asc">Price: Low to High</MenuItem>
+//                         <MenuItem value="price-desc">Price: High to Low</MenuItem>
+//                         <MenuItem value="newest">Newest First</MenuItem>
+//                     </Select>
+//                     <Select
+//                         value={productsPerPage}
+//                         onChange={e => setProductsPerPage(Number(e.target.value))}
+//                         sx={{ width: { xs: '100%', sm: '20%' } }}
+//                     >
+//                         {[6, 9, 12, 18, 24].map(n => (
+//                             <MenuItem key={n} value={n}>Show {n}/page</MenuItem>
+//                         ))}
+//                     </Select>
+//                 </Box>
+
+//                 {loading ? (
+//                     <Typography align="center">Loading products...</Typography>
+//                 ) : error ? (
+//                     <Typography align="center" color="error">{error}</Typography>
+//                 ) : (
+//                     <>
+//                         <Box
+//                             display="flex"
+//                             flexWrap="wrap"
+//                             gap={2}
+//                             justifyContent={{ xs: 'center', md: 'flex-start' }}
+//                             mb={3}
+//                         >
+//                             {displayedProducts.map((product) => (
+//                                 <Box
+//                                     key={product._id}
+//                                     sx={{ p: 1, width: { xs: '100%', sm: '46%', md: '31%', lg: '22%' } }}
+//                                     component={Link}
+//                                     to={`/singleProduct/${product._id}`}
+//                                     style={{ textDecoration: 'none' }}
+//                                 >
+//                                     <JewelleryCard product={product} />
+//                                 </Box>
+//                             ))}
+//                         </Box>
+//                         {pageCount > 1 && (
+//                             <Box display="flex" justifyContent="center" mt={2}>
+//                                 <Pagination
+//                                     count={pageCount}
+//                                     page={page}
+//                                     siblingCount={1}
+//                                     boundaryCount={1}
+//                                     onChange={(_, value) => setPage(value)}
+//                                     color="primary"
+//                                     size="large"
+//                                     showFirstButton
+//                                     showLastButton
+//                                 />
+//                             </Box>
+//                         )}
+//                     </>
+//                 )}
+//             </Box>
+//         </Box>
+//     );
+// }
+
+// export function JewelAssurance() {
+//     return (
+//         <Box
+//             sx={{
+//                 width: '100%',
+//                 background: '#fff',
+//                 border: "1px solid #e8e4e2",
+//                 borderRadius: '28px',
+//                 py: { xs: 4, sm: 6 },
+//                 mx: 'auto',
+//                 my: 5,
+//                 boxShadow: '0 2px 8px rgba(190,165,140,0.04)',
+//                 position: 'relative',
+//             }}
+//         >
+//             <Typography
+//                 variant="h5"
+//                 align="center"
+//                 sx={{
+//                     fontFamily: 'serif',
+//                     fontWeight: 600,
+//                     color: '#3d1822',
+//                     mb: 0.5,
+//                 }}
+//             >
+//                 The Chauhan Sons Assurance
+//             </Typography>
+//             <Typography
+//                 variant="subtitle1"
+//                 align="center"
+//                 sx={{
+//                     color: '#8f8f8f',
+//                     mb: { xs: 3, sm: 6 },
+//                     fontWeight: 400,
+//                     fontSize: 18,
+//                 }}
+//             >
+//                 Crafted by experts, cherished by you.
+//             </Typography>
+//             <Box display="flex" flexWrap="wrap" justifyContent="center" gap={{ xs: 3, sm: 7 }}>
+//                 {assuranceData.map((item) => (
+//                     <Box
+//                         key={item.label}
+//                         display="flex"
+//                         flexDirection="column"
+//                         alignItems="center"
+//                         width={120}
+//                         mb={{ xs: 3, sm: 0 }}
+//                     >
+//                         <Box
+//                             sx={{
+//                                 width: 90,
+//                                 height: 80,
+//                                 mb: 1,
+//                                 display: 'flex',
+//                                 alignItems: 'center',
+//                                 justifyContent: 'center',
+//                             }}
+//                         >
+//                             <img src={item.img} alt={item.label} style={{ maxWidth: '90%', maxHeight: '90%' }} />
+//                         </Box>
+//                         <Typography
+//                             variant="subtitle1"
+//                             align="center"
+//                             sx={{
+//                                 fontFamily: 'serif',
+//                                 color: '#3d1822',
+//                                 fontWeight: 500,
+//                                 mt: 0.5,
+//                                 fontSize: 17,
+//                                 lineHeight: 1.25,
+//                             }}
+//                         >
+//                             {item.label}
+//                         </Typography>
+//                     </Box>
+//                 ))}
+//             </Box>
+//         </Box>
+//     );
+// }
+
+// export default function AllJewelleryPage() {
+//     return (
+//         <Box sx={{ backgroundColor: '#f9f9f9' }}>
+//             <Container maxWidth="xl">
+//                 <JewelleryGrid />
+//                 <JewelAssurance />
+//                 <SlickSlider />
+//             </Container>
+//         </Box>
+//     );
+// }
+
+
