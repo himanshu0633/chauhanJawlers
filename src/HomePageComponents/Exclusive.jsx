@@ -257,7 +257,7 @@ const StyledButton = styled(Button)(({ theme, variant }) => ({
   "&:hover": {
     background: "#ea9e3a",
   },
-  [theme.breakpoints.down("sm")]: {
+  [theme.breakpoints.down("lg")]: {
     padding: "8px 18px",
     fontSize: 15,
     borderRadius: 5,
@@ -274,10 +274,13 @@ const RightHeader = styled(Box)({
 const RightTitle = styled(Typography)(({ theme }) => ({
   fontFamily: "Georgia, serif",
   fontWeight: 500,
-  fontSize: 40,
+  fontSize: 35,
   color: "#fff",
+  [theme.breakpoints.down("lg")]: {
+    fontSize: 23,
+  },
   [theme.breakpoints.down("sm")]: {
-    fontSize: 24,
+    fontSize: 18,
   },
 }));
 
@@ -289,7 +292,7 @@ const RightText = styled(Typography)(({ theme }) => ({
   margin: "9px 0 24px 0",
   [theme.breakpoints.down("sm")]: {
     fontSize: 12,
-    margin: "9px 0 15px 0",
+    margin: "0px 0 8px 0",
   },
 }));
 
@@ -341,7 +344,7 @@ export default function Exclusive() {
           </PromoBlock>
 
           <PromoBlock variant="right">
-              <div><img className="" src="/logo.svg" alt="img" /></div>
+            <div><img className="" src="/logo.svg" alt="img" /></div>
             <RightHeader>
               <RightTitle>
                 Exchange your Old
