@@ -173,7 +173,7 @@ function Treasure() {
                 <Container maxWidth="xl">
                     <Box display="flex" gap={1} justifyContent={"center"}>
                         {categories.map((category) => (
-                            <Grid item xs={4} key={category.id}>
+                            <Grid  xs={4} key={category.id}>
                                 <CategoryCard>
                                     <CategoryImage
                                         src={category.image}
