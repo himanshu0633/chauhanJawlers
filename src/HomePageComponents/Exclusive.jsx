@@ -134,12 +134,8 @@ const getSliderSettings = (theme) => ({
       settings: { slidesToShow: 3 },
     },
     {
-      breakpoint: theme.breakpoints.values.sm, // 600px
+      breakpoint: 500,
       settings: { slidesToShow: 2 },
-    },
-    {
-      breakpoint: 400,
-      settings: { slidesToShow: 1 },
     },
   ],
 });

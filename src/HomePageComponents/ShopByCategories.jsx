@@ -146,7 +146,6 @@ const ShopByCategories = () => {
             {
                 breakpoint: 1024,
                 settings: {
-                    // slidesToShow: 4,
                     slidesToShow: Math.max(1, Math.min(categoryName.length, 5)),
                     slidesToScroll: 1,
                     infinite: categoryName.length >= 5
