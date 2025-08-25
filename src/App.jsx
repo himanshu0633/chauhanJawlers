@@ -1,4 +1,5 @@
 import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import HomePage from './pages/HomePage';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { Box } from '@mui/material';

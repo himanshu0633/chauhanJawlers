@@ -810,46 +810,416 @@ import {
     AccordionSummary,
     AccordionDetails,
     Chip,
-    Grid,
     Container,
     InputAdornment,
-    FormControl,
-    Select,
-    MenuItem,
-    useTheme,
-    useMediaQuery,
+    OutlinedInput,
+    Divider,
 } from '@mui/material';
 import {
     FavoriteBorder,
     Share,
     ExpandMore,
-    LocationOn,
-    Diamond,
     Settings,
-    Description,
-    Visibility,
-    ShoppingCart,
+    Diamond,
 } from '@mui/icons-material';
-import ScaleRoundedIcon from "@mui/icons-material/ScaleRounded";
+import RemoveIcon from '@mui/icons-material/Remove';
+import AddIcon from '@mui/icons-material/Add';
 import { useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../common components/AxiosInstance';
 import { publicUrl } from '../common components/PublicUrl';
 import LocationSelector from '../common components/LocationSelector';
+import { useDispatch, useSelector } from 'react-redux';
+import { addData } from '../store/Action';
+import { toast, ToastContainer } from 'react-toastify';
 
+const normalizeNumber = val => {
+    const n = parseFloat(val);
+    return Number.isNaN(n) ? null : n;
+};
+
+const parseVariants = (raw) => {
+    try {
+        let arr = raw;
+
+        // Check if raw data is a string and parse the array first
+        if (typeof raw === 'string') {
+            // Parse the stringified array (this will handle the outer array)
+            arr = JSON.parse(raw);
+        }
+
+        // Now parse each item in the array (which is a stringified object)
+        arr = arr.map((item) => {
+            if (typeof item === 'string') {
+                return JSON.parse(item); // Parse the inner stringified JSON object
+            }
+            return item; // If it's already an object, return it as is
+        });
+
+        if (!Array.isArray(arr)) return [];  // Ensure it's an array
+
+        // Return the mapped variants with proper handling for missing/incorrect fields
+        return arr.map((v, i) => ({
+            _key: v._key || `v-${i}`,
+            label: v.label || '',
+            mrp: normalizeNumber(v.mrp),
+            discount: normalizeNumber(v.discount),
+            gst: normalizeNumber(v.gst),
+            retail_price: normalizeNumber(v.retail_price),
+            final_price: normalizeNumber(v.finalPrice || v.final_price),  // Use correct property name
+            in_stock: v.in_stock ? v.in_stock.toString().toLowerCase() === 'yes' : false,
+            ...v,
+        }));
+    } catch (error) {
+        console.error("Error parsing variants:", error);
+        return [];
+    }
+};
+
+// // 1st:
+// export default function SingleProductPage() {
+//     const [product, setProduct] = useState(null);
+//     const [loading, setLoading] = useState(false);
+//     const [activeTab, setActiveTab] = useState('details');
+//     const navigate = useNavigate();
+//     const { id } = useParams();
+//     const best = product?.bestVariant ?? {};
+
+//     const dispatch = useDispatch();
+//     const cartItems = useSelector(state => state.cart?.items || []);
+//     const [units, setUnits] = useState(1);
+//     const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
+
+//     const increaseUnits = () => setUnits((prev) => prev + 1);
+//     const decreaseUnits = () => setUnits((prev) => (prev > 1 ? prev - 1 : prev));
+
+//     const handleTabChange = (tab) => setActiveTab(tab);
+
+//     // Fetch product data from the API
+//     const fetchData = async () => {
+//         setLoading(true);
+//         try {
+//             const response = await axiosInstance.get(`/user/product/${id}`);
+//             const p = response.data;
+//             const variants = parseVariants(p.quantity);
+
+//             // Extract relevant data from the response and set it in state
+//             const fetchedProduct = {
+//                 ...p,
+//                 price: parseFloat(p.consumer_price),
+//                 originalPrice: parseFloat(p.mrp),
+//                 frontImage: publicUrl(p?.media[0]?.url) || '',
+//                 sideImage: p?.media[1] ? publicUrl(p?.media[1]?.url) : '',
+//                 quantity: variants,
+//                 bestVariant: variants.find(v => v.in_stock) || variants[0],
+//             };
+//             setProduct(fetchedProduct);
+//             setSelectedVariantIndex(fetchedProduct.bestVariant ? variants.indexOf(fetchedProduct.bestVariant) : 0);
+//         } catch (error) {
+//             console.error("Error fetching data:", error);
+//         } finally {
+//             setLoading(false);
+//         }
+//     };
+
+//     useEffect(() => {
+//         if (!id) {
+//             console.warn('Product ID is undefined!');
+//             return;
+//         }
+//         fetchData();
+//     }, [id]);
+
+//     const handleAddToCart = () => {
+//         if (!product || !best) return;
+//         const cartItem = {
+//             ...product,
+//             selectedVariant: best,
+//             quantity: units,
+//             price: best.final_price,
+//             total: best.final_price * units,
+//         };
+//         dispatch(addData(cartItem));
+//     };
+
+//     if (loading) return <div>Loading...</div>;
+//     if (!product) return <div>Product not found</div>;
+
+//     const selectedVariant = product.quantity[selectedVariantIndex];
+//     const unitPrice = selectedVariant?.final_price ?? 0;
+
+//     if (unitPrice === 0) {
+//         console.log("Price data is missing or invalid.");
+//     } else {
+//         console.log(unitPrice, "Selected Variant Price");
+//     }
+
+//     const orderTotal = unitPrice * units;
+//     if (selectedVariant && selectedVariant["0"] && selectedVariant["0"].finalPrice !== undefined) {
+//         console.log(selectedVariant["0"].finalPrice, "ooooo");
+//     } else {
+//         console.log('finalPrice is not available or selectedVariant is empty');
+//     }
+
+//     console.log('Selected Variant:', selectedVariant);  // This will log the entire object
+//     console.log('Final Price:', selectedVariant["0"]?.finalPrice);  // This will correctly log finalPrice or undefined
+
+
+//     return (
+//         <Box bgcolor="#fff" py={6}>
+//             <Container maxWidth="xl" sx={{ maxWidth: 1140 }}>
+//                 <Box display="flex" alignItems="center" justifyContent="space-between" flexDirection={{ xs: "column", sm: "row" }} gap={{ xs: 5, md: 0 }} mb={4}>
+//                     <Box sx={{ width: { sm: "38%" } }}>
+//                         {/* Product Specs Chips */}
+//                         <Box sx={{ display: 'flex', justifyContent: "center", textAlign: 'center', mb: 1 }}>
+//                             <Chip
+//                                 icon={<Diamond sx={{ color: '#fff' }} />}
+//                                 label={product?.productvariety}
+//                                 sx={{
+//                                     bgcolor: '#44170D',
+//                                     color: '#fff',
+//                                     fontSize: 13,
+//                                     fontWeight: 600,
+//                                     mx: 1,
+//                                     height: 32,
+//                                     px: 1.5,
+//                                     boxShadow: '0 1px 3px rgba(230, 120, 30, 0.3)',
+//                                 }}
+//                             />
+//                             <Chip
+//                                 label={`Stock: ${product?.stock === 'yes' ? 'In Stock' : 'Out of Stock'}`}
+//                                 sx={{
+//                                     bgcolor: '#44170D',
+//                                     color: '#fff',
+//                                     fontSize: 13,
+//                                     fontWeight: 600,
+//                                     mx: 1,
+//                                     height: 32,
+//                                     px: 1.5,
+//                                     boxShadow: '0 1px 3px rgba(230, 120, 30, 0.3)',
+//                                 }}
+//                             />
+//                         </Box>
+
+//                         {/* Title */}
+//                         <Typography
+//                             component="h1"
+//                             sx={{
+//                                 fontFamily: 'serif',
+//                                 fontWeight: 400,
+//                                 fontSize: { xs: 24, md: 34 },
+//                                 color: '#2C2C2C',
+//                                 textAlign: 'center',
+//                                 mb: 1,
+//                                 letterSpacing: '0.03em',
+//                                 textTransform: 'capitalize',
+//                             }}
+//                         >
+//                             {product?.name}
+//                         </Typography>
+
+//                         {/* Price with old price */}
+//                         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
+//                             <Typography sx={{ fontSize: { xs: 24, md: 30 }, fontWeight: 700, color: '#2C2C2C' }}>
+//                                 ₹  ₹{finalPrice || 'Price not available'}
+//                                 {console.log(selectedVariant[0].final_price, "yyyyyyyy")}
+//                             </Typography>
+//                         </Box>
+
+//                         <Typography variant="caption" display="block" textAlign="center" sx={{ fontSize: 13, color: '#666', mb: 1 }}>
+//                             incl taxes and charges
+//                         </Typography>
+
+//                         {/* Action Buttons */}
+//                         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 2 }}>
+//                             <IconButton
+//                                 onClick={() => navigate('/wishlist')}
+//                                 size="large"
+//                                 aria-label="Add to wishlist"
+//                                 sx={{
+//                                     border: '1px solid #ddd',
+//                                     color: '#666',
+//                                     borderRadius: '50%',
+//                                     width: 46,
+//                                     height: 46,
+//                                     transition: 'background-color 0.3s',
+//                                     '&:hover': { bgcolor: '#f3f1ee' },
+//                                 }}
+//                             >
+//                                 <FavoriteBorder fontSize="medium" />
+//                             </IconButton>
+//                             <IconButton
+//                                 size="large"
+//                                 aria-label="Share"
+//                                 sx={{
+//                                     border: '1px solid #ddd',
+//                                     color: '#666',
+//                                     borderRadius: '50%',
+//                                     width: 46,
+//                                     height: 46,
+//                                     transition: 'background-color 0.3s',
+//                                     '&:hover': { bgcolor: '#f3f1ee' },
+//                                 }}
+//                             >
+//                                 <Share fontSize="medium" />
+//                             </IconButton>
+//                         </Box>
+
+//                         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 3 }} >
+//                             <OutlinedInput
+//                                 type="text"
+//                                 value={units}
+//                                 sx={{
+//                                     width: 120,
+//                                     height: 40,
+//                                     bgcolor: "#fff",
+//                                     color: "#000",
+//                                     borderRadius: 1.5,
+//                                     ".MuiOutlinedInput-input": {
+//                                         textAlign: "center",
+//                                         padding: 0,
+//                                         fontWeight: 600,
+//                                         fontSize: 16,
+//                                     }
+//                                 }}
+//                                 startAdornment={
+//                                     <InputAdornment position="start" sx={{ pl: 0.5 }}>
+//                                         <IconButton
+//                                             size="small"
+//                                             onClick={decreaseUnits}
+//                                             aria-label="Decrease quantity"
+//                                             edge="start"
+//                                             sx={{ p: "3px" }}
+//                                         >
+//                                             <RemoveIcon fontSize="small" />
+//                                         </IconButton>
+//                                         <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+//                                     </InputAdornment>
+//                                 }
+//                                 endAdornment={
+//                                     <InputAdornment position="end" sx={{ pr: 0.5 }}>
+//                                         <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+//                                         <IconButton
+//                                             size="small"
+//                                             onClick={increaseUnits}
+//                                             aria-label="Increase quantity"
+//                                             edge="end"
+//                                             sx={{ p: "3px" }}
+//                                         >
+//                                             <AddIcon fontSize="small" />
+//                                         </IconButton>
+//                                     </InputAdornment>
+//                                 }
+//                                 inputProps={{
+//                                     "aria-label": "quantity",
+//                                 }}
+//                             />
+
+//                             <Box sx={{ textAlign: 'center' }}>
+//                                 <Button variant="contained" onClick={handleAddToCart}>
+//                                     Add to Cart
+//                                 </Button>
+//                             </Box>
+//                         </Box>
+//                     </Box>
+
+//                     {/* Product Images */}
+//                     <Box sx={{ width: { sm: "58%" } }}>
+//                         <Box
+//                             sx={{
+//                                 display: 'flex',
+//                                 justifyContent: 'center',
+//                                 alignItems: 'center',
+//                                 gap: 2,
+//                                 borderRadius: 3,
+//                                 position: 'relative',
+//                             }}
+//                         >
+//                             <Box>
+//                                 <Box component="img" src={product?.frontImage} alt="Front view" sx={{ height: 300, width: '100%', objectFit: 'cover', userSelect: 'none', boxShadow: '0 6px 20px rgb(0 0 0 / 0.10)', borderRadius: 2 }} draggable={false} />
+//                             </Box>
+//                             <Box>
+//                                 {product?.sideImage && (
+//                                     <Box component="img" src={product?.sideImage} alt="Side view" sx={{ height: 300, width: '100%', objectFit: 'cover', userSelect: 'none', boxShadow: '0 8px 28px rgb(0 0 0 / 0.08)', borderRadius: 4 }} draggable={false} />
+//                                 )}
+//                             </Box>
+//                         </Box>
+//                     </Box>
+//                 </Box>
+
+//                 {/* Delivery Details */}
+//                 <Box sx={{ bgcolor: '#fff', py: 2, borderRadius: 2, border: '1px solid #eee', mb: { xs: 6, sm: 8 }, maxWidth: 580, mx: 'auto', textAlign: 'center' }}>
+//                     <Typography variant="h6" sx={{ fontWeight: 700, color: '#2C2C2C', mb: 3, fontFamily: 'serif' }}>
+//                         Delivery Details
+//                     </Typography>
+
+//                     {/* location pincode */}
+//                     <LocationSelector />
+//                 </Box>
+
+//                 {/* Jewellery Details */}
+//                 <Box sx={{ bgcolor: '#fff', borderRadius: 2, p: { xs: 3, sm: 5 }, maxWidth: 920, mx: 'auto', boxShadow: '0 4px 32px rgb(242 227 213 / 0.8)' }}>
+//                     <Typography sx={{ fontFamily: 'serif', fontWeight: 400, fontSize: { xs: 24, sm: 28 }, color: '#2C2C2C', textAlign: 'center', mb: 5, letterSpacing: 0.5 }}>
+//                         Jewellery Details
+//                     </Typography>
+
+//                     {/* Tabs */}
+//                     <Box sx={{ display: 'flex', justifyContent: 'center', mb: 5, borderBottom: '1px solid #eee', gap: 3, flexWrap: 'wrap' }}>
+//                         {[{ key: 'details', label: 'Product Details' }, { key: 'breakup', label: 'Price Breakup' }].map(({ key, label }) => (
+//                             <Button key={key} onClick={() => handleTabChange(key)} sx={{ px: 4, py: 1.4, borderRadius: 30, fontWeight: 600, textTransform: 'none', fontSize: 16, minWidth: 160, bgcolor: activeTab === key ? '#44170D' : 'transparent', color: activeTab === key ? '#fff' : '#757575', boxShadow: activeTab === key ? '0 6px 15px rgb(139 69 19 / 0.45)' : 'none', transition: 'all 0.3s ease', '&:hover': { bgcolor: activeTab === key ? '#7A3A0F' : '#f5f5f5', color: activeTab === key ? '#fff' : '#5a5a5a' } }}>
+//                                 {label}
+//                             </Button>
+//                         ))}
+//                     </Box>
+
+//                     {/* Tab Content */}
+//                     {activeTab === 'details' && (
+//                         <Accordion defaultExpanded sx={{ mb: 3, borderRadius: 3, boxShadow: 'none', border: '1px solid #eee' }}>
+//                             <AccordionSummary expandIcon={<ExpandMore sx={{ color: '#E65100' }} />}>
+//                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+//                                     <Settings sx={{ color: '#E65100', fontSize: 20 }} />
+//                                     <Typography fontWeight={700} fontSize={16} color="#2C2C2C" letterSpacing={0.5}>
+//                                         METAL DETAILS
+//                                     </Typography>
+//                                 </Box>
+//                             </AccordionSummary>
+//                             <AccordionDetails>
+//                                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+//                                     {[{ label: 'Material', value: product?.productvariety }, { label: 'Description', value: product?.description }].map(({ label, value }) => (
+//                                         <Box key={label} sx={{ flex: '1 1 45%', minWidth: '140px' }}>
+//                                             <Typography fontSize={13} color="#666" fontWeight={500} mb={0.8} letterSpacing={0.3}>
+//                                                 {label}
+//                                             </Typography>
+//                                             <Typography fontWeight={600} fontSize={15} color="#2C2C2C" letterSpacing={0.3}>
+//                                                 {value}
+//                                             </Typography>
+//                                         </Box>
+//                                     ))}
+//                                 </Box>
+//                             </AccordionDetails>
+//                         </Accordion>
+//                     )}
+//                 </Box>
+//             </Container>
+//         </Box>
+//     );
+// }
+
+// // 2::
 export default function SingleProductPage() {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(false);
-    const theme = useTheme();
-    const isSm = useMediaQuery(theme.breakpoints.down('sm'));
-    const [weight, setWeight] = React.useState("0.57");
     const [activeTab, setActiveTab] = useState('details');
     const navigate = useNavigate();
     const { id } = useParams();
+    const best = product?.bestVariant ?? {};
 
-    const weightOptions = [
-        { value: "0.57", label: "0.57 g" },
-        { value: "0.80", label: "0.80 g" },
-    ];
+    const dispatch = useDispatch();
+    const cartItems = useSelector(state => state.cart?.items || []);
+    const [units, setUnits] = useState(1);
+    const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
+
+    const increaseUnits = () => setUnits((prev) => prev + 1);
+    const decreaseUnits = () => setUnits((prev) => (prev > 1 ? prev - 1 : 1));
 
     const handleTabChange = (tab) => setActiveTab(tab);
 
@@ -859,16 +1229,20 @@ export default function SingleProductPage() {
         try {
             const response = await axiosInstance.get(`/user/product/${id}`);
             const p = response.data;
+            const variants = parseVariants(p.quantity);
 
             // Extract relevant data from the response and set it in state
             const fetchedProduct = {
                 ...p,
                 price: parseFloat(p.consumer_price),
-                originalPrice: parseFloat(p.mrp),  // Assuming 'mrp' is the original price
+                originalPrice: parseFloat(p.mrp),
                 frontImage: publicUrl(p?.media[0]?.url) || '',
                 sideImage: p?.media[1] ? publicUrl(p?.media[1]?.url) : '',
+                quantity: variants,
+                bestVariant: variants.find(v => v.in_stock) || variants[0],
             };
             setProduct(fetchedProduct);
+            setSelectedVariantIndex(fetchedProduct.bestVariant ? variants.indexOf(fetchedProduct.bestVariant) : 0);
         } catch (error) {
             console.error("Error fetching data:", error);
         } finally {
@@ -884,38 +1258,77 @@ export default function SingleProductPage() {
         fetchData();
     }, [id]);
 
+    if (loading) return <div>Loading...</div>;
+    if (!product) return <div>Product not found</div>;
+
+    const selectedVariant = product.quantity[selectedVariantIndex];
+    const finalPrice = selectedVariant?.["0"]?.finalPrice;
+    // console.log('Final Price:', finalPrice);
+
+    const unitPrice = finalPrice ?? 0;
+
+    // // uncomment it to see the price :
+    // if (unitPrice === 0) {
+    //     console.log("Price data is missing or invalid.");
+    // } else {
+    //     console.log(unitPrice, "Selected Variant Price");
+    // }
+
+    const orderTotal = unitPrice * units;
+
+    // 1: add to cart
+    // const handleAddToCart = () => {
+    //     if (!product || !best) return;
+    //     const cartItem = {
+    //         ...product,
+    //         selectedVariant: best,
+    //         quantity: units,
+    //         price: best.final_price,
+    //         total: best.final_price * units,
+    //     };
+    //     dispatch(addData(cartItem));
+    // };
+
+
+    // 2: add to cart2
+    const handleAddToCart = () => {
+        console.log('Adding to cart:', product);
+        if (!product) return;
+        const variant = product.quantity[selectedVariantIndex];
+        if (!variant) return;
+
+        const cartItem = {
+            ...product,
+            selectedVariant: {
+                label: variant.label,
+                mrp: variant.mrp,
+                discount: variant.discount,
+                gst: variant.gst,
+                retail_price: variant.retail_price,
+                final_price: variant.final_price,
+                in_stock: variant.in_stock,
+            },
+            quantity: units,
+            unitPrice: variant.final_price,
+            totalPrice: variant.final_price != null ? variant.final_price * units : null,
+        };
+        toast.success('Item added to cart!', {
+            position: 'top-right',
+            autoClose: 2000,
+        });
+
+        dispatch(addData(cartItem));
+    };
+
 
     return (
-        <Box bgcolor="#fff" px={{ xs: 1, sm: 3, md: 6 }} py={6}>
+        <Box bgcolor="#fff" py={6}>
+            <ToastContainer position="top-right" autoClose={2000} hideProgressBar={false} />
             <Container maxWidth="xl" sx={{ maxWidth: 1140 }}>
-                <Box display="flex" alignItems="center" justifyContent="space-between" flexDirection={{ xs: "column", sm: "row" }}>
-                    <Box sx={{ width: { sm: "48%" } }}>
-                        {/* View Similar Button */}
-                        {/* <Box sx={{ textAlign: 'center', mb: { xs: 2, sm: 3 } }}>
-                            <Button
-                                variant="outlined"
-                                startIcon={<Visibility />}
-                                sx={{
-                                    bgcolor: '#fff',
-                                    color: '#44170D',
-                                    border: '1px solid #ddd',
-                                    borderRadius: 20,
-                                    px: 2.5,
-                                    py: 1,
-                                    fontSize: 13,
-                                    fontWeight: 600,
-                                    textTransform: 'none',
-                                    minWidth: 150,
-                                    '&:hover': { bgcolor: '#fafafa', borderColor: '#b8843f' },
-                                    boxShadow: '0 1px 3px rgba(139, 69, 19,0.15)',
-                                }}
-                            >
-                                View Similar
-                            </Button>
-                        </Box> */}
-
+                <Box display="flex" alignItems="center" justifyContent="space-between" flexDirection={{ xs: "column", sm: "row" }} gap={{ xs: 5, md: 0 }} mb={4}>
+                    <Box sx={{ width: { sm: "38%" } }}>
                         {/* Product Specs Chips */}
-                        <Box sx={{ display: 'flex',justifyContent:"center", textAlign: 'center', mb: { xs: 1, md: 3 } }}>
+                        <Box sx={{ display: 'flex', justifyContent: "center", textAlign: 'center', mb: 1 }}>
                             <Chip
                                 icon={<Diamond sx={{ color: '#fff' }} />}
                                 label={product?.productvariety}
@@ -965,29 +1378,16 @@ export default function SingleProductPage() {
                         {/* Price with old price */}
                         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
                             <Typography sx={{ fontSize: { xs: 24, md: 30 }, fontWeight: 700, color: '#2C2C2C' }}>
-                                ₹{product?.price}
+                                ₹{finalPrice || 'Price not available'}
                             </Typography>
-                            {product?.originalPrice && (
-                                <Typography
-                                    sx={{
-                                        fontSize: 18,
-                                        color: '#A49E9B',
-                                        textDecoration: 'line-through',
-                                        fontWeight: 400,
-                                        ml: { xs: 0, sm: 2 },
-                                    }}
-                                >
-                                    ₹{product?.originalPrice}
-                                </Typography>
-                            )}
                         </Box>
 
-                        <Typography variant="caption" display="block" textAlign="center" sx={{ fontSize: 13, color: '#666', mb: { xs: 2, sm: 3 } }}>
+                        <Typography variant="caption" display="block" textAlign="center" sx={{ fontSize: 13, color: '#666', mb: 1 }}>
                             incl taxes and charges
                         </Typography>
 
                         {/* Action Buttons */}
-                        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: { xs: 4, sm: 6 } }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 2 }}>
                             <IconButton
                                 onClick={() => navigate('/wishlist')}
                                 size="large"
@@ -1020,31 +1420,69 @@ export default function SingleProductPage() {
                                 <Share fontSize="medium" />
                             </IconButton>
                         </Box>
+
+                        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 3 }} >
+                            <div className="input-group" style={{ maxWidth: '160px' }}>
+                                <button
+                                    className="btn btn-outline-secondary"
+                                    type="button"
+                                    onClick={decreaseUnits}
+                                    aria-label="Decrease quantity"
+                                >
+                                    -
+                                </button>
+                                <input
+                                    type="text"
+                                    className="form-control text-center"
+                                    value={units}
+                                    readOnly
+                                    aria-label="Current quantity"
+                                />
+                                <button
+                                    className="btn btn-outline-secondary"
+                                    type="button"
+                                    onClick={increaseUnits}
+                                    aria-label="Increase quantity"
+                                >
+                                    +
+                                </button>
+                            </div>
+
+
+                            <Box sx={{ textAlign: 'center' }}>
+                                <Button variant="contained" onClick={handleAddToCart}>
+                                    Add to Cart
+                                </Button>
+                            </Box>
+                        </Box>
+
+
                     </Box>
 
                     {/* Product Images */}
-                    <Box sx={{ width: { sm: "48%" } }}>
+                    <Box sx={{ width: { sm: "58%" } }}>
                         <Box
                             sx={{
                                 display: 'flex',
                                 justifyContent: 'center',
                                 alignItems: 'center',
-                                gap: { xs: 3, sm: 6 },
-                                // bgcolor: '#fafafa',
-                                // py: { xs: 5, sm: 7 },
-                                px: { xs: 1, sm: 3 },
+                                gap: 2,
                                 borderRadius: 3,
                                 position: 'relative',
-                                mb: 7,
                             }}
                         >
-                            <Box component="img" src={product?.frontImage} alt="Front view" sx={{ maxHeight: 350, width: '100%', objectFit: 'cover', userSelect: 'none', boxShadow: '0 6px 20px rgb(0 0 0 / 0.10)', borderRadius: 2 }} draggable={false} />
-                            {product?.sideImage && (
-                                <Box component="img" src={product?.sideImage} alt="Side view" sx={{ maxHeight: 350, width: '100%', objectFit: 'cover', userSelect: 'none', boxShadow: '0 8px 28px rgb(0 0 0 / 0.08)', borderRadius: 4 }} draggable={false} />
-                            )}
+                            <Box>
+                                <Box component="img" src={product?.frontImage} alt="Front view" sx={{ height: 300, width: '100%', objectFit: 'cover', userSelect: 'none', boxShadow: '0 6px 20px rgb(0 0 0 / 0.10)', borderRadius: 2 }} draggable={false} />
+                            </Box>
+                            <Box>
+                                {product?.sideImage && (
+                                    <Box component="img" src={product?.sideImage} alt="Side view" sx={{ height: 300, width: '100%', objectFit: 'cover', userSelect: 'none', boxShadow: '0 8px 28px rgb(0 0 0 / 0.08)', borderRadius: 4 }} draggable={false} />
+                                )}
+                            </Box>
                         </Box>
                     </Box>
                 </Box>
+
                 {/* Delivery Details */}
                 <Box sx={{ bgcolor: '#fff', py: 2, borderRadius: 2, border: '1px solid #eee', mb: { xs: 6, sm: 8 }, maxWidth: 580, mx: 'auto', textAlign: 'center' }}>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: '#2C2C2C', mb: 3, fontFamily: 'serif' }}>
@@ -1072,46 +1510,35 @@ export default function SingleProductPage() {
 
                     {/* Tab Content */}
                     {activeTab === 'details' && (
-                        <>
-                            <Typography sx={{ fontSize: 13, color: '#666', textAlign: 'right', mb: 4, fontFamily: 'monospace', letterSpacing: 0.3 }}>
-                                {/* SKU ID : {product.skuId} */}
-                            </Typography>
-
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center', maxWidth: '100%' }}>
-                                <Box sx={{ flex: '1 1 50%' }}>
-                                    {/* Metal Details Accordion */}
-                                    <Accordion defaultExpanded sx={{ mb: 3, borderRadius: 3, boxShadow: 'none', border: '1px solid #eee' }}>
-                                        <AccordionSummary expandIcon={<ExpandMore sx={{ color: '#E65100' }} />}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                <Settings sx={{ color: '#E65100', fontSize: 20 }} />
-                                                <Typography fontWeight={700} fontSize={16} color="#2C2C2C" letterSpacing={0.5}>
-                                                    METAL DETAILS
-                                                </Typography>
-                                            </Box>
-                                        </AccordionSummary>
-                                        <AccordionDetails>
-                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-                                                {[{ label: 'Material', value: product?.productvariety }, { label: 'Description', value: product?.description }].map(({ label, value }) => (
-                                                    <Box key={label} sx={{ flex: '1 1 45%', minWidth: '140px' }}>
-                                                        <Typography fontSize={13} color="#666" fontWeight={500} mb={0.8} letterSpacing={0.3}>
-                                                            {label}
-                                                        </Typography>
-                                                        <Typography fontWeight={600} fontSize={15} color="#2C2C2C" letterSpacing={0.3}>
-                                                            {value}
-                                                        </Typography>
-                                                    </Box>
-                                                ))}
-                                            </Box>
-                                        </AccordionDetails>
-                                    </Accordion>
+                        <Accordion defaultExpanded sx={{ mb: 3, borderRadius: 3, boxShadow: 'none', border: '1px solid #eee' }}>
+                            <AccordionSummary expandIcon={<ExpandMore sx={{ color: '#E65100' }} />}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Settings sx={{ color: '#E65100', fontSize: 20 }} />
+                                    <Typography fontWeight={700} fontSize={16} color="#2C2C2C" letterSpacing={0.5}>
+                                        METAL DETAILS
+                                    </Typography>
                                 </Box>
-                            </Box>
-                        </>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                                    {[{ label: 'Material', value: product?.productvariety }, { label: 'Description', value: product?.description }].map(({ label, value }) => (
+                                        <Box key={label} sx={{ flex: '1 1 45%', minWidth: '140px' }}>
+                                            <Typography fontSize={13} color="#666" fontWeight={500} mb={0.8} letterSpacing={0.3}>
+                                                {label}
+                                            </Typography>
+                                            <Typography fontWeight={600} fontSize={15} color="#2C2C2C" letterSpacing={0.3}>
+                                                {value}
+                                            </Typography>
+                                        </Box>
+                                    ))}
+                                </Box>
+                            </AccordionDetails>
+                        </Accordion>
                     )}
                 </Box>
+
             </Container>
         </Box>
     );
 }
-
 

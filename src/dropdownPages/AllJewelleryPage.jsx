@@ -559,7 +559,6 @@ function JewelleryCard({ product }) {
     const imgUrl = publicUrl(product.media?.[0]?.url) || "no img found";
     const best = product.bestVariant || {};
 
-    let finalPrice = "Not Available";
     try {
         const quantityData = JSON.parse(product.quantity?.[0] || '[]');
         finalPrice = quantityData.length > 0 ? quantityData[0]?.finalPrice : "Not Available";
@@ -662,8 +661,6 @@ export function JewelleryGrid() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [shownCount, setShownCount] = useState(10);
-    const dispatch = useDispatch();
-    const cartItems = useSelector((state) => state.cart?.items || []);
     const [filters, setFilters] = useState({
         query: '',
         priceRange: 'all',
