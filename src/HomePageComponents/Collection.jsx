@@ -2,6 +2,7 @@ import { Box, Typography, Container, styled } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { publicUrl } from "../common components/PublicUrl";
 import axiosInstance from "../common components/AxiosInstance";
+import { useNavigate } from "react-router-dom";
 
 const SectionContainer = styled(Box)({
     backgroundColor: "#F2EDED",
@@ -120,6 +121,7 @@ const FallbackImage = ({ src, alt, fallbackSrc, ...props }) => {
 
 function Collection() {
     const [banners, setBanners] = useState([]);
+    const navigate = useNavigate();
 
     const fetchData = async () => {
         try {
@@ -161,8 +163,9 @@ function Collection() {
                     {/* Left Large Card */}
                     <Box flex={1} minWidth={0} mb={{ xs: 3, md: 0 }}>
                         {banners.length > 0 && (
-                            <Card 
-                            height="500px"
+                            <Card
+                                height="500px"
+                                onClick={() => navigate(`/collection`)}
                             >
                                 <FallbackImage
                                     src={publicUrl(banners[0].slider_image[0])}
@@ -193,7 +196,7 @@ function Collection() {
                         minWidth={0}
                     >
                         {banners.slice(1).map((item) => (
-                            <Card height="240px" key={item._id}>
+                            <Card height="240px" key={item._id} onClick={() => navigate(`/collection`)}>
                                 <FallbackImage
                                     src={publicUrl(item.slider_image[0])}
                                     alt={item.name}
