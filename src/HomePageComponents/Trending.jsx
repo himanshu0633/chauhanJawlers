@@ -209,6 +209,7 @@ import { Box, Typography, Container, styled, CircularProgress } from "@mui/mater
 import { useEffect, useState } from "react";
 import axiosInstance from "../common components/AxiosInstance";
 import { publicUrl } from "../common components/PublicUrl";
+import { useNavigate } from "react-router-dom";
 
 const SectionContainer = styled(Box)({
     backgroundColor: "#fff",
@@ -337,6 +338,7 @@ function Trending() {
     const [hoveredItem, setHoveredItem] = useState(null);
     const [subcategoryName, setSubCategoryName] = useState([]);
     const [loading, setLoading] = useState(true)
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchSubCategories();
@@ -367,6 +369,7 @@ function Trending() {
             ) :
                 <ImageSection
                     backgroundImage={publicUrl(currentImage)}
+                    onClick={() => navigate("/allJewellery")}
                 >
                     <OverlayFlex>
                         {subcategoryName.map((item, idx) => {
