@@ -791,8 +791,6 @@ export function JewelleryGrid() {
                         <MenuItem value="newest">Newest First</MenuItem>
                     </Select>
                 </Box>
-
-
             </Box>
 
             {/* Product List */}

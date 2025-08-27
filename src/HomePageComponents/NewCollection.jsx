@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Typography, Container, Card, CardMedia, CardContent, Button, Chip, styled } from "@mui/material";
 import { Star } from "@mui/icons-material";
+import axiosInstance from "../common components/AxiosInstance";
+import { useNavigate } from "react-router-dom";
+import { publicUrl } from "../common components/PublicUrl";
 
 // ---- Styled Components ----
 const SectionContainer = styled(Box)({
@@ -196,7 +199,7 @@ const DiscountBadge = styled(Chip)({
   position: "absolute",
   top: 10,
   right: 10,
-  backgroundColor: "#FF8C00",
+  backgroundColor: "#44170b",
   color: "#fff",
   fontSize: 12,
   fontWeight: 600,
@@ -280,72 +283,61 @@ function StarRating({ rating }) {
   );
 }
 
-// ---- Product data ----
-const products = [
-  {
-    id: 1,
-    name: "Golden Elegance Bracelet",
-    category: "bracelet",
-    image: "/newCollectionImg1.png",
-    currentPrice: "$420.00",
-    originalPrice: "$600.00",
-    discount: "30% off",
-    rating: 4.8,
-  },
-  {
-    id: 2,
-    name: "Gold Diamond Ring",
-    category: "ring",
-    image: "/newCollectionImg2.png",
-    currentPrice: "$175.00",
-    originalPrice: "$260.00",
-    discount: "30% off",
-    rating: 4.9,
-  },
-  {
-    id: 3,
-    name: "Golden Bracelet",
-    category: "bracelet",
-    image: "/newCollectionImg3.png",
-    currentPrice: "$385.00",
-    originalPrice: "$550.00",
-    discount: "30% off",
-    rating: 5.0,
-  },
-  {
-    id: 4,
-    name: "Green Diamond Earrings",
-    category: "earrings",
-    image: "/newCollectionImg4.png",
-    currentPrice: "$315.00",
-    originalPrice: "$450.00",
-    discount: "30% off",
-    rating: 4.8,
-  },
-  {
-    id: 5,
-    name: "Gold Bracelet",
-    category: "bracelet",
-    image: "/newCollectionImg5.png",
-    currentPrice: "$280.00",
-    originalPrice: "$400.00",
-    discount: "30% off",
-    rating: 4.9,
-  },
-  {
-    id: 6,
-    name: "Gold Bangles",
-    category: "bangle",
-    image: "/newCollectionImg6.png",
-    currentPrice: "$420.00",
-    originalPrice: "$500.00",
-    discount: "30% off",
-    rating: 4.8,
-  },
-];
-
 // ---- Main Component ----
 export default function NewCollection() {
+  const [allProducts, setAllProducts] = useState([]);
+  const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
+
+  const parseQuantityArray = (q) => {
+    if (!q) return [];
+    let arr = q;
+    if (typeof q === "string") {
+      try { arr = JSON.parse(q); } catch { return []; }
+    }
+    return Array.isArray(arr) ? arr : [];
+  };
+
+  const pickBestVariation = (arr) => {
+    if (!arr.length) return null;
+    // Lowest finalPrice variant
+    return arr.reduce((best, cur) =>
+      parseFloat(cur.finalPrice) < parseFloat(best.finalPrice) ? cur : best, arr[0]);
+  };
+
+  const preprocessProducts = (productsRaw) => productsRaw.map((p) => {
+    const quantityArr = parseQuantityArray(p.quantity?.[0]);
+    const bestVariation = pickBestVariation(quantityArr);
+    return {
+      ...p,
+      price: bestVariation ? parseFloat(bestVariation.finalPrice) : 0,
+      gst: bestVariation ? parseFloat(bestVariation.gst) : null,
+      discount: bestVariation ? parseFloat(bestVariation.discount) : 0,
+      weight: bestVariation ? parseFloat(bestVariation.weight) : null,
+      makingPrice: bestVariation ? parseFloat(bestVariation.makingPrice) : null,
+      quantityVariants: quantityArr,
+      bestVariant: bestVariation,
+    };
+  });
+
+  useEffect(() => {
+    fetchAllProducts();
+  }, []);
+
+  const fetchAllProducts = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get('/user/allproducts');
+      // setAllProducts(response.data);
+      const processedProducts = preprocessProducts(response.data);
+      setAllProducts(processedProducts);
+    } catch (error) {
+      setError('Could not load products. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <SectionContainer>
       <HeaderContainer maxWidth="xl">
@@ -362,37 +354,33 @@ export default function NewCollection() {
             component="img"
           />
           <PromoOverlay>
-            <PromoDiscount>30% off</PromoDiscount>
-            <PromoDates>06 MAY - 16 May</PromoDates>
-            <PromoButton variant="outlined">SHOP NOW</PromoButton>
+            {/* <PromoDiscount>30% off</PromoDiscount>
+            <PromoDates>06 MAY - 16 May</PromoDates> */}
+            <PromoButton variant="outlined" onClick={() => navigate('/allJewellery')}>SHOP NOW</PromoButton>
           </PromoOverlay>
         </PromoCard>
 
         {/* Right flex product cards */}
         <RightFlexBox>
-          {products.map((product) => (
-            <ProductCard key={product.id}>
+          {allProducts.map((product) => (
+            <ProductCard key={product.id} onClick={() => navigate(`/singleProduct/${product._id}`)}>
               <ProductImageContainer>
                 <ProductImage
-                  src={product.image}
+                  src={publicUrl(product.media[0].url)}
                   title={product.name}
                   component="img"
                   onError={(e) => {
                     e.target.src = "/newCollectionLady.png";
                   }}
                 />
-                <DiscountBadge label={product.discount} />
+                <DiscountBadge label={`${product.discount}%`} />
               </ProductImageContainer>
 
               <ProductInfo>
                 <ProductCategory>{product.category}</ProductCategory>
                 <ProductName>{product.name}</ProductName>
-                <RatingContainer>
-                  <StarRating rating={product.rating} />
-                </RatingContainer>
                 <PriceContainer>
-                  <CurrentPrice>{product.currentPrice}</CurrentPrice>
-                  <OriginalPrice>{product.originalPrice}</OriginalPrice>
+                  <CurrentPrice>₹{product.price}</CurrentPrice>
                 </PriceContainer>
               </ProductInfo>
             </ProductCard>
