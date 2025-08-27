@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -188,6 +188,32 @@ export default function Header() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [hoveredMenu, setHoveredMenu] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
+
+  const toggleDropdown = (e) => {
+    e.stopPropagation();
+    setShowDropdown(!showDropdown);
+    // setShowAccountPopup(!showAccountPopup)
+  };
+
+
 
   // Dropdown IDs for hover menu
   const hasDropdown = ["category", "price", "gender", "occasion"];
@@ -269,8 +295,9 @@ export default function Header() {
           <TopIconButton size="small">
             <FavoriteBorder onClick={() => navigate("/wishlist")} sx={{ fontSize: 20 }} />
           </TopIconButton>
-          <TopIconButton size="small">
-            <PersonOutline onMouseEnter={() => setShowAccountPopup(!showAccountPopup)} sx={{ fontSize: 20 }} />
+          <TopIconButton size="small" >
+            <PersonOutline onClick={() => setShowAccountPopup(!showAccountPopup)} sx={{ fontSize: 20 }} />
+            {/* <PersonOutline onClick={toggleDropdown} sx={{ fontSize: 20 }} /> */}
           </TopIconButton>
           <TopIconButton size="small">
             <ShoppingBagOutlined onClick={() => navigate("/cart")} sx={{ fontSize: 20 }} />

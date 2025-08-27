@@ -1,5 +1,5 @@
 const API_URL = 'https://fvvcbrpm-4000.inc1.devtunnels.ms/'
-// const API_URL = 'http://chauhansonsjewellers.com'
+// const API_URL = 'https://www.chauhansonsjewellers.com/'
 // const API_URL = 'http://31.97.237.55:4000'
 
 export default API_URL;

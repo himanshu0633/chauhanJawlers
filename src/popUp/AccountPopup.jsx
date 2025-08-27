@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     Typography,
@@ -16,6 +16,7 @@ import CardGiftcardOutlinedIcon from '@mui/icons-material/CardGiftcardOutlined';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import { useNavigate } from 'react-router-dom';
 
 const menu = [
     { icon: <HistoryOutlinedIcon sx={{ color: '#6a2322' }} />, label: "Order History" },
@@ -28,6 +29,14 @@ export default function AccountPopup() {
     const isMobile = useMediaQuery('(max-width:600px)');
     const storedUser = localStorage.getItem('userData');
     const userData = storedUser ? JSON.parse(storedUser) : null;
+    const navigate = useNavigate();
+
+    const handleLogout = (e) => {
+        e.preventDefault();
+        localStorage.removeItem('userData');
+        // setShowDropdown(false);
+        navigate('/login');
+    };
 
     // Responsive typography and spacing
     const fontSize = isMobile ? 14 : 16;
@@ -48,102 +57,115 @@ export default function AccountPopup() {
                 borderRadius: '15px',
                 width: paperWidth,
                 px: 0,
-                py: isMobile ? 0.2 : 0.7,
+                py: 2,
                 background: '#fff',
                 position: 'fixed',
                 top: paperTop,
                 right: paperRight,
                 zIndex: 1300,
-                minHeight: isMobile ? 270 : 320
             }}
         >
-            {/* Profile header */}
-            <Box
-                sx={{
-                    background: 'linear-gradient(90deg, #bd527c 10%, #d46a60 85%)',
-                    borderRadius: isMobile ? '12px' : '15px',
-                    mt: isMobile ? 1 : 1.2,
-                    mx: isMobile ? 0.7 : 1,
-                    color: 'white',
-                    py: headerPaddingY,
-                    px: isMobile ? 1.2 : 2,
-                    gap: 0.5,
-                    boxShadow: '0 2px 10px rgba(220,120,135,0.10)',
-                    position: 'relative'
-                }}
-            >
-                {/* Sparkle in top right */}
-                <Box sx={{
-                    position: 'absolute',
-                    top: isMobile ? 4 : 8,
-                    right: isMobile ? 5 : 12
-                }}>
-                    <svg width={isMobile ? 15 : 23} height={isMobile ? 11 : 15} viewBox="0 0 27 17">
-                        <text x={isMobile ? 1 : 3} y={isMobile ? 10 : 14} fontSize={isMobile ? "10" : "16"} fill="#fff" fontFamily="serif" style={{ opacity: 0.9 }}>✨</text>
-                    </svg>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <PersonOutlineIcon sx={{ fontSize: iconSize, mr: 1 }} />
-                    <Typography sx={{ fontWeight: 500, fontSize: headerFont, letterSpacing: 0.1, textTransform: 'capitalize' }}>
-                        {userData.name}
+            {!userData ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <Typography variant="body1" sx={{ fontSize: 16, fontWeight: 500, color: '#6a2322', cursor: 'pointer' }}
+                        onClick={() => navigate('/login')}
+                    >
+                        Please login to view your account
                     </Typography>
                 </Box>
-            </Box>
-
-            {/* Menu List */}
-            <List sx={{ mt: isMobile ? 0.3 : 0.7, px: 0.7 }}>
-                {menu.map(item => (
-                    <ListItem
-                        key={item.label}
-                        button
+            ) : (
+                <>
+                    {/* Profile header */}
+                    <Box
                         sx={{
-                            borderRadius: 2,
-                            mb: isMobile ? 0.2 : 0.5,
-                            py: itemPaddingY,
-                            px: itemPaddingX,
-                            minHeight: '28px'
+                            background: 'linear-gradient(90deg, #bd527c 10%, #d46a60 85%)',
+                            borderRadius: isMobile ? '12px' : '15px',
+                            mt: isMobile ? 1 : 1.2,
+                            mx: isMobile ? 0.7 : 1,
+                            color: 'white',
+                            py: headerPaddingY,
+                            px: isMobile ? 1.2 : 2,
+                            gap: 0.5,
+                            boxShadow: '0 2px 10px rgba(220,120,135,0.10)',
+                            position: 'relative'
                         }}
                     >
-                        <ListItemIcon sx={{ minWidth: iconMinWidth }}>
-                            {item.icon}
-                        </ListItemIcon>
-                        <ListItemText
-                            primary={item.label}
-                            primaryTypographyProps={{
-                                fontSize,
-                                fontWeight: 500,
-                                color: '#211415',
-                                fontFamily: 'serif'
+                        {/* Sparkle in top right */}
+                        <Box sx={{
+                            position: 'absolute',
+                            top: isMobile ? 4 : 8,
+                            right: isMobile ? 5 : 12
+                        }}>
+                            <svg width={isMobile ? 15 : 23} height={isMobile ? 11 : 15} viewBox="0 0 27 17">
+                                <text x={isMobile ? 1 : 3} y={isMobile ? 10 : 14} fontSize={isMobile ? "10" : "16"} fill="#fff" fontFamily="serif" style={{ opacity: 0.9 }}>✨</text>
+                            </svg>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <PersonOutlineIcon sx={{ fontSize: iconSize, mr: 1 }} />
+                            <Typography sx={{ fontWeight: 500, fontSize: headerFont, letterSpacing: 0.1, textTransform: 'capitalize' }}>
+                                {userData.name}
+                            </Typography>
+                        </Box>
+                    </Box>
+
+                    {/* Menu List */}
+                    <List sx={{ mt: isMobile ? 0.3 : 0.7, px: 0.7 }}>
+                        {menu.map(item => (
+                            <ListItem
+                                key={item.label}
+                                button
+                                sx={{
+                                    borderRadius: 2,
+                                    mb: isMobile ? 0.2 : 0.5,
+                                    py: itemPaddingY,
+                                    px: itemPaddingX,
+                                    minHeight: '28px'
+                                }}
+                            >
+                                <ListItemIcon sx={{ minWidth: iconMinWidth }}>
+                                    {item.icon}
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary={item.label}
+                                    primaryTypographyProps={{
+                                        fontSize,
+                                        fontWeight: 500,
+                                        color: '#211415',
+                                        fontFamily: 'serif'
+                                    }}
+                                />
+                            </ListItem>
+                        ))}
+
+                        <Divider sx={{ my: isMobile ? 1 : 1.3 }} />
+
+                        <ListItem
+                            button
+                            sx={{
+                                borderRadius: 2,
+                                py: itemPaddingY,
+                                px: itemPaddingX,
+                                minHeight: '28px'
                             }}
-                        />
-                    </ListItem>
-                ))}
+                        >
+                            <ListItemIcon sx={{ minWidth: iconMinWidth }}>
+                                <LogoutOutlinedIcon sx={{ color: '#6a2322' }} />
+                            </ListItemIcon>
+                            <ListItemText
+                                onClick={handleLogout}
+                                primary="Log Out"
+                                primaryTypographyProps={{
+                                    fontSize,
+                                    fontWeight: 500,
+                                    color: '#661e1b',
+                                    fontFamily: 'serif'
+                                }}
+                            />
+                        </ListItem>
+                    </List>
+                </>
+            )}
 
-                <Divider sx={{ my: isMobile ? 1 : 1.3 }} />
-
-                <ListItem
-                    button
-                    sx={{
-                        borderRadius: 2,
-                        py: itemPaddingY,
-                        px: itemPaddingX,
-                        minHeight: '28px'
-                    }}
-                >
-                    <ListItemIcon sx={{ minWidth: iconMinWidth }}>
-                        <LogoutOutlinedIcon sx={{ color: '#6a2322' }} />
-                    </ListItemIcon>
-                    <ListItemText
-                        primary="Log Out"
-                        primaryTypographyProps={{
-                            fontSize,
-                            fontWeight: 500,
-                            color: '#661e1b',
-                            fontFamily: 'serif'
-                        }}
-                    />
-                </ListItem>
-            </List>
         </Paper>
     );
 }
