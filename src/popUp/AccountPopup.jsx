@@ -102,7 +102,7 @@ export default function AccountPopup() {
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <PersonOutlineIcon sx={{ fontSize: iconSize, mr: 1 }} />
-                            <Typography sx={{ fontWeight: 500, fontSize: headerFont, letterSpacing: 0.1, textTransform: 'capitalize' }}>
+                            <Typography sx={{ fontWeight: 500, fontSize: headerFont, letterSpacing: 0.1, textTransform: 'capitalize', cursor: 'pointer' }}>
                                 {userData.name}
                             </Typography>
                         </Box>
@@ -119,7 +119,8 @@ export default function AccountPopup() {
                                     mb: isMobile ? 0.2 : 0.5,
                                     py: itemPaddingY,
                                     px: itemPaddingX,
-                                    minHeight: '28px'
+                                    minHeight: '28px',
+                                    cursor: 'pointer'
                                 }}
                             >
                                 <ListItemIcon sx={{ minWidth: iconMinWidth }}>
@@ -158,7 +159,8 @@ export default function AccountPopup() {
                                     fontSize,
                                     fontWeight: 500,
                                     color: '#661e1b',
-                                    fontFamily: 'serif'
+                                    fontFamily: 'serif',
+                                    cursor: 'pointer'
                                 }}
                             />
                         </ListItem>
