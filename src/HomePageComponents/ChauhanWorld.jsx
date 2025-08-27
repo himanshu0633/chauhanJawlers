@@ -152,28 +152,6 @@ const SunburstIcon = styled("div")({
     }
 });
 
-const categories = [
-    {
-        id: 1,
-        name: "Wedding",
-        image: "/worldActorImg1.png"
-    },
-    {
-        id: 2,
-        name: "Diamond",
-        image: "/worldActorImg2.png"
-    },
-    {
-        id: 3,
-        name: "Gold",
-        image: "/worldActorImg3.png"
-    },
-    {
-        id: 4,
-        name: "Dailywear",
-        image: "/worldActorImg4.png"
-    }
-];
 
 export default function ChauhanWorld() {
     const [occasion, setOccasion] = useState([]);

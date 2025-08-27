@@ -766,28 +766,6 @@ const ProductsJewel = () => {
         <DialogContent dividers>
           {selectedProduct && (
             <Grid container spacing={3}>
-              {/* <Grid item xs={12} md={4}>
-                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                  {selectedProduct.media && selectedProduct.media.length > 0 ? (
-                    <Avatar
-                      // src={`${API_URL}${selectedProduct.media[0].url}`}
-                      src={publicUrl(selectedProduct.media[0].url)}
-                      alt={selectedProduct.name}
-                      sx={{ width: 200, height: 200 }}
-                      variant="rounded"
-                    />
-                 
-                  ) : (
-                    <Avatar
-                      sx={{ width: 200, height: 200 }}
-                      variant="rounded"
-                    >
-                      No Image
-                    </Avatar>
-                  )}
-                </Box>
-              </Grid> */}
-
               <Grid item xs={12} md={4}>
                 {Array.isArray(selectedProduct.media) && selectedProduct.media.length > 0 ? (
                   <Grid container spacing={1}>

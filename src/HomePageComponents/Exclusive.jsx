@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Slider from "react-slick";
 import {
   Box,
@@ -9,6 +9,9 @@ import {
   styled,
   Button,
 } from "@mui/material";
+import axiosInstance from "../common components/AxiosInstance";
+import { useNavigate } from "react-router-dom";
+import { publicUrl } from "../common components/PublicUrl";
 
 // ===== Slider Component & styles (your existing code) =====
 
@@ -301,6 +304,25 @@ const RightText = styled(Typography)(({ theme }) => ({
 export default function Exclusive() {
   const theme = useTheme();
   const sliderSettings = getSliderSettings(theme);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const response = await axiosInstance.get(`/user/allproducts`);
+      setProducts(response?.data ?? []);
+    } catch (error) {
+      console.error("Error fetching occasion:", error);
+    } finally {
+      setLoading(false)
+    }
+  };
+
 
   return (
     <>
@@ -310,18 +332,18 @@ export default function Exclusive() {
         <SubTitle>Browse for Him or Her</SubTitle>
         <Box sx={{ maxWidth: 1080, margin: "0 auto", px: { xs: 1.5, sm: 3 } }}>
           <Slider {...sliderSettings}>
-            {categoryData.map((cat) => (
-              <Box key={cat.key} sx={{ px: 1.3 }}>
-                <CategoryCard>
+            {products.map((item) => (
+              <Box key={item._id} sx={{ px: 1.3 }}>
+                <CategoryCard onClick={() => navigate(`/allJewellery`)}> 
                   <CategoryImg
                     component="img"
-                    src={cat.image}
-                    alt={cat.label}
+                    src={publicUrl(item.media[0].url)}
+                    alt={item.label}
                     onError={(e) => {
                       e.target.src = "/placeholder-category.png";
                     }}
                   />
-                  <CategoryLabel>{cat.label}</CategoryLabel>
+                  <CategoryLabel>{item.name}</CategoryLabel>
                 </CategoryCard>
               </Box>
             ))}
