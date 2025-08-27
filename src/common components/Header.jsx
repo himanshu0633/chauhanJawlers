@@ -234,31 +234,6 @@ export default function Header() {
     }
   };
 
-  // // 1:
-  // useEffect(() => {
-  //   const delayDebounce = setTimeout(() => {
-  //     if (query.trim() !== '') {
-  //       axiosInstance
-  //         .get(`/user/search?query=${encodeURIComponent(query)}`)
-  //         .then(res => setResults(res.data.results))
-  //         .catch(err => {
-  //           console.error('Search API error:', err);
-  //           setResults([]);
-  //         });
-  //     } else {
-  //       setResults([]);
-  //     }
-  //   }, 300);
-
-  //   return () => clearTimeout(delayDebounce);
-  // }, [query]);
-
-  // const handleSuggestionClick = (productId) => {
-  //   navigate(`/allJewellery/${productId}`);
-  // };
-
-  // //2:
-
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (query.trim() !== '') {
@@ -321,39 +296,6 @@ export default function Header() {
 
         {isMdUp && (
           <>
-            {/* 1:: */}
-            {/* <Box sx={{ flex: 1, px: 2, display: "flex", justifyContent: "center", position: 'relative' }}>
-              <SearchContainer>
-                <SearchIconWrapper>
-                  <SearchIcon sx={{ fontSize: "20px" }} />
-                </SearchIconWrapper>
-                <StyledInputBase
-                  placeholder="Search for Gold Jewellery, Diamond Jewellery and more..."
-                  inputProps={{ "aria-label": "search" }}
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                />
-              </SearchContainer>
-            </Box>
-
-            <>
-              {query.trim() !== '' && results.length > 0 && (
-                <Box sx={{ position: 'absolute', top: '55px', left: '50%', transform: 'translateX(-50%)', zIndex: 999, height: '100%', overflowY: 'auto', minHeight: '260px', overflowY: 'scroll', backgroundColor: '#fff', width: '500px', padding: '10px', }}>
-                  {results.map((product) => (
-                    <Typography
-                      key={product._id}
-                      sx={{ cursor: 'pointer', color: '#000', fontSize: '15px', '&:hover': { color: '#ab6941', bgcolor: '#f5f5f5' }, textTransform: 'capitalize', p: '5px', fontWeight: 500 }}
-                      onClick={() => handleSuggestionClick(product._id)}
-                    >
-                      {product.name}
-                    </Typography>
-                  ))}
-                </Box>
-              )}
-            </> */}
-
-            {/* 2:: */}
-            <>
               <Box sx={{ flex: 1, px: 2, display: 'flex', justifyContent: 'center', position: 'relative' }} ref={searchBoxRef}>
                 <SearchContainer>
                   <SearchIconWrapper>
@@ -410,7 +352,6 @@ export default function Header() {
                 </Box>
               )}
             </>
-          </>
         )}
 
         <IconsRow>
@@ -484,7 +425,7 @@ export default function Header() {
                     setDropdownOpen(true);
                   }}
                 >
-                  {item.label}
+                  <Typography sx={{textTransform: 'capitalize'}}>{item.label}</Typography>
                 </NavButton>
               ))}
               {dropdownOpen && hoveredMenu && (
