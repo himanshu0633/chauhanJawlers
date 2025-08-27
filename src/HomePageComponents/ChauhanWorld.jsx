@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "../common components/AxiosInstance";
 import { publicUrl } from "../common components/PublicUrl";
 import { useEffect, useState } from "react";
+import CustomLoader from "../common components/CustomLoader";
 
 const SectionContainer = styled(Box)({
     backgroundColor: "#fff",
@@ -186,7 +187,7 @@ export default function ChauhanWorld() {
 
             <Container maxWidth="xl">
                 <FlexCardGrid>
-                    {loading ? "Loading..." : (
+                    {loading ? <CustomLoader/> : (
                         <>
                             {occasion.slice(0, 4).map(item => (
                                 <CategoryCard key={item._id}>

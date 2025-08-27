@@ -12,6 +12,7 @@ import {
 import axiosInstance from "../common components/AxiosInstance";
 import { useNavigate } from "react-router-dom";
 import { publicUrl } from "../common components/PublicUrl";
+import CustomLoader from "../common components/CustomLoader";
 
 // ===== Slider Component & styles (your existing code) =====
 
@@ -326,28 +327,31 @@ export default function Exclusive() {
 
   return (
     <>
-      {/* Slider Section */}
       <RootBox>
         <Title component="h2">Exclusively For You</Title>
         <SubTitle>Browse for Him or Her</SubTitle>
         <Box sx={{ maxWidth: 1080, margin: "0 auto", px: { xs: 1.5, sm: 3 } }}>
-          <Slider {...sliderSettings}>
-            {products.map((item) => (
-              <Box key={item._id} sx={{ px: 1.3 }}>
-                <CategoryCard onClick={() => navigate(`/allJewellery`)}> 
-                  <CategoryImg
-                    component="img"
-                    src={publicUrl(item.media[0].url)}
-                    alt={item.label}
-                    onError={(e) => {
-                      e.target.src = "/placeholder-category.png";
-                    }}
-                  />
-                  <CategoryLabel>{item.name}</CategoryLabel>
-                </CategoryCard>
-              </Box>
-            ))}
-          </Slider>
+          {loading ? <CustomLoader /> : (
+            <>
+              <Slider {...sliderSettings}>
+                {products.map((item) => (
+                  <Box key={item._id} sx={{ px: 1.3 }}>
+                    <CategoryCard onClick={() => navigate(`/allJewellery`)}>
+                      <CategoryImg
+                        component="img"
+                        src={publicUrl(item.media[0].url)}
+                        alt={item.label}
+                        onError={(e) => {
+                          e.target.src = "/placeholder-category.png";
+                        }}
+                      />
+                      <CategoryLabel>{item.name}</CategoryLabel>
+                    </CategoryCard>
+                  </Box>
+                ))}
+              </Slider>
+            </>
+          )}
         </Box>
       </RootBox>
 
