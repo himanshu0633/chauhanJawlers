@@ -289,6 +289,10 @@ export default function NewCollection() {
       const response = await axiosInstance.get('/user/allproducts');
       // setAllProducts(response.data);
       const processedProducts = preprocessProducts(response.data);
+
+      // Sort by createdAt descending (latest first)
+      processedProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
       setAllProducts(processedProducts);
     } catch (error) {
       setError('Could not load products. Please try again.');
