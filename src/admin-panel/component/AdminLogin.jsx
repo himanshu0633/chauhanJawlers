@@ -10,7 +10,7 @@ const AdminLogin = () => {
     const handleLogin = (e) => {
         e.preventDefault();
         localStorage.setItem("isAdminLoggedIn", "true");
-        navigate("/AdminPanel/dashboard");
+        navigate("/AdminPanel");
     };
 
     return (
