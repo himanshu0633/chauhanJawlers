@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography, Container, Card, CardMedia, CardContent, Button, Chip, styled } from "@mui/material";
-import { Star } from "@mui/icons-material";
 import axiosInstance from "../common components/AxiosInstance";
 import { useNavigate } from "react-router-dom";
 import { publicUrl } from "../common components/PublicUrl";
@@ -230,13 +229,6 @@ const ProductName = styled(Typography)({
   "@media (max-width:600px)": { fontSize: 13 },
 });
 
-const RatingContainer = styled(Box)({
-  display: "flex",
-  alignItems: "center",
-  gap: 4,
-  marginBottom: 8,
-});
-
 const PriceContainer = styled(Box)({
   display: "flex",
   alignItems: "center",
@@ -249,39 +241,6 @@ const CurrentPrice = styled(Typography)({
   color: "#2C2C2C",
 });
 
-const OriginalPrice = styled(Typography)({
-  fontSize: 13,
-  color: "#999",
-  textDecoration: "line-through",
-});
-
-const RatingStars = styled("span")({
-  display: "flex",
-  alignItems: "center",
-});
-
-const RatingText = styled(Typography)({
-  fontSize: 12,
-  color: "#666",
-  marginLeft: 4,
-});
-
-function StarRating({ rating }) {
-  return (
-    <RatingStars>
-      {[...Array(5)].map((_, idx) => (
-        <Star
-          key={idx}
-          sx={{
-            fontSize: 14,
-            color: idx < Math.floor(rating) ? "#FFD700" : "#E0E0E0",
-          }}
-        />
-      ))}
-      <RatingText>{rating.toFixed(1)}</RatingText>
-    </RatingStars>
-  );
-}
 
 // ---- Main Component ----
 export default function NewCollection() {

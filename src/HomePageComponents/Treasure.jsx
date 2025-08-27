@@ -1,4 +1,8 @@
 import { Box, Typography, Button, Grid, Container, styled } from "@mui/material"
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import axiosInstance from "../common components/AxiosInstance"
+import { publicUrl } from "../common components/PublicUrl"
 
 const SectionContainer = styled(Box)({
     position: "relative",
@@ -105,7 +109,7 @@ const CategoryCard = styled(Box)({
 })
 
 const CategoryImage = styled("img")({
-    width: "100%",
+    width: "200px",
     height: "200px",
     objectFit: "cover",
     objectPosition: "center",
@@ -154,6 +158,23 @@ const categories = [
 ]
 
 function Treasure() {
+    const [subcategoryName, setSubCategoryName] = useState([]);
+    const [loading, setLoading] = useState(true)
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        fetchSubCategories();
+    }, [])
+    const fetchSubCategories = async () => {
+        try {
+            const response = await axiosInstance.get(`/user/allSubcategories`);
+            setSubCategoryName(response?.data);
+            setLoading(false)
+        } catch (error) {
+            console.error("Error fetching subcategories:", error);
+        }
+    };
+
     return (
         <Box>
             <SectionContainer>
@@ -164,7 +185,7 @@ function Treasure() {
                             From Monday to Friday, discover a daily dose of elegance with our newest arrivals—each piece thoughtfully
                             designed to elevate your everyday style.
                         </Description>
-                        <CTAButton variant="contained">1000+ New Items</CTAButton>
+                        <CTAButton variant="contained" onClick={() => { navigate("/allJewellery") }}>1000+ New Items</CTAButton>
                     </TextContent>
                 </ContentOverlay>
             </SectionContainer>
@@ -172,19 +193,19 @@ function Treasure() {
             <CategorySection>
                 <Container maxWidth="xl">
                     <Box display="flex" gap={1} justifyContent={"center"}>
-                        {categories.map((category) => (
-                            <Grid  xs={4} key={category.id}>
-                                <CategoryCard>
+                        {subcategoryName.slice(1, 4).map((item) => (
+                            <Grid xs={4} key={item._id}>
+                                <CategoryCard onClick={() => { navigate(`/allJewellery/${item._id}`) }}>
                                     <CategoryImage
-                                        src={category.image}
-                                        alt={category.name}
+                                        src={publicUrl(item.image)}
+                                        alt={item.name}
                                         loading="lazy"
                                         onError={(e) => {
                                             e.target.src = "/placeholder.svg?height=200&width=300&text=Image+Not+Found"
                                         }}
                                     />
                                     <CategoryOverlay>
-                                        <CategoryName>{category.name}</CategoryName>
+                                        <CategoryName>{item.name}</CategoryName>
                                     </CategoryOverlay>
                                 </CategoryCard>
                             </Grid>
