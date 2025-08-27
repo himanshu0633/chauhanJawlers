@@ -357,7 +357,7 @@ function Trending() {
         try {
             const response = await axiosInstance.get(`/user/allSubcategories`);
             setSubCategoryName(response?.data);
-            const shuffled = shuffleArray(data);
+            const shuffled = shuffleArray(response?.data);
             const selectedRandom = shuffled.slice(0, 3); 
             setSubCategoryName(selectedRandom);
             setLoading(false)

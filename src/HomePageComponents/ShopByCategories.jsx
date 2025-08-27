@@ -354,14 +354,29 @@ const ShopByCategories = () => {
                                             display: "flex",
                                             flexDirection: "column",
                                         }}
+                                        // onClick={() => {
+                                        //     const route = assignedRouteToPath[item.assignedRoute];
+                                        //     if (route) {
+                                        //         navigate(route);
+                                        //     } else {
+                                        //         navigate(`/category/${item.apiId}`);
+                                        //     }
+                                        // }}
+
                                         onClick={() => {
-                                            const route = assignedRouteToPath[item.assignedRoute];
-                                            if (route) {
-                                                navigate(route);
-                                            } else {
-                                                navigate(`/category/${item.apiId}`);
-                                            }
+                                            const route = assignedRouteToPath[item.assignedRoute] || `/category/${item.apiId}`;
+                                            navigate(route + `?category=${item.name.toLowerCase()}`);
                                         }}
+
+                                    // onClick={() => {
+                                    //     const route = assignedRouteToPath[item.assignedRoute] || `/category/${item.apiId}`;
+                                    //     // create a safe slug (lowercase, trimmed, spaces -> hyphens)
+                                    //     const slug = String(item?.name || '')
+                                    //         .trim()
+                                    //         .toLowerCase()
+                                    //         .replace(/\s+/g, '-');
+                                    //     navigate(`${route}?category=${encodeURIComponent(slug)}`);
+                                    // }}
                                     >
                                         <CardMedia
                                             component="img"

@@ -456,7 +456,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import { useEffect, useState } from 'react';
 import SlickSlider from '../common components/SlickSlider';
 import axiosInstance from '../common components/AxiosInstance';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { publicUrl } from '../common components/PublicUrl';
 import { useDispatch, useSelector } from "react-redux";
 
@@ -640,7 +640,7 @@ function JewelleryCard({ product }) {
                     textTransform: 'capitalize',
                 }}
             >
-                {product.name} 
+                {product.name}
             </Typography>
 
             <Typography variant="subtitle1" sx={{ fontWeight: 500, fontSize: 17, color: '#222' }}>
@@ -666,6 +666,41 @@ export function JewelleryGrid() {
         priceRange: 'all',
     });
     const [sortOption, setSortOption] = useState('relevance');
+
+    function useQuery() {
+        return new URLSearchParams(useLocation().search);
+    }
+
+    // --- helpers: slugify and get category names from product ---
+    const slugify = (str) =>
+        String(str || '')
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, '-');
+
+    // return an array of category names for a product, normalized as slugs
+    const getProductCategorySlugs = (p) => {
+        // Common cases handled:
+        // 1) p.category is a string
+        // 2) p.category is an object with 'name'
+        // 3) p.categories is an array of strings/objects
+        const out = new Set();
+        if (p?.category) {
+            if (typeof p.category === 'string') out.add(slugify(p.category));
+            else if (typeof p.category === 'object' && p.category.name) out.add(slugify(p.category.name));
+        }
+        if (Array.isArray(p?.categories)) {
+            p.categories.forEach((c) => {
+                if (typeof c === 'string') out.add(slugify(c));
+                else if (c && typeof c === 'object' && c.name) out.add(slugify(c.name));
+            });
+        }
+        return Array.from(out);
+    };
+
+    const query = useQuery();
+    const selectedCategory = slugify(query.get('category') || '');
+
 
     const loadMoreProducts = () => {
         const newCount = shownCount + 10;
@@ -716,24 +751,60 @@ export function JewelleryGrid() {
         setLoading(true);
         try {
             const response = await axiosInstance.get('/user/allproducts');
-            // setAllProducts(response.data);
+            console.log(response.data, "ooo");  
             const processedProducts = preprocessProducts(response.data);
             setAllProducts(processedProducts);
         } catch (error) {
             setError('Could not load products. Please try again.');
+            console.error(error,"eee"); 
         } finally {
             setLoading(false);
         }
     };
 
+    // // 1:
+    // const filteredProducts = allProducts.filter(product => {
+    //     const isInPriceRange = filters.priceRange === 'all' ||
+    //         (product.price >= priceBuckets.find(b => b.label === filters.priceRange)?.min &&
+    //             product.price <= priceBuckets.find(b => b.label === filters.priceRange)?.max);
+
+    //     const isMatchingQuery = product.name.toLowerCase().includes(filters.query.toLowerCase());
+    //     return isInPriceRange && isMatchingQuery;
+    // });
+
+    // // 2:
     const filteredProducts = allProducts.filter(product => {
         const isInPriceRange = filters.priceRange === 'all' ||
             (product.price >= priceBuckets.find(b => b.label === filters.priceRange)?.min &&
                 product.price <= priceBuckets.find(b => b.label === filters.priceRange)?.max);
 
         const isMatchingQuery = product.name.toLowerCase().includes(filters.query.toLowerCase());
-        return isInPriceRange && isMatchingQuery;
+
+        // Assuming product.category holds product category name, normalize case for comparison
+        const matchesCategory = selectedCategory ? product.category?.toLowerCase() === selectedCategory : true;
+
+        return isInPriceRange && isMatchingQuery && matchesCategory;
     });
+
+    // // 3:
+    // const filteredProducts = allProducts.filter(product => {
+    //     const isInPriceRange =
+    //         filters.priceRange === 'all' ||
+    //         (product.price >= priceBuckets.find(b => b.label === filters.priceRange)?.min &&
+    //             product.price <= priceBuckets.find(b => b.label === filters.priceRange)?.max);
+
+    //     const isMatchingQuery =
+    //         product.name.toLowerCase().includes(filters.query.toLowerCase());
+
+    //     // if a category is selected, product must have that category slug
+    //     const categorySlugs = getProductCategorySlugs(product);
+    //     const matchesCategory = selectedCategory
+    //         ? categorySlugs.includes(selectedCategory)
+    //         : true;
+
+    //     return isInPriceRange && isMatchingQuery && matchesCategory;
+    // });
+
 
     const sortedProducts = filteredProducts.sort((a, b) => {
         switch (sortOption) {
@@ -743,7 +814,6 @@ export function JewelleryGrid() {
             default: return 0;
         }
     });
-
 
     useEffect(() => {
         fetchAllProducts();
