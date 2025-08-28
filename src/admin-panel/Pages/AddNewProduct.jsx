@@ -180,99 +180,6 @@
 //     return (bytes / 1048576).toFixed(2) + ' MB';
 //   };
 
-//   // field change + price calc
-//   // const handleChange = (e, index) => {
-//   //   const { name, value } = e.target;
-
-//   //   setFormData(prev => {
-//   //     const updated = { ...prev };
-//   //     const qtyList = Array.isArray(updated.quantity) ? [...updated.quantity] : [];
-//   //     // Initialize if index doesn't exist
-//   //     if (!qtyList[index]) {
-//   //       qtyList[index] = {
-//   //         weight: '',
-//   //         pricePerGram: '',
-//   //         discount: '',
-//   //         gst: '',
-//   //         makingPrice: '',
-//   //         totalWeight: '',
-//   //         finalPrice: ''
-//   //       };
-//   //     }
-//   //     qtyList[index][name] = value;
-//   //     updated.quantity = qtyList;
-
-
-//   //     // Calculating price per gram, total weight, and final price
-//   //     const weight = parseFloat(qtyList[index].weight);
-//   //     const pricePerGram = parseFloat(qtyList[index].pricePerGram);
-//   //     const discount = parseFloat(qtyList[index].discount);
-//   //     const gst = parseFloat(qtyList[index].gst);
-//   //     const makingPrice = parseFloat(qtyList[index].makingPrice);
-//   //     let totalPrice = 0;
-//   //     // Calculation logic
-//   //     if (!isNaN(pricePerGram) && !isNaN(weight)) {
-//   //       const totalPriceBeforeDiscountAndGST = pricePerGram * weight + makingPrice;
-//   //       const discountedPrice = totalPriceBeforeDiscountAndGST - (totalPriceBeforeDiscountAndGST * discount) / 100;
-//   //       totalPrice = discountedPrice + (discountedPrice * gst) / 100;
-//   //     }
-//   //     qtyList[index].totalWeight = weight;
-//   //     qtyList[index].finalPrice = isNaN(totalPrice) ? '' : totalPrice.toFixed(2);
-//   //     updated.quantity = qtyList;
-
-//   //     if (name === 'category') {
-//   //       updated.sub_category = '';
-//   //       fetchSubCategories(value);
-//   //     }
-
-//   //     return updated;
-//   //   });
-//   // };
-
-//   // const handleChange = (e, index) => {
-//   //   const { name, value } = e.target;
-//   //   setFormData(prev => {
-//   //     const updated = { ...prev };
-//   //     if (typeof index === 'number') {
-//   //       const qtyList = Array.isArray(updated.quantity) ? [...updated.quantity] : [];
-//   //       if (!qtyList[index]) {
-//   //         qtyList[index] = {
-//   //           weight: '',
-//   //           pricePerGram: '',
-//   //           discount: '',
-//   //           gst: '',
-//   //           makingPrice: '',
-//   //           totalWeight: '',
-//   //           finalPrice: ''
-//   //         };
-//   //       }
-//   //       qtyList[index][name] = value;
-//   //       // Calculations
-//   //       const weight = parseFloat(qtyList[index].weight);
-//   //       const pricePerGram = parseFloat(qtyList[index].pricePerGram);
-//   //       const discount = parseFloat(qtyList[index].discount);
-//   //       const gst = parseFloat(qtyList[index].gst);
-//   //       const makingPrice = parseFloat(qtyList[index].makingPrice);
-//   //       let totalPrice = 0;
-//   //       if (!isNaN(pricePerGram) && !isNaN(weight)) {
-//   //         const totalPriceBeforeDiscountAndGST = pricePerGram * weight + makingPrice;
-//   //         const discountedPrice = totalPriceBeforeDiscountAndGST - (totalPriceBeforeDiscountAndGST * discount) / 100;
-//   //         totalPrice = discountedPrice + (discountedPrice * gst) / 100;
-//   //       }
-//   //       qtyList[index].totalWeight = weight;
-//   //       qtyList[index].finalPrice = isNaN(totalPrice) ? '' : totalPrice.toFixed(2);
-//   //       updated.quantity = qtyList;
-//   //     } else {
-//   //       updated[name] = value;
-//   //       if (name === 'category') {
-//   //         updated.sub_category = '';
-//   //         fetchSubCategories(value);
-//   //       }
-//   //     }
-//   //     return updated;
-//   //   });
-//   // };
-
 //   const handleChange = (e, index) => {
 //     const { name, value } = e.target;
 
@@ -356,25 +263,6 @@
 //     });
 //   };
 
-//   // quantity controls
-//   const handleQuantityChange = (index, value) => {
-//     setFormData(prev => {
-//       const list = [...prev.quantity];
-//       list[index] = value;
-//       return { ...prev, quantity: list };
-//     });
-//   };
-
-//   // const addQuantityField = () => {
-//   //   setFormData(prev => ({
-//   //     ...prev,
-//   //     quantity: [
-//   //       ...prev.quantity,
-//   //       { weight: '', pricePerGram: '', discount: '', gst: '', makingPrice: '', totalWeight: '', finalPrice: '' }
-//   //     ]
-//   //   }));
-//   // };
-
 //   const addQuantityField = () => {
 //     setFormData(prev => ({
 //       ...prev,
@@ -415,71 +303,6 @@
 //     setErrors(newErrors);
 //     return Object.keys(newErrors).length === 0;
 //   };
-
-//   // submit
-//   // const handleSubmit = async (e) => {
-//   //   e.preventDefault();
-//   //   if (!validateForm()) return;
-
-//   //   try {
-//   //     const payload = new FormData();
-
-//   //     Object.entries(formData).forEach(([key, value]) => {
-//   //       if (key === 'media') return;
-//   //       if (value !== null && value !== undefined) {
-//   //         if (Array.isArray(value)) {
-//   //           // send quantities as repeated key or a JSON string (adjust to your API)
-//   //           payload.append(key, JSON.stringify(value));
-//   //         } else {
-//   //           payload.append(key, value);
-//   //         }
-//   //       }
-//   //     });
-
-//   //     // formData.media.forEach(item => {
-//   //     //   if (item?.file) {
-//   //     //     payload.append('media', item.file);
-//   //     //   } else if (item?.url) {
-//   //     //     payload.append('existingMedia', item.url);
-//   //     //   }
-//   //     // });
-
-//   //     if (isEditMode) {
-//   //       //   await axiosInstance.put(`/user/updateProduct/${id}`, payload, {
-//   //       //     headers: { 'Content-Type': 'multipart/form-data' },
-//   //       //   });
-//   //       //   toast.success('Product updated successfully!');
-//   //       // } else {
-//   //       //   await axiosInstance.post('/user/createProduct', payload, {
-//   //       //     headers: { 'Content-Type': 'multipart/form-data' },
-//   //       //   });
-//   //       //   toast.success('Product added successfully!');
-
-//   //       // IDs of existing media you did NOT delete in the UI
-//   //       const existingMediaIds = formData.media
-//   //         .filter(m => !m.file && (m._id || m.id))
-//   //         .map(m => m._id || m.id);
-
-//   //       // send IDs to keep (server replaces media with: keep + new uploads)
-//   //       payload.append('existingMediaIds', JSON.stringify(existingMediaIds));
-
-//   //       // send only the new files
-//   //       formData.media
-//   //         .filter(m => m.file)
-//   //         .forEach(m => payload.append('media', m.file));
-//   //     } else {
-//   //       // create mode — same as before
-//   //       formData.media.forEach(m => {
-//   //         if (m?.file) payload.append('media', m.file);
-//   //       });
-//   //     }
-//   //     navigate('/AdminPanel/products');
-
-//   //   } catch (error) {
-//   //     console.error('Submit Error:', error);
-//   //     toast.error('Something went wrong. Please try again.');
-//   //   }
-//   // };
 
 //   const handleSubmit = async (e) => {
 //     e.preventDefault();
@@ -622,7 +445,7 @@
 //             label="Product Name"
 //             name="name"
 //             value={formData.name}
-//             onChange={handleChange}
+//             onChange={handleFormFieldChange}
 //             fullWidth
 //             error={!!errors.name}
 //             helperText={errors.name}
@@ -753,7 +576,7 @@
 //           label="Description"
 //           name="description"
 //           value={formData.description}
-//           onChange={handleChange}
+//           onChange={handleFormFieldChange}
 //           fullWidth
 //           multiline
 //           minRows={3}
@@ -762,83 +585,6 @@
 //           sx={{ mt: 2 }}
 //         />
 //       </Box>
-
-
-//       {/* Pricing */}
-//       {/* <Box sx={{ mb: 3 }}>
-//         <Typography variant="h6" sx={{ mb: 2 }}>Pricing</Typography>
-
-//         <Box
-//           sx={{
-//             display: 'flex',
-//             flexWrap: 'wrap',
-//             gap: 2,
-//           }}
-//         >
-//           <TextField
-//             type="number"
-//             label="MRP"
-//             name="mrp"
-//             value={formData.mrp}
-//             onChange={handleChange}
-//             fullWidth
-//             inputProps={{ min: 0, step: 0.01 }}
-//             sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 8px)', md: '1 1 calc(33.333% - 12px)' }, minWidth: 0 }}
-//           />
-
-//           <TextField
-//             type="number"
-//             label="Discount (%)"
-//             name="discount"
-//             value={formData.discount}
-//             onChange={handleChange}
-//             fullWidth
-//             inputProps={{ min: 0, max: 100, step: 0.01 }}
-//             sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 8px)', md: '1 1 calc(33.333% - 12px)' }, minWidth: 0 }}
-//           />
-
-//           <TextField
-//             type="number"
-//             label="GST (%)"
-//             name="gst"
-//             value={formData.gst}
-//             onChange={handleChange}
-//             fullWidth
-//             inputProps={{ min: 0, step: 0.01 }}
-//             sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 8px)', md: '1 1 calc(33.333% - 12px)' }, minWidth: 0 }}
-//           />
-
-//           <TextField
-//             type="number"
-//             label="Final Consumer Price"
-//             name="consumer_price"
-//             value={formData.consumer_price}
-//             fullWidth
-//             InputProps={{ readOnly: true }}
-//             error={!!errors.consumer_price}
-//             helperText={errors.consumer_price}
-//             sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 8px)', md: '1 1 calc(50% - 10px)' }, minWidth: 0 }}
-//           />
-
-//           <FormControl
-//             fullWidth
-//             sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 8px)', md: '1 1 calc(50% - 10px)' }, minWidth: 0 }}
-//           >
-//             <InputLabel id="stock-label">Stock</InputLabel>
-//             <Select
-//               labelId="stock-label"
-//               label="Stock"
-//               name="stock"
-//               value={formData.stock}
-//               onChange={handleChange}
-//             >
-//               <MenuItem value="yes">Yes</MenuItem>
-//               <MenuItem value="no">No</MenuItem>
-//             </Select>
-//           </FormControl>
-//         </Box>
-//       </Box> */}
-
 
 //       {/* Category */}
 //       <Box sx={{ mb: 3 }}>
@@ -899,7 +645,7 @@
 //                 label="Category"
 //                 name="category"
 //                 value={formData.category}
-//                 onChange={handleChange}
+//                 onChange={handleFormFieldChange}
 //               >
 //                 <MenuItem value=""><em>Select Category</em></MenuItem>
 //                 {categoryList
@@ -926,7 +672,7 @@
 //                 label="Sub Category"
 //                 name="sub_category"
 //                 value={formData.sub_category}
-//                 onChange={handleChange}
+//                 onChange={handleFormFieldChange}
 //               >
 //                 <MenuItem value=""><em>Select subcategory</em></MenuItem>
 //                 {subCategoryList.map((sub, i) => (
@@ -946,7 +692,7 @@
 //                 label="Occasion"
 //                 name="occasion"
 //                 value={formData.occasion}
-//                 onChange={handleChange}
+//                 onChange={handleFormFieldChange}
 //               >
 //                 <MenuItem value=""><em>Select occasion</em></MenuItem>
 //                 {occasionList.map((occasion, i) => (
@@ -973,7 +719,7 @@
 //                   label="Weight (gm)"
 //                   name="weight"
 //                   value={qty.weight ?? ''}
-//                   onChange={(e) => handleChange(e, index)}
+//                   onChange={(e) => handleQuantityChange(e, index)}
 //                   fullWidth
 //                   type="number"
 //                   inputProps={{ min: 0 }}
@@ -986,7 +732,7 @@
 //                   label="Price per gram (₹)"
 //                   name="pricePerGram"
 //                   value={qty.pricePerGram ?? ''}
-//                   onChange={(e) => handleChange(e, index)}
+//                   onChange={(e) => handleQuantityChange(e, index)}
 //                   fullWidth
 //                   type="number"
 //                   inputProps={{ min: 0 }}
@@ -999,7 +745,7 @@
 //                   label="Discount (%)"
 //                   name="discount"
 //                   value={qty.discount ?? ''}
-//                   onChange={(e) => handleChange(e, index)}
+//                   onChange={(e) => handleQuantityChange(e, index)}
 //                   fullWidth
 //                   type="number"
 //                   inputProps={{ min: 0, max: 100 }}
@@ -1012,7 +758,7 @@
 //                   label="GST (%)"
 //                   name="gst"
 //                   value={qty.gst ?? ''}
-//                   onChange={(e) => handleChange(e, index)}
+//                   onChange={(e) => handleQuantityChange(e, index)}
 //                   fullWidth
 //                   type="number"
 //                   inputProps={{ min: 0 }}
@@ -1025,7 +771,7 @@
 //                   label="Making Price (₹)"
 //                   name="makingPrice"
 //                   value={qty.makingPrice ?? ''}
-//                   onChange={(e) => handleChange(e, index)}
+//                   onChange={(e) => handleQuantityChange(e, index)}
 //                   fullWidth
 //                   type="number"
 //                   inputProps={{ min: 0 }}
@@ -1059,7 +805,7 @@
 //                   label="Stock"
 //                   name="stock"
 //                   value={formData.stock}
-//                   onChange={handleChange}
+//                   onChange={handleFormFieldChange}
 //                   sx={{ width: '100%' }}
 //                 >
 //                   <MenuItem value="yes">Yes</MenuItem>
@@ -1091,8 +837,6 @@
 // };
 
 // export default AddNewProduct;
-
-
 
 
 // // 2:
@@ -1157,6 +901,7 @@ const AddNewProduct = () => {
     occasion: '',
     productvariety: '',
     sub_category: '',
+    genderVariety: '',
     created_at: new Date().toISOString(),
     deleted_at: null,
   });
@@ -1380,7 +1125,8 @@ const AddNewProduct = () => {
   // validation (trimmed to current fields)
   const validateForm = () => {
     const newErrors = {};
-    const required = ['name', 'description', 'category', 'productvariety', 'stock'];
+    const required = ['name', 'description', 'category', 'productvariety', 'stock', 'genderVariety', 'occasion'];
+    // because of subcategory product is not being submitted
 
     required.forEach(field => {
       const v = formData[field];
@@ -1388,10 +1134,6 @@ const AddNewProduct = () => {
         newErrors[field] = 'Required';
       }
     });
-
-    const hasAtLeastOneQty = Array.isArray(formData.quantity) &&
-      formData.quantity.some(q => !!(q && q.weight && q.weight !== ''));
-
 
     // consumer_price is derived; ensure it exists if MRP was provided
     if ((formData.mrp?.toString().length || 0) > 0 && (formData.consumer_price || '').trim() === '') {
@@ -1408,6 +1150,8 @@ const AddNewProduct = () => {
 
     try {
       const fd = new FormData();
+      console.log(fd, "pp")
+      console.log("object")
 
       // non-media fields
       Object.entries(formData).forEach(([key, val]) => {
@@ -1444,6 +1188,7 @@ const AddNewProduct = () => {
           .forEach((m, i) => fd.append('media', m.file, m.name || `media-${i}`));
 
         await axiosInstance.post('/user/createProduct', fd);
+
         toast.success('Product added successfully!');
       }
 
@@ -1510,6 +1255,7 @@ const AddNewProduct = () => {
       quantity: [],
       category: '',
       productvariety: '',
+      genderVariety: '',
       sub_category: '',
       occasion: '',
       created_at: new Date().toISOString(),
@@ -1799,6 +1545,40 @@ const AddNewProduct = () => {
               </Select>
             </FormControl>
 
+            {/* gender */}
+            <FormControl
+              fullWidth
+              error={!!errors.genderVariety}
+              sx={{ flex: '1 1 300px', minWidth: 0 }}
+            >
+              <InputLabel id="variety-label">Gender</InputLabel>
+              <Select
+                labelId="variety-label"
+                label="Gender"
+                name="genderVariety"
+                value={formData.genderVariety}
+                onChange={(e) => {
+                  const selectedVariety = e.target.value;
+                  setFormData(prev => ({
+                    ...prev,
+                    genderVariety: selectedVariety,
+                    // genderVariety: product.gender || '',
+                  }));
+                }}
+              >
+                <MenuItem value=""><em>Select Variety</em></MenuItem>
+                {/* your real options here */}
+                <MenuItem value="women">Women</MenuItem>
+                <MenuItem value="men">Men</MenuItem>
+                <MenuItem value="unisex">Unisex</MenuItem>
+              </Select>
+              {errors.genderVariety && (
+                <Typography variant="caption" color="error" sx={{ mt: .5 }}>
+                  {errors.genderVariety}
+                </Typography>
+              )}
+            </FormControl>
+
           </Box>
         </div>
       </Box>
@@ -1935,4 +1715,6 @@ const AddNewProduct = () => {
 };
 
 export default AddNewProduct;
+
+
 
