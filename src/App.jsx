@@ -27,6 +27,7 @@ import Banners from './admin-panel/Pages/Banners';
 import UsersJewel from './admin-panel/Pages/UsersJewel';
 import Occasion from './admin-panel/Pages/Occasion';
 import DimandShowCase from './pages/DaimondPageNav/DimandShowCase';
+import VisitOurStore from './ContactJewellers/VisitOurStore';
 
 function App() {
   const location = useLocation();
@@ -56,6 +57,7 @@ function App() {
         <Route path="/singleProduct/:id" element={<SingleProductPage />} />
         <Route path="/collection" element={<CollectionPage />} />
         <Route path="/diamond" element={<DimandShowCase />} />
+        <Route path="/visit" element={<VisitOurStore />} />
 
         {/* admin panel  */}
         <Route>

@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, Typography, Card, CardMedia, Button, styled } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 // ---- Styled Components ----
 // const ExperienceRoot = styled(Box)(({ theme }) => ({
@@ -120,6 +121,7 @@ const ExperienceCards = [
     key: "visit-store",
     image: "/experImg1.png",
     title: "VISIT OUR STORE",
+    navigate: "/visit"
   },
   {
     key: "jewellery-guide",
@@ -152,6 +154,9 @@ const ExperienceCards = [
 ];
 
 export default function ChauhanExperience() {
+  const navigate = useNavigate();
+
+
   return (
     <Box sx={{ mb: 2, py: 5 }}>
       < Title > Chauhan Son’s Experience</Title >
@@ -178,6 +183,8 @@ export default function ChauhanExperience() {
                 key={card.key}
                 image={card.image}
                 alt={card.title}
+                // navigate={card.navigate}
+                onClick={() => navigate(card.navigate)}
                 onError={(e) => {
                   e.target.src = "/placeholder-exp.jpg";
                 }}
