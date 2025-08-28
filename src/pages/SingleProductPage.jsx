@@ -39,16 +39,16 @@ const parseVariants = (raw) => {
         if (typeof raw === 'string') arr = JSON.parse(raw);
         if (!Array.isArray(arr)) return [];
 
-        // parse inner strings if any
+        // if inner entries are strings, parse them
         arr = arr.map((x) => (typeof x === 'string' ? JSON.parse(x) : x));
 
+        const num = (x) => (x === '' || x == null ? null : Number(x));
+
         return arr.map((v, i) => {
-            // FLATTEN: move fields from v["0"] to the top
+            // flatten weird shape: move v["0"] fields to top
             const core = (v && typeof v === 'object' && v['0'] && typeof v['0'] === 'object')
                 ? { ...v, ...v['0'] }
                 : v;
-
-            const num = (x) => (x === '' || x == null ? null : Number(x));
 
             return {
                 ...core,
@@ -132,7 +132,10 @@ export default function SingleProductPage() {
     const discount = selectedVariant?.["0"]?.discount;
     // console.log('Final Price:', finalPrice);
 
-    const unitPrice = finalPrice ?? 0;
+    // const unitPrice = finalPrice ?? 0;
+    const unitPrice = Number(
+        selectedVariant?.final_price ?? selectedVariant?.finalPrice ?? 0
+    );
 
     // // 1:
     // const handleAddToCart = () => {
@@ -175,18 +178,16 @@ export default function SingleProductPage() {
         const unit = Number(variant.final_price ?? variant.finalPrice ?? 0);
 
         const cartItem = {
-            ...product,                 // keeps quantity = [variants]
+            ...product,                   // keeps quantity = [flat variants]
             selectedVariant: { ...variant },
-            cartQty: units,
-            unitPrice: unit,
-            totalPrice: unit * units,
+            cartQty: units,               // cart line count
+            unitPrice: unit,              // per-unit price
+            totalPrice: unit * units,     // line total
         };
 
         toast.success('Item added to cart!', { position: 'top-right', autoClose: 2000 });
         dispatch(addData(cartItem));
     };
-
-
 
     // Handle increase/decrease in units, while ensuring the total price is updated correctly
     const increaseUnits = () => {

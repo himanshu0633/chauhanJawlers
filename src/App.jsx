@@ -41,7 +41,7 @@ function App() {
       {!isAdminRoute && (
         <>
           <Header />
-          <Box sx={{ paddingTop: { xs: 13, md: '124px', lg: 14.5 } }} />
+          <Box sx={{ paddingTop: { xs: 13, md: '134px', lg: 14.5 } }} />
           {/* <Box sx={{ paddingTop: { xs: 13, md: '90px', lg: 14.5 } }} /> */}
         </>
       )}

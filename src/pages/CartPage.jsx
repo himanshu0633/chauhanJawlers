@@ -1691,7 +1691,6 @@ import axiosInstance from '../common components/AxiosInstance';
 import { deleteProduct, updateData, clearProducts } from '../store/Action';
 import { publicUrl } from '../common components/PublicUrl';
 
-
 // ---------- helpers ----------
 const formatINR = (n) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(Number(n || 0));
@@ -1767,7 +1766,6 @@ function EmptyCart({ onContinueShopping }) {
 function CartCard({ product, onRemove, onUpdateQuantity }) {
   const quantity = product.cartQty ?? (typeof product.quantity === 'number' ? product.quantity : 1);
 
-
   const parsedQuantities = useMemo(() => {
     const src = product?.quantity;
     if (!src) return [];
@@ -1797,10 +1795,6 @@ function CartCard({ product, onRemove, onUpdateQuantity }) {
 
     return [];
   }, [product?.quantity]);
-
-
-
-
 
   return (
     <Box sx={{
@@ -1845,32 +1839,18 @@ function CartCard({ product, onRemove, onUpdateQuantity }) {
             {product.name}
           </Typography>
 
-          {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.3, sm: 0.5, md: 0.5 }, mb: { xs: 0.3, sm: 0.5, md: 0.5 } }}>
-            <Typography sx={{ fontWeight: 500, color: '#272727', fontSize: { xs: 11, sm: 12, md: 13, lg: 14 } }}>
-              {formatINR(getItemPriceNumber(product))}
-            </Typography>
-            {product.retail_price && (
-              <Typography sx={{ color: '#bdbdbd', fontSize: { xs: 9, sm: 10, md: 11, lg: 12 }, textDecoration: 'line-through' }}>
-                {formatINR(product.retail_price)}
-              </Typography>
-            )}
-          </Box> */}
-
           {parsedQuantities.map((q, idx) => {
             const fp = Number(q.final_price ?? q.finalPrice ?? q?.['0']?.finalPrice ?? 0);
-            // const disc = (q.discount ?? q?.['0']?.discount);
+            // const disc = q.discount ?? q?.['0']?.discount ?? '-';
             return (
               <Box key={idx} sx={{ mt: 0.5 }}>
                 <Typography variant="caption" color="textSecondary">
-                  Final Price: {formatINR(fp)} 
-                  {/* | Discount: {disc != null ? `${disc}%` : '-'} */}
+                  Final Price: {formatINR(fp)}
+                  {/* | Discount: {disc !== '-' ? `${disc}%` : '-'} */}
                 </Typography>
               </Box>
             );
           })}
-
-
-
 
           {product.weight && (
             <Typography sx={{ color: '#666', fontSize: { xs: 9, sm: 10, md: 11, lg: 12 }, mb: { xs: 0.3, sm: 0.5, md: 0.5 } }}>
@@ -1939,11 +1919,19 @@ export default function CartPage() {
 
   // ----- totals -----
   const subtotal = useMemo(
-    () => cartItems.reduce((sum, item) =>
-      (item.unitPrice ?? 0) * (item.cartQty ?? (typeof item.quantity === 'number' ? item.quantity : 1))
-      , 0),
+    () => cartItems.reduce((sum, item) => {
+      const qty = item.cartQty ?? (typeof item.quantity === 'number' ? item.quantity : 1);
+      const price = Number(
+        item.unitPrice ??
+        item.selectedVariant?.final_price ??
+        item.selectedVariant?.finalPrice ??
+        0
+      );
+      return sum + price * qty;
+    }, 0),
     [cartItems]
   );
+
   const discountRate = 0; // change if you add coupons
   const discount = subtotal * discountRate;
   const total = subtotal - discount;
@@ -2070,12 +2058,28 @@ export default function CartPage() {
           const orderPayload = {
             userId: userData?._id,
             // checkout payload price/qty (inside handleCheckout)
-            items: cartItems.map(item => ({
-              productId: item._id,
-              name: item.name,
-              quantity: item.cartQty ?? (typeof item.quantity === 'number' ? item.quantity : 1),
-              price: item.unitPrice ?? 0,
-            })),
+            // items: cartItems.map(item => ({
+            //   productId: item._id,
+            //   name: item.name,
+            //   quantity: item.cartQty ?? (typeof item.quantity === 'number' ? item.quantity : 1),
+            //   price: item.unitPrice ?? 0,
+            // })),
+            items: cartItems.map((item) => {
+              const qty = item.cartQty ?? (typeof item.quantity === 'number' ? item.quantity : 1);
+              const price = Number(
+                item.unitPrice ??
+                item.selectedVariant?.final_price ??
+                item.selectedVariant?.finalPrice ??
+                0
+              );
+              return {
+                productId: item._id,
+                name: item.name,
+                quantity: qty,
+                price,
+              };
+            }),
+
             address: formData.selectedAddress,
             phone: formData.phone || '9999999999',
             totalAmount: total,
@@ -2196,6 +2200,7 @@ export default function CartPage() {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.2 }}>
                   <Typography sx={{ color: '#555' }}>Subtotal ({cartItems.length} {cartItems.length === 1 ? 'item' : 'items'})</Typography>
                   <Typography sx={{ fontWeight: 600 }}>{formatINR(subtotal)}</Typography>
+                  
                 </Box>
                 {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.2 }}>
                   <Typography sx={{ color: '#28a745' }}>Discount</Typography>
