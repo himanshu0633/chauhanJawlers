@@ -663,7 +663,7 @@ export function JewelleryGrid() {
     const [occasion, setOccasion] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [shownCount, setShownCount] = useState(10);
+    const [shownCount, setShownCount] = useState(12);
     const [filters, setFilters] = useState({
         query: '',
         priceRange: 'all',
@@ -715,7 +715,7 @@ export function JewelleryGrid() {
         : null;
 
     const loadMoreProducts = () => {
-        const newCount = shownCount + 10;
+        const newCount = shownCount + 12;
         setShownCount(newCount); // Increment the shown count
     };
 
@@ -1022,7 +1022,7 @@ export default function AllJewelleryPage() {
             <Container maxWidth="xl">
                 <JewelleryGrid />
                 <JewelAssurance />
-                <SlickSlider />
+                {/* <SlickSlider /> */}
             </Container>
         </Box>
     );
