@@ -169,13 +169,13 @@ export default function ChauhanExperience() {
       <GridWrap>
         {ExperienceCards.map(card => (
           card.key === "digigold" ? (
-            <DigiGoldCard onClick={() => navigate(card.navigate)} key="digigold" elevation={0}>
+            <DigiGoldCard onClick={() => navigate(card.navigate)} key="digigold" elevation={0} sx={{ cursor: "pointer" }}>
               <img className="digiGoldLogoSize" src="/logo.svg" alt="Digi Gold Logo" />
               <DigiHeading>DIGITAL GOLD</DigiHeading>
               <DigiPowered>POWERED BY SAFE GOLD</DigiPowered>
             </DigiGoldCard>
           ) : card.key === "silver" ? (
-            <DigiGoldCard onClick={() => navigate(card.navigate)} key="silver" elevation={0}>
+            <DigiGoldCard onClick={() => navigate(card.navigate)} key="silver" elevation={0} sx={{ cursor: "pointer" }}>
               <img src="/logo.svg" alt="Digi silver Logo" />
               <DigiHeading>DIGITAL Silver</DigiHeading>
               <DigiPowered>POWERED BY SAFE Silver</DigiPowered>
@@ -188,11 +188,11 @@ export default function ChauhanExperience() {
                 key={card.key}
                 image={card.image}
                 alt={card.title}
-                // navigate={card.navigate}
                 onClick={() => navigate(card.navigate)}
                 onError={(e) => {
                   e.target.src = "/placeholder-exp.jpg";
                 }}
+                sx={{ cursor: "pointer" }}
               />
               {/* </ExpCard> */}
               <ExpTitle>{card.title}</ExpTitle>
