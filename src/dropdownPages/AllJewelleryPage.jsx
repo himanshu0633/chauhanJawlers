@@ -559,12 +559,13 @@ function JewelleryCard({ product }) {
     const imgUrl = publicUrl(product.media?.[0]?.url) || "no img found";
     const best = product.bestVariant || {};
 
-    try {
-        const quantityData = JSON.parse(product.quantity?.[0] || '[]');
-        finalPrice = quantityData.length > 0 ? quantityData[0]?.finalPrice : "Not Available";
-    } catch (e) {
-        console.error("Error parsing quantity data:", e);
-    }
+    // try {
+    //     const quantityData = JSON.parse(product.quantity?.[0] || '[]');
+    //     // finalPrice = quantityData.length > 0 ? quantityData[0]?.finalPrice : "Not Available";
+    //     // finalPrice = quantityData.length > 0 ? quantityData[0]?.price : "Not Available";
+    // } catch (e) {
+    //     console.error("Error parsing quantity data:", e);
+    // }
 
     return (
         <Box sx={{ pb: 1 }}>

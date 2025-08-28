@@ -325,7 +325,7 @@ export default function NewCollection() {
 
         {/* Right flex product cards */}
         <RightFlexBox>
-          {allProducts.map((product) => (
+          {allProducts.slice(0, 6).map((product) => (
             <ProductCard key={product.id} onClick={() => navigate(`/singleProduct/${product._id}`)}>
               <ProductImageContainer>
                 <ProductImage
