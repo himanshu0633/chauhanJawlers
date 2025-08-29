@@ -1,16 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, IconButton, Button } from '@mui/material';
 import { ArrowBackIos, ArrowForwardIos, ArrowForward } from '@mui/icons-material';
 import axiosInstance from '../../common components/AxiosInstance';
 import { publicUrl } from '../../common components/PublicUrl';
 
 const WeddingOccasionSlider = () => {
-  const [activeIndex, setActiveIndex] = useState(6); // Start with Reception (index 6)
+  const [activeIndex, setActiveIndex] = useState(6); 
   const [occasion, setOccasion] = useState([]);
 
   useEffect(() => {
     fetchOccasions();
-  })
+  },[])
   const fetchOccasions = async () => {
     try {
       const response = await axiosInstance.get(`/user/allOccasions`);

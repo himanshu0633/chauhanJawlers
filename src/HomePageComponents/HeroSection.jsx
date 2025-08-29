@@ -142,7 +142,6 @@ function HeroSection() {
                             // onClick={() => navigate(`/allJewellery/${(item.variety || 'all').toLowerCase()}`)}
                             onClick={() => navigate(`/collection/${(item.variety || 'all').toLowerCase()}`)}
                             // onClick={() => navigate(`/collection?variety=${(item.variety || 'all').toLowerCase()}`)}
-
                         >
                             <SlideImage src={publicUrl(item.slider_image[0])} alt={`slide-${index}`} />
                         </Slide>

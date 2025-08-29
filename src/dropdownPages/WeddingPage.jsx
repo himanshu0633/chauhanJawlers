@@ -260,9 +260,7 @@ import {
   Container,
   Typography,
   Box,
-  Button,
   useScrollTrigger,
-  styled,
 } from "@mui/material";
 import { keyframes } from "@emotion/react";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -273,18 +271,6 @@ import FindMyCommunity from "../common components/FindMyCommunity";
 import { publicUrl } from "../common components/PublicUrl";
 import axiosInstance from "../common components/AxiosInstance";
 import { useLocation } from "react-router-dom";
-
-// Animation presets
-const shimmer = keyframes`
-  0% { background-position: -468px 0 }
-  100% { background-position: 468px 0 }
-`;
-const float = keyframes`
-  0% { transform: translateY(0px) }
-  50% { transform: translateY(-10px) }
-  100% { transform: translateY(0px) }
-`;
-
 
 const titleStyle = {
   textAlign: "center",
@@ -317,6 +303,7 @@ function useQuery() {
 const WeddingPage = () => {
   const trigger = useScrollTrigger({ threshold: 100, disableHysteresis: true });
   const [occasion, setOccasion] = useState([]);
+  const [banners, setBanners] = useState([]);
   const [products, setProducts] = useState([]);
   const [filteredOccasionName, setFilteredOccasionName] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -326,6 +313,7 @@ const WeddingPage = () => {
   useEffect(() => {
     fetchOccasions();
     fetchAllProducts();
+    fetchBanners();
   }, []);
 
   // Filter products by occasionQuery after products loaded
@@ -350,7 +338,6 @@ const WeddingPage = () => {
     }
   }, [occasionQuery, products, occasion]);
 
-
   const fetchOccasions = async () => {
     try {
       const response = await axiosInstance.get(`/user/allOccasions`);
@@ -368,6 +355,23 @@ const WeddingPage = () => {
     }
   };
 
+  const fetchBanners = async () => {
+    try {
+      const response = await axiosInstance.get("/user/allBanners");
+      const bannerData = response.data;
+      const mainBanners = bannerData.filter(
+        (banner) =>
+          banner.type === "EndSlider" &&
+          Array.isArray(banner.slider_image) &&
+          banner.slider_image.length > 0
+      );
+      setBanners(mainBanners);
+
+    } catch (error) {
+      console.error("Error fetching banners:", error);
+    }
+  };
+
   const trendingItems = [
     "Accessories",
     "Long Necklace",
@@ -375,6 +379,7 @@ const WeddingPage = () => {
     "Necklace Sets",
     "Diamond Jewellery",
   ];
+
   const trendingImages = {
     Accessories:
       "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
@@ -394,8 +399,8 @@ const WeddingPage = () => {
 
       {/* Handpicked for the Bride */}
       <Container maxWidth="lg" sx={{ mt: 10 }}>
-          <Typography variant="h4" component="h2" sx={titleStyle}>
-            Handpicked for the {filteredOccasionName || "Bride"}
+        <Typography variant="h4" component="h2" sx={titleStyle}>
+          Handpicked for the {filteredOccasionName || "Bride"}
         </Typography>
 
         <Box sx={{
@@ -453,31 +458,6 @@ const WeddingPage = () => {
         </Container>
       </Box>
 
-      {/* Services Section */}
-      <Box sx={{ py: 8, backgroundColor: "#faf5f0" }}>
-        <Container maxWidth="lg">
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 4, justifyContent: "center" }}>
-            {["Golden Harvest", "Book An Appointment", "Talk to Jewellery Expert", "Locate Store"].map((service, i) => (
-              <Box key={i} sx={{ width: 250, height: 250, position: "relative" }}>
-                <Typography sx={{ position: "absolute", left: 21, top: 20 }}>{service}</Typography>
-                <img
-                  src={`https://staticimg.tanishq.co.in/microsite/rivaah-homepage/assets/images/exchangeCard/${i + 1}.png`}
-                  alt={service}
-                  style={{
-                    position: "absolute",
-                    maxWidth: "120px",
-                    top: "25%",
-                  }}
-                />
-                <Button sx={{ position: "absolute", left: 20, bottom: 20, background: "#832729", color: "#fff" }}>
-                  {i === 0 ? "Read More" : i === 1 ? "Schedule Now" : i === 2 ? "Connect Now" : "Visit Store"}
-                </Button>
-              </Box>
-            ))}
-          </Box>
-        </Container>
-      </Box>
-
       {/* Featured Articles */}
       <Box sx={{ py: 8, backgroundColor: "#fff" }}>
         <Container maxWidth="lg">
@@ -489,17 +469,22 @@ const WeddingPage = () => {
             autoplay={{ delay: 4000, disableOnInteraction: false }}
             loop={true}
           >
-            {[1, 2, 3, 4].map((i) => (
-              <SwiperSlide key={i}>
-                <Box>
-                  <img
-                    src={`https://staticimg.tanishq.co.in/microsite/rivaah-homepage/assets/images/blogs/${i}.jpg`}
-                    alt={`Article ${i}`}
-                    style={{ width: "100%", height: "220px", objectFit: "cover" }}
-                  />
-                </Box>
-              </SwiperSlide>
-            ))}
+            {banners.length> 0 && (
+              <>
+                {banners.map((item) => (
+                  <SwiperSlide key={item._id}>
+                    <Box>
+                      <img
+                        src={publicUrl(item.slider_image)}
+                        alt={item.type}
+                        style={{ width: "100%", height: "220px", objectFit: "cover" }}
+                      />
+                    </Box>
+                  </SwiperSlide>
+                ))}
+              </>
+            )}
+
           </Swiper>
         </Container>
       </Box>
