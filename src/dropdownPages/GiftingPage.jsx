@@ -112,19 +112,21 @@ const GiftingPage = () => {
                 <CardMedia
                     component="img"
                     image={latestBanner && latestBanner.slider_image && latestBanner.slider_image.length > 0 && publicUrl(latestBanner.slider_image[0])}
-                    alt={latestBanner.type}
+                    alt="Latest festival banner"
                     sx={{
                         width: '100%',
                         height: '100%',
                         objectFit: 'cover',
-                        objectPosition: 'center'
+                        objectPosition: 'center',
+                        cursor: 'pointer'
                     }}
+                    onClick={() => navigate(`/allJewellery`)}
                 />
             </Box>
 
 
             {/* Gift By Range Section */}
-            <Box sx={{ mb: 6, textAlign: 'center' }}>
+            {/* <Box sx={{ mb: 6, textAlign: 'center' }}>
                 <Typography sx={{ ...responsiveTitle, mb: 1 }}>
                     Gift By Range
                 </Typography>
@@ -156,7 +158,7 @@ const GiftingPage = () => {
                         </Box>
                     ))}
                 </Box>
-            </Box>
+            </Box> */}
 
             {/* Shop by Occasion Section */}
             <Box sx={{ mb: 6 }}>
