@@ -15,14 +15,14 @@ const HomePage = () => {
 
     return (
         <div>
-            {/* <VideoCardSlider /> */}
+      
             <HeroSection />
             <ShopByCategories />
             <Collection />
             <Treasure />
             <Trending />
             {/* <MasterDaimondSlider /> */}
-            <VideoCardSlider />
+            {/* <VideoCardSlider /> */}
             <NewCollection />
             <ChauhanWorld />
             <ExchangeOffer />

@@ -187,7 +187,7 @@ export default function ChauhanWorld() {
 
             <Container maxWidth="xl">
                 <FlexCardGrid>
-                    {loading ? <CustomLoader/> : (
+                    {loading ? <CustomLoader /> : (
                         <>
                             {occasion.slice(0, 4).map(item => (
                                 <CategoryCard key={item._id}>
@@ -198,8 +198,10 @@ export default function ChauhanWorld() {
                                         onError={e => {
                                             e.target.src = "/placeholder.svg?height=280&width=400&text=Image+Not+Found";
                                         }}
-                                        // onClick={() => navigate(`/allJewellery/${item._id}`)}
-                                         onClick={() => { navigate(`/allJewellery?occasion=${item._id}`) }}
+                                        //  onClick={() => { navigate(`/allJewellery?occasion=${item._id}`) }}
+                                        // onClick={() => { navigate(`/wedding?occasion=${item._id}`) }}
+                                        onClick={() => navigate(`/wedding?occasion=${item.name.toLowerCase()}`)}
+
                                     />
                                     <CategoryOverlay>
                                         <CategoryName>{item.name}</CategoryName>

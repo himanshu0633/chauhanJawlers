@@ -39,7 +39,7 @@ const TrendingKeywordsMarquee = ({ trigger, trendingItems, trendingImages }) => 
                     fontFamily: '"Playfair Display", serif',
                     position: "relative"
                 }}>
-                    What other brides are looking for
+                    What others are looking for
                 </Typography>
             </Fade>
 
