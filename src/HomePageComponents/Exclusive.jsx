@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Slider from "react-slick";
 import {
   Box,
@@ -300,14 +300,15 @@ const RightText = styled(Typography)(({ theme }) => ({
   },
 }));
 
-// ===== Combined Component =====
 
 export default function Exclusive() {
   const theme = useTheme();
   const sliderSettings = getSliderSettings(theme);
   const [products, setProducts] = useState([]);
+  const [genderFilter, setGenderFilter] = useState('all');
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+  const allowedGenders = ['women', 'men', 'unisex'];
 
   useEffect(() => {
     fetchData();
@@ -324,6 +325,17 @@ export default function Exclusive() {
     }
   };
 
+  const filteredProducts = React.useMemo(() => {
+    if (genderFilter === 'all') {
+      return products.filter(p =>
+        ['women', 'men', 'unisex'].includes(p.genderVariety?.toLowerCase())
+      );
+    }
+    // else filter by single gender
+    return products.filter(
+      p => p.genderVariety?.toLowerCase() === genderFilter.toLowerCase()
+    );
+  }, [products, genderFilter]);
 
   return (
     <>
@@ -334,7 +346,7 @@ export default function Exclusive() {
           {loading ? <CustomLoader /> : (
             <>
               <Slider {...sliderSettings}>
-                {products.map((item) => (
+                {filteredProducts.map((item) => (
                   <Box key={item._id} sx={{ px: 1.3 }}>
                     <CategoryCard onClick={() => navigate(`/allJewellery`)}>
                       <CategoryImg
@@ -345,7 +357,7 @@ export default function Exclusive() {
                           e.target.src = "/placeholder-category.png";
                         }}
                       />
-                      <CategoryLabel>{item.name}</CategoryLabel>
+                      <CategoryLabel>{item.genderVariety}</CategoryLabel>
                     </CategoryCard>
                   </Box>
                 ))}

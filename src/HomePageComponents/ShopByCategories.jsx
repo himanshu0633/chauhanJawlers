@@ -9,7 +9,6 @@ import { useNavigate } from "react-router-dom";
 const ShopByCategories = () => {
     const [categoryName, setCategoryName] = useState([]);
     const [loading, setLoading] = useState(true)
-    const theme = useTheme();
     const navigate = useNavigate()
 
     useEffect(() => {
