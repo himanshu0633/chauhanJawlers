@@ -1,59 +1,36 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Box, IconButton, Button } from '@mui/material';
 import { ArrowBackIos, ArrowForwardIos, ArrowForward } from '@mui/icons-material';
-
-const weddingOccasions = [
-  {
-    name: 'Reception',
-    image: 'https://staticimg.tanishq.co.in/microsite/rivaah-homepage/assets/images/bigImageSlider/8.png',
-    link: 'https://www.tanishq.co.in/shop/rivaah-x-tarun-tahiliani?lang=en_IN'
-  },
-  {
-    name: 'Engagement',
-    image: 'https://staticimg.tanishq.co.in/microsite/rivaah-homepage/assets/images/bigImageSlider/1.png',
-    link: 'https://www.tanishq.co.in/shop/finger-rings?lang=en_IN'
-  },
-  {
-    name: 'Haldi',
-    image: 'https://staticimg.tanishq.co.in/microsite/rivaah-homepage/assets/images/bigImageSlider/2.png',
-    link: 'https://www.tanishq.co.in/shop/rivaah-gujarati-jewellery?lang=en_IN'
-  },
-  {
-    name: 'Mehendi',
-    image: 'https://staticimg.tanishq.co.in/microsite/rivaah-homepage/assets/images/bigImageSlider/3.png',
-    link: 'https://www.tanishq.co.in/shop/rivaah-contemporary-jewellery?lang=en_IN'
-  },
-  {
-    name: 'Sangeet',
-    image: 'https://staticimg.tanishq.co.in/microsite/rivaah-homepage/assets/images/bigImageSlider/4.png',
-    link: 'https://www.tanishq.co.in/shop/rivaah?lang=en_IN'
-  },
-  {
-    name: 'Wedding',
-    image: 'https://staticimg.tanishq.co.in/microsite/rivaah-homepage/assets/images/bigImageSlider/5.png',
-    link: 'https://www.tanishq.co.in/shop/rivaah?lang=en_IN'
-  },
-  {
-    name: 'Cocktail',
-    image: 'https://staticimg.tanishq.co.in/microsite/rivaah-homepage/assets/images/bigImageSlider/6.png',
-    link: 'https://www.tanishq.co.in/shop/diamond?lang=en_IN'
-  }
-];
+import axiosInstance from '../../common components/AxiosInstance';
+import { publicUrl } from '../../common components/PublicUrl';
 
 const WeddingOccasionSlider = () => {
   const [activeIndex, setActiveIndex] = useState(6); // Start with Reception (index 6)
+  const [occasion, setOccasion] = useState([]);
+
+  useEffect(() => {
+    fetchOccasions();
+  })
+  const fetchOccasions = async () => {
+    try {
+      const response = await axiosInstance.get(`/user/allOccasions`);
+      setOccasion(response?.data ?? []);
+    } catch (error) {
+      console.error("Error fetching occasion:", error);
+    }
+  };
 
   const nextSlide = () => {
-    setActiveIndex((prev) => (prev + 1) % weddingOccasions.length);
+    setActiveIndex((prev) => (prev + 1) % occasion.length);
   };
 
   const prevSlide = () => {
-    setActiveIndex((prev) => (prev - 1 + weddingOccasions.length) % weddingOccasions.length);
+    setActiveIndex((prev) => (prev - 1 + occasion.length) % occasion.length);
   };
 
   const getCardStyle = (index) => {
     const diff = index - activeIndex;
-    const totalCards = weddingOccasions.length;
+    const totalCards = occasion.length;
 
     // Normalize the difference to handle circular array
     let normalizedDiff = diff;
@@ -171,7 +148,7 @@ const WeddingOccasionSlider = () => {
         perspective: '1000px',
         transformStyle: 'preserve-3d'
       }}>
-        {weddingOccasions.map((occasion, index) => {
+        {occasion.map((occasion, index) => {
           const cardStyle = getCardStyle(index);
           const isActive = index === activeIndex;
 
@@ -198,7 +175,7 @@ const WeddingOccasionSlider = () => {
               onClick={() => setActiveIndex(index)}
             >
               <img
-                src={occasion.image}
+                src={publicUrl(occasion.image)}
                 alt={occasion.name}
                 style={{
                   width: '100%',
