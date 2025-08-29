@@ -400,7 +400,7 @@ const WeddingPage = () => {
       {/* Handpicked for the Bride */}
       <Container maxWidth="lg" sx={{ mt: 10 }}>
         <Typography variant="h4" component="h2" sx={titleStyle}>
-          Handpicked for the {filteredOccasionName || "Bride"}
+          Handpicked for the {filteredOccasionName || "all occasions"}
         </Typography>
 
         <Box sx={{
@@ -478,6 +478,7 @@ const WeddingPage = () => {
                         src={publicUrl(item.slider_image)}
                         alt={item.type}
                         style={{ width: "100%", height: "220px", objectFit: "cover" }}
+                          onClick={() => navigate(`/allJewellery/${(item.variety || 'all').toLowerCase()}`)}
                       />
                     </Box>
                   </SwiperSlide>
