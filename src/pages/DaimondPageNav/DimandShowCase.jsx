@@ -22,7 +22,7 @@ const DimandShowCase = () => {
             <DiamondSliderThree />
             <DiamondSliderTwo />
             <DiamondSlider />
-            <DiamondSliderOne />
+            {/* <DiamondSliderOne /> */}
             {/* <BridesDiamondStories /> */}
             {/* <PerfectSparkleSection /> */}
             {/* <ChauhanExchange /> */}
