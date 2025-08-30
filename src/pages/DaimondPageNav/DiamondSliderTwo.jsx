@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Scrollbar, EffectCoverflow } from 'swiper/modules';
 import {
@@ -17,6 +17,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/scrollbar';
 import 'swiper/css/effect-coverflow';
+import axiosInstance from '../../common components/AxiosInstance';
 
 const DiamondSliderContainer = styled(Box)(({ theme }) => ({
   backgroundColor: '#ffffff',
@@ -38,6 +39,7 @@ const SlideImage = styled('img')(({ theme }) => ({
 }));
 
 const DiamondSliderTwo = () => {
+  const [subcategoryName, setSubCategoryName] = useState([]);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigationPrevRef = useRef(null);
@@ -45,6 +47,18 @@ const DiamondSliderTwo = () => {
   const scrollbarRef = useRef(null);
   const mainSwiperRef = useRef(null);
   const subSwiperRef = useRef(null);
+
+  useEffect(() => {
+    const fetchSubCategory = async () => {
+      try {
+        const response = await axiosInstance.get(`/user/allSubcategories`);
+        setSubCategoryName(response?.data ?? []);
+      } catch (error) {
+        console.error("Error fetching sub categories:", error);
+      }
+    };
+    fetchSubCategory();
+  }, []);
 
   const [, setActiveSlide] = useState(0);
 
@@ -429,3 +443,5 @@ const navButtonStyle = (side) => ({
 });
 
 export default DiamondSliderTwo;
+
+
