@@ -184,16 +184,16 @@ const sidenavTabs = [
 ];
 
 const priceRanges = [
-    { img: "https://www.tanishq.co.in/on/demandware.static/-/Sites-Tanishq-site-catalog/default/dw20b368e1/header-mega-menu/banner-images/all-jew-below-25k-hr.jpg", name: "<25K" },
-    { img: "https://www.tanishq.co.in/on/demandware.static/-/Sites-Tanishq-site-catalog/default/dw20b368e1/header-mega-menu/banner-images/all-jew-below-25k-hr.jpg", name: "25K-50K" },
-    { img: "https://www.tanishq.co.in/on/demandware.static/-/Sites-Tanishq-site-catalog/default/dw20b368e1/header-mega-menu/banner-images/all-jew-below-25k-hr.jpg", name: "50K-1L" },
-    { img: "https://www.tanishq.co.in/on/demandware.static/-/Sites-Tanishq-site-catalog/default/dw20b368e1/header-mega-menu/banner-images/all-jew-below-25k-hr.jpg", name: "1L & Above" },
+    { img: "https://www.tanishq.co.in/on/demandware.static/-/Sites-Tanishq-site-catalog/default/dw20b368e1/header-mega-menu/banner-images/all-jew-below-25k-hr.jpg", name: "Under ₹25K" },
+    { img: "https://www.tanishq.co.in/on/demandware.static/-/Sites-Tanishq-site-catalog/default/dw20b368e1/header-mega-menu/banner-images/all-jew-below-25k-hr.jpg", name: "₹25K-₹50K" },
+    { img: "https://www.tanishq.co.in/on/demandware.static/-/Sites-Tanishq-site-catalog/default/dw20b368e1/header-mega-menu/banner-images/all-jew-below-25k-hr.jpg", name: "₹50K-₹1L" },
+    { img: "https://www.tanishq.co.in/on/demandware.static/-/Sites-Tanishq-site-catalog/default/dw20b368e1/header-mega-menu/banner-images/all-jew-below-25k-hr.jpg", name: "Over ₹1L" },
 ];
 
 const genders = [
     { img: "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=240&fit=crop", name: "Women" },
     { img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=240&fit=crop", name: "Men" },
-    { img: "https://images.unsplash.com/photo-1519764622345-23439dd774f7?w=240&fit=crop", name: "Kids & Teens" },
+    { img: "https://images.unsplash.com/photo-1519764622345-23439dd774f7?w=240&fit=crop", name: "Unisex" },
 ];
 
 const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
@@ -207,7 +207,7 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
     const canHover = useMediaQuery("(hover: hover)");
     if (!isMdUp || !canHover) return null;
 
-    const [categoryName, setCategoryName] = useState([]);
+    const [subcategoryName, setSubCategoryName] = useState([]);
     const [isLoadingCats, setIsLoadingCats] = useState(false);
     const [catsError, setCatsError] = useState(null);
     const [occasions, setOccasions] = useState([]);
@@ -227,10 +227,10 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
                 const res = await axiosInstance.get("/user/allSubcategories");
                 const subcategories =
                     res?.data?.categories ?? res?.data?.data ?? (Array.isArray(res?.data) ? res.data : []);
-                setCategoryName(Array.isArray(subcategories) ? subcategories : []);
+                setSubCategoryName(Array.isArray(subcategories) ? subcategories : []);
             } catch (err) {
                 setCatsError(err?.response?.data?.message || err?.message || "Failed to load categories");
-                setCategoryName([]);
+                setSubCategoryName([]);
             } finally {
                 setIsLoadingCats(false);
             }
@@ -260,9 +260,9 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
 
     const categoryCols = useMemo(() => {
         const out = Array.from({ length: cols }, () => []);
-        categoryName.forEach((item, i) => out[i % cols].push(item));
+        subcategoryName.forEach((item, i) => out[i % cols].push(item));
         return out;
-    }, [categoryName, cols]);
+    }, [subcategoryName, cols]);
 
     const centerPanel =
         tab === "category" ? (
@@ -278,7 +278,7 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
                     </Typography>
                 )}
 
-                {categoryName.length > 0 ? (
+                {subcategoryName.length > 0 ? (
                     categoryCols.map((col, idx) => (
                         <CategoryCol key={idx}>
                             {col.map((item) => {
@@ -288,12 +288,7 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
                                 return (
                                     <CategoryBox
                                         key={id || name}
-                                        onClick={() => {
-                                            if (id) {
-                                                navigate(`/category/${id}`);
-                                                onClose && onClose();
-                                            }
-                                        }}
+                                        onClick={() => { navigate(`/allJewellery?subcategory=${item._id}`) }}
                                     >
                                         <IconWrap>
                                             <img src={img} alt={name} />
@@ -327,7 +322,30 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
         ) : (
             <BigGrid>
                 {(tab === "price" ? priceRanges : tab === "gender" ? genders : occasions).map((item) => (
-                    <BigItem key={item._id}>
+                    <BigItem
+                        key={item.name}
+                        sx={{ cursor: "pointer" }}
+                        onClick={() => {
+                            // Determine query params based on tab
+                            let params = new URLSearchParams();
+
+                            if (tab === "price") {
+                                params.set("price", item.name);
+
+                            } else if (tab === "gender") {
+                                params.set("gender", item.name.toLowerCase());
+                            } else if (tab === "occasion") {
+                                // If handling occasions similarly, add here, for example:
+                                params.set("occasion", item.name.toLowerCase());
+                            }
+
+                            // Navigate to allJewellery with query params
+                            navigate(`/allJewellery?${params.toString()}`);
+
+                            // Close the dropdown after selection
+                            onClose && onClose();
+                        }}
+                    >
                         <BigImageWrap>
                             <img src={item.image ? publicUrl(item.image) : item.img} alt={item.name} />
                         </BigImageWrap>
@@ -335,8 +353,10 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
                             {item.name}
                         </Typography>
                     </BigItem>
-                ))}
-            </BigGrid>
+                ))
+                }
+            </BigGrid >
+
         );
 
     return (
@@ -407,12 +427,9 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
                         </Typography>
                     </Paper>
                 </RightPanel>
-
             </NavGrid>
         </DropdownMenu>
     );
 };
 
-
 export default NavHoverDropdown;
-

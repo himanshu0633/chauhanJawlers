@@ -230,26 +230,6 @@ export function JewelleryGrid() {
             .toLowerCase()
             .replace(/\s+/g, '-');
 
-    // return an array of category names for a product, normalized as slugs
-    const getProductCategorySlugs = (p) => {
-        // Common cases handled:
-        // 1) p.category is a string
-        // 2) p.category is an object with 'name'
-        // 3) p.categories is an array of strings/objects
-        const out = new Set();
-        if (p?.category) {
-            if (typeof p.category === 'string') out.add(slugify(p.category));
-            else if (typeof p.category === 'object' && p.category.name) out.add(slugify(p.category.name));
-        }
-        if (Array.isArray(p?.categories)) {
-            p.categories.forEach((c) => {
-                if (typeof c === 'string') out.add(slugify(c));
-                else if (c && typeof c === 'object' && c.name) out.add(slugify(c.name));
-            });
-        }
-        return Array.from(out);
-    };
-
     //  // use of query for filtering
     function useQuery() {
         return new URLSearchParams(useLocation().search);
@@ -267,6 +247,18 @@ export function JewelleryGrid() {
     const selectedOccasion = selectedOccasionId
         ? occasion.find(item => item._id === selectedOccasionId)
         : null;
+    const priceQuery = query.get("price") || "all";
+    const genderQuery = query.get("gender") || "all";
+    const occasionQuery = query.get("occasion") || "all";
+
+
+  const norm = (s) =>
+  (s || '')
+    .toUpperCase()
+    .replace(/\s+/g, '')   // remove ALL spaces
+    .replace(/-/g, '–')    // hyphen -> en-dash
+    .trim();
+
 
     const loadMoreProducts = () => {
         const newCount = shownCount + 12;
@@ -306,12 +298,15 @@ export function JewelleryGrid() {
 
     // Price buckets for filtering
     const priceBuckets = [
-        { label: 'Under ₹25k', min: 0, max: 25000 },
-        { label: '₹25k – ₹50k', min: 25000, max: 50000 },
-        { label: '₹50k – ₹1L', min: 50000, max: 100000 },
+        { label: 'Under ₹25K', min: 0, max: 25000 },
+        { label: '₹25K – ₹50K', min: 25000, max: 50000 },
+        { label: '₹50K – ₹1L', min: 50000, max: 100000 },
         { label: 'Over ₹1L', min: 100000, max: Number.MAX_SAFE_INTEGER },
     ];
 
+    const priceBucketFromQuery = priceBuckets.find(
+        b => norm(b.label) === norm(priceQuery)
+    );
     const fetchAllProducts = async () => {
         setLoading(true);
         try {
@@ -348,17 +343,6 @@ export function JewelleryGrid() {
         }
     };
 
-    // // 1:
-    // const filteredProducts = allProducts.filter(product => {
-    //     const isInPriceRange = filters.priceRange === 'all' ||
-    //         (product.price >= priceBuckets.find(b => b.label === filters.priceRange)?.min &&
-    //             product.price <= priceBuckets.find(b => b.label === filters.priceRange)?.max);
-
-    //     const isMatchingQuery = product.name.toLowerCase().includes(filters.query.toLowerCase());
-    //     return isInPriceRange && isMatchingQuery;
-    // });
-
-    // // 2:
     const filteredProducts = allProducts.filter(product => {
         const isInPriceRange = filters.priceRange === 'all' ||
             (product.price >= priceBuckets.find(b => b.label === filters.priceRange)?.min &&
@@ -378,31 +362,24 @@ export function JewelleryGrid() {
         const matchesOccasion = selectedOccasion
             ? product.occasion === selectedOccasion.name
             : true;
-
+        // variety filter
         const matchesVariety = varietyParam === 'all' || (product.productvariety?.toLowerCase() === varietyParam);
 
-        return isInPriceRange && isMatchingQuery && matchesCategory && matchesSubcategory && matchesOccasion && matchesVariety;
+        const matchesPriceTab =
+            priceQuery === "all" ||
+            (priceBucketFromQuery &&
+                product.price >= priceBucketFromQuery.min &&
+                product.price <= priceBucketFromQuery.max);
+
+        const matchesGenderTab =
+            genderQuery === "all" ||
+            (product.genderVariety && product.genderVariety.toLowerCase() === genderQuery.toLowerCase());
+        const matchesOccasionTab =
+            occasionQuery === "all" ||
+            (product.occasion && product.occasion.toLowerCase() === occasionQuery.toLowerCase());
+
+        return isInPriceRange && isMatchingQuery && matchesCategory && matchesSubcategory && matchesOccasion && matchesVariety && matchesPriceTab && matchesGenderTab && matchesOccasionTab;
     });
-
-    // // 3 slugify:
-    // const filteredProducts = allProducts.filter(product => {
-    //     const isInPriceRange =
-    //         filters.priceRange === 'all' ||
-    //         (product.price >= priceBuckets.find(b => b.label === filters.priceRange)?.min &&
-    //             product.price <= priceBuckets.find(b => b.label === filters.priceRange)?.max);
-
-    //     const isMatchingQuery =
-    //         product.name.toLowerCase().includes(filters.query.toLowerCase());
-
-    //     // if a category is selected, product must have that category slug
-    //     const categorySlugs = getProductCategorySlugs(product);
-    //     const matchesCategory = selectedCategory
-    //         ? categorySlugs.includes(selectedCategory)
-    //         : true;
-
-    //     return isInPriceRange && isMatchingQuery && matchesCategory;
-    // });
-
 
     const sortedProducts = filteredProducts.sort((a, b) => {
         switch (sortOption) {
@@ -418,7 +395,6 @@ export function JewelleryGrid() {
         fetchSubCategories();
         fetchOccasions();
     }, []);
-
 
     const productsToDisplay = sortedProducts.slice(0, shownCount);
 
