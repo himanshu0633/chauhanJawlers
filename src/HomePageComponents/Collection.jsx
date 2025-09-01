@@ -47,10 +47,10 @@ const Card = styled(Box)(({ height }) => ({
         boxShadow: "0 12px 32px rgba(0,0,0,0.2)",
     },
     "@media (max-width: 960px)": {
-        height: height === "500px" ? "400px" : height === "240px" ? "200px" : height,
+        height: height === "450px" ? "400px" : height === "220px" ? "200px" : height,
     },
     "@media (max-width: 600px)": {
-        height: height === "500px" ? "300px" : height === "240px" ? "145px" : height,
+        height: height === "450px" ? "300px" : height === "220px" ? "145px" : height,
     },
 }));
 

@@ -137,7 +137,7 @@ function HeroSection() {
     return (
         <SliderContainer>
             <SliderWrapper>
-                <Slider {...settings}>
+                <Slider {...settings} >
                     {banners.map((item, index) => (
                         <Slide key={index}
                             // onClick={() => navigate(`/allJewellery/${(item.variety || 'all').toLowerCase()}`)}
