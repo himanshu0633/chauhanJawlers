@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     Box,
     Typography,
@@ -25,11 +25,24 @@ const menu = [
     { icon: <ChatBubbleOutlineOutlinedIcon sx={{ color: '#6a2322' }} />, label: "Contact Us" }
 ];
 
-export default function AccountPopup() {
+export default function AccountPopup({ onClose }) {
     const isMobile = useMediaQuery('(max-width:600px)');
     const storedUser = localStorage.getItem('userData');
     const userData = storedUser ? JSON.parse(storedUser) : null;
     const navigate = useNavigate();
+    const popupRef = useRef(null);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (popupRef.current && !popupRef.current.contains(event.target)) {
+                onClose();
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [onClose]);
 
     const handleLogout = (e) => {
         e.preventDefault();
@@ -53,6 +66,7 @@ export default function AccountPopup() {
     return (
         <Paper
             elevation={4}
+            ref={popupRef}
             sx={{
                 borderRadius: '15px',
                 width: paperWidth,
