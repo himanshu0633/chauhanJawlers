@@ -406,7 +406,7 @@ const ShopByCategories = () => {
                                                 cursor: "pointer",
                                                 transition: "0.3s",
                                                 width: "100%",
-                                                borderRadius: "50%",
+                                                borderRadius: 4,
                                                 "&:hover": { transform: "translateY(-4px)" },
                                                 display: "flex",
                                                 flexDirection: "column",
