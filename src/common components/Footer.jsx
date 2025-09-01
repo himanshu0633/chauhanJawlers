@@ -131,7 +131,6 @@ const BottomSection = styled(Box)({
     display: "flex",
     flexDirection: "column",
     flexWrap: "wrap",
-    alignItems: "center",
     gap: 20,
     "@media (min-width: 601px)": {
         flexDirection: "row",
@@ -182,7 +181,7 @@ const BottomLink = styled(Link)({
 const Copyright = styled(Typography)({
     fontSize: 12,
     color: "rgba(255,255,255,0.7)",
-    whiteSpace: "nowrap",
+    // whiteSpace: "nowrap",
 });
 
 
