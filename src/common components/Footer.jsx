@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 
 const FooterContainer = styled(Box)({
     color: "#fff",
-    paddingTop: 60,
-    paddingBottom: 30,
+    paddingTop: 30,
+    paddingBottom: 15,
     fontFamily: "'Roboto', sans-serif",
 });
 
@@ -14,7 +14,7 @@ const LogoAndDesc = styled(Box)({
     flexDirection: "column",
     gap: 16,
     maxWidth: 280,
-    marginBottom: 40,
+    marginBottom: 10,
     "@media (max-width: 900px)": {
         maxWidth: "100%",
         marginBottom: 32,
@@ -37,10 +37,10 @@ const FooterSection = styled(Box)({
     flexDirection: "column",
     minWidth: 140,
     gap: 12,
-    marginBottom: 40,
+    marginBottom: 10,
     "@media (max-width: 900px)": {
         minWidth: "auto",
-        marginBottom: 32,
+        marginBottom: 12,
     },
 });
 const FooterSection1 = styled(Box)({
@@ -48,7 +48,7 @@ const FooterSection1 = styled(Box)({
     flexDirection: "column",
     minWidth: 140,
     // gap: 12,
-    marginBottom: 40,
+    marginBottom: 20,
     "@media (max-width: 900px)": {
         minWidth: "auto",
         marginBottom: 32,
@@ -126,10 +126,12 @@ const SocialIcon = styled(IconButton)({
 
 const BottomSection = styled(Box)({
     borderTop: "1px solid rgba(255,255,255,0.2)",
-    marginTop: 20,
+    marginTop: 10,
     paddingTop: 20,
     display: "flex",
     flexDirection: "column",
+    flexWrap: "wrap",
+    alignItems: "center",
     gap: 20,
     "@media (min-width: 601px)": {
         flexDirection: "row",
@@ -197,7 +199,7 @@ export default function Footer() {
                             Chauhan Sons Jewellers offers exquisite gold, diamond, and traditional jewellery with timeless craftsmanship and trusted quality for every occasion.
                         </CompanyDescription>
                     </LogoAndDesc>
-                
+
                     <FooterSection>
                         <SectionTitle>Our Policy</SectionTitle>
                         <FooterLink onClick={() => navigate('/terms')}>Terms and Conditions</FooterLink>
@@ -205,7 +207,7 @@ export default function Footer() {
                         <FooterLink onClick={() => navigate('/shipping')}>Shipping and Delivery Policy</FooterLink>
                         <FooterLink onClick={() => navigate('/return')}>Return, Refund and Cancellation Policy</FooterLink>
                     </FooterSection>
-                   
+
                     <FooterSection1 sx={{ minWidth: 220 }}>
                         <SectionTitle>Contact Us</SectionTitle>
                         <ChatTitle>Phone</ChatTitle>
@@ -247,6 +249,7 @@ export default function Footer() {
                                 <BottomLink key={text}>{text}</BottomLink>
                             ))}
                         </FooterLinksRow> */}
+                        <Copyright> <a className="text-white" target="blank" href="https://careerinfowisitsolution.com/">Crafted With ❤ by CIIS - Career Infowis IT Solutions Pvt Ltd</a></Copyright>
                         <Copyright>© {new Date().getFullYear()} Chauhan Son's Company Limited. All Rights Reserved.</Copyright>
                     </BottomSection>
                 </Container>
