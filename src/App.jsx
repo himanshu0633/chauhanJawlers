@@ -32,7 +32,7 @@ import PolicyCenter from './ContactJewellers/PrivacyCenter';
 import ReturnsPolicy from './ContactJewellers/ReturnPolicy';
 import ShippingPolicy from './ContactJewellers/ShippingPolicy';
 import TermsConditions from './ContactJewellers/TermsConditions';
-// import PrivacyPolicy from './ContactJewellers/PrivacyPolicy';
+import Privacy from './ContactJewellers/Privacy';
 
 function App() {
   const location = useLocation();
@@ -68,10 +68,10 @@ function App() {
         <Route path="/diamond" element={<DimandShowCase />} />
         <Route path="/visit" element={<VisitOurStore />} />
         <Route path="/policy" element={<PolicyCenter />} />
-        {/* <Route path="/privacy" element={<PrivacyPolicy />} /> */}
         <Route path="/shipping" element={<ShippingPolicy />} />
         <Route path="/return" element={<ReturnsPolicy />} />
         <Route path="/terms" element={<TermsConditions />} />
+        <Route path="/privacy" element={<Privacy />} />
 
 
         {/* admin panel  */}

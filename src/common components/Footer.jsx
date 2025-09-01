@@ -197,25 +197,15 @@ export default function Footer() {
                             Chauhan Sons Jewellers offers exquisite gold, diamond, and traditional jewellery with timeless craftsmanship and trusted quality for every occasion.
                         </CompanyDescription>
                     </LogoAndDesc>
-                    {/* Useful Links */}
+                
                     <FooterSection>
                         <SectionTitle>Our Policy</SectionTitle>
-                        {/* {["Delivery Information", "International Shipping", "Payment Options", "Track Your Order", "Returns", "Find a Store"].map((text) => (
-                            <FooterLink key={text}>{text}</FooterLink>
-                        ))} */}
                         <FooterLink onClick={() => navigate('/terms')}>Terms and Conditions</FooterLink>
                         <FooterLink onClick={() => navigate('/privacy')}>Privacy Policy</FooterLink>
                         <FooterLink onClick={() => navigate('/shipping')}>Shipping and Delivery Policy</FooterLink>
                         <FooterLink onClick={() => navigate('/return')}>Return, Refund and Cancellation Policy</FooterLink>
                     </FooterSection>
-                    {/* Information */}
-                    {/* <FooterSection>
-                        <SectionTitle>Information</SectionTitle>
-                        {["Blog", "Offers & Contest Details", "Help & FAQ", "About Chauhan Sons"].map((text) => (
-                            <FooterLink key={text}>{text}</FooterLink>
-                        ))}
-                    </FooterSection> */}
-                    {/* Contact Us */}
+                   
                     <FooterSection1 sx={{ minWidth: 220 }}>
                         <SectionTitle>Contact Us</SectionTitle>
                         <ChatTitle>Phone</ChatTitle>
