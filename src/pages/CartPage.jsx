@@ -10,7 +10,6 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-
 import axiosInstance from '../common components/AxiosInstance';
 import { deleteProduct, updateData, clearProducts } from '../store/Action';
 import { publicUrl } from '../common components/PublicUrl';

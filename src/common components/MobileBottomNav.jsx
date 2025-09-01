@@ -70,7 +70,7 @@ export const MobileBottomNav = () => {
             >
                 <BottomNavigationAction onClick={() => navigate("/")} label="Home" icon={<Home />} />
                 <BottomNavigationAction onClick={() => navigate("/allJewellery")} label="Products" icon={<Category />} />
-                <BottomNavigationAction onClick={() => navigate("/wishlist")} label="Wishlist" icon={<Star />} />
+                {/* <BottomNavigationAction onClick={() => navigate("/wishlist")} label="Wishlist" icon={<Star />} /> */}
                 <BottomNavigationAction onClick={() => navigate("/cart")} label="Cart" icon={<ShoppingCart />} />
                 <BottomNavigationAction onClick={() => navigate("/profile")} label="You" icon={<PersonOutline />} />
             </BottomNavigation>
