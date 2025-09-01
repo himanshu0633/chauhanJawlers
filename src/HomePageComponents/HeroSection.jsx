@@ -18,7 +18,8 @@ const SliderContainer = styled(Box)({
 
 const Slide = styled(Box)(({ theme }) => ({
     width: "100%",
-    height: 550,
+    height: 470,
+    // maxHeight: 470,
     position: "relative",
     overflow: "hidden",
     [theme.breakpoints.down("lg")]: {
