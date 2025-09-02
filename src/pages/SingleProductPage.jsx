@@ -90,17 +90,19 @@ export default function SingleProductPage() {
     const handleTabChange = (tab) => setActiveTab(tab);
 
 
-    // const handleWishlistClick = (e) => {
-    //     e.stopPropagation(); // Prevent parent click event
-    //     e.preventDefault();  // Prevent any link navigation
-    //     if (isWishlisted) {
-    //         dispatch(removeFromWishlist(product._id));
-    //         toast.info('Removed from Wishlist');
-    //     } else {
-    //         dispatch(addToWishlist(product));
-    //         toast.info('Added to Wishlist');
-    //     }
-    // }
+    const handleShare = () => {
+        if (navigator.share) {
+            navigator.share({
+                title: product.name,
+                text: `Check out this product: ${product.name}`,
+                url: window.location.href,
+            }).catch(console.error);
+        } else {
+            navigator.clipboard.writeText(window.location.href)
+                .then(() => toast.success('Link copied to clipboard!'))
+                .catch(() => toast.error('Failed to copy link.'));
+        }
+    };
 
     const handleWishlistClick = (e) => {
         e.stopPropagation();
@@ -346,6 +348,7 @@ export default function SingleProductPage() {
                                 )}
                             </IconButton>
                             <IconButton
+                                onClick={handleShare}
                                 size="large"
                                 aria-label="Share"
                                 sx={{
