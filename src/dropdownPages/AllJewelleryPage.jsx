@@ -209,10 +209,16 @@ import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
 import { createSelector } from '@reduxjs/toolkit';
 
+// export const selectWishlist = createSelector(
+//     [state => Array.isArray(state.app?.wishlist) ? state.app.wishlist : []],
+//     wishlist => wishlist
+// );
+
 export const selectWishlist = createSelector(
-    [state => Array.isArray(state.app?.wishlist) ? state.app.wishlist : []],
-    wishlist => wishlist
+    [state => Array.isArray(state?.app?.wishlist) ? state.app.wishlist : []],
+    wishlist => wishlist.filter(item => item.in_stock)  // example transformation
 );
+
 
 function JewelleryCard({ product }) {
     const dispatch = useDispatch();
@@ -543,7 +549,7 @@ export function JewelleryGrid() {
                         //         <JewelleryCard product={product} />
                         //     </Grid>
                         // </Link>
-                        <Grid item xs={12} sm={6} md={4}>
+                        <Grid key={product._id}  xs={12} sm={6} md={4}>
                             <JewelleryCard product={product} />
                         </Grid>
                     ))}
