@@ -12,21 +12,26 @@ import {
     Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper
 } from '@mui/material';
 import {
-    FavoriteBorder,
     Share,
     ExpandMore,
     Settings,
     Diamond,
 } from '@mui/icons-material';
-import RemoveIcon from '@mui/icons-material/Remove';
-import AddIcon from '@mui/icons-material/Add';
 import { useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../common components/AxiosInstance';
 import { publicUrl } from '../common components/PublicUrl';
 import LocationSelector from '../common components/LocationSelector';
 import { useDispatch, useSelector } from 'react-redux';
-import { addData } from '../store/Action';
+import { addData, addToWishlist, removeFromWishlist } from '../store/Action';
 import { toast, ToastContainer } from 'react-toastify';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import { createSelector } from '@reduxjs/toolkit';
+
+export const selectWishlist = createSelector(
+    [state => Array.isArray(state.app?.wishlist) ? state.app.wishlist : []],
+    wishlist => [...wishlist]  // creates a new array to avoid identity reuse warning
+);
 
 const normalizeNumber = val => {
     const n = parseFloat(val);
@@ -76,13 +81,26 @@ export default function SingleProductPage() {
     const navigate = useNavigate();
     const { id } = useParams();
     const best = product?.bestVariant ?? {};
-
+    const wishlist = useSelector(selectWishlist);
+    const isWishlisted = !!product && wishlist.some(item => item._id === product._id);
     const dispatch = useDispatch();
-    const cartItems = useSelector(state => state.cart?.items || []);
     const [units, setUnits] = useState(1);
     const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
 
     const handleTabChange = (tab) => setActiveTab(tab);
+
+
+    const handleWishlistClick = (e) => {
+        e.stopPropagation(); // Prevent parent click event
+        e.preventDefault();  // Prevent any link navigation
+        if (isWishlisted) {
+            dispatch(removeFromWishlist(product._id));
+            toast.info('Removed from Wishlist');
+        } else {
+            dispatch(addToWishlist(product));
+            toast.info('Added to Wishlist');
+        }
+    }
 
     // Fetch product data from the API
     const fetchData = async () => {
@@ -219,8 +237,8 @@ export default function SingleProductPage() {
         <Box bgcolor="#fff" py={6}>
             <ToastContainer position="top-right" autoClose={2000} hideProgressBar={false} />
             <Container maxWidth="xl" sx={{ maxWidth: 1140 }}>
-                <Box display="flex" alignItems="center" justifyContent="space-between" flexDirection={{ xs: "column", sm: "row" }} gap={{ xs: 5, md: 0 }} mb={4}>
-                    <Box sx={{ width: { sm: "38%" } }}>
+                <Box display="flex" alignItems="center" justifyContent="space-between" flexDirection={{ xs: "column", sm: "row" }} gap={{ xs: 3, md: 0 }} mb={4}>
+                    <Box sx={{ width: { sm: "46%" } }}>
                         {/* Product Specs Chips */}
                         <Box sx={{ display: 'flex', justifyContent: "center", textAlign: 'center', mb: 1 }}>
                             <Chip
@@ -235,6 +253,7 @@ export default function SingleProductPage() {
                                     height: 32,
                                     px: 1.5,
                                     boxShadow: '0 1px 3px rgba(230, 120, 30, 0.3)',
+                                    textTransform: 'capitalize',
                                 }}
                             />
                             <Chip
@@ -271,13 +290,7 @@ export default function SingleProductPage() {
 
                         {/* Price with old price */}
                         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
-                            {/* <Typography sx={{ fontSize: { xs: 24, md: 30 }, fontWeight: 700, color: '#2C2C2C' }}>
-                                ₹{finalPrice || 'Price not available'}
-                            </Typography> */}
-
                             <Typography sx={{ fontSize: 20, fontWeight: 600, color: '#2C2C2C' }}>
-                                {/* Total: ₹{unitPrice * units} */}
-                                {/* {Math.round(unitPrice * units)} */}
                                 {Number(unitPrice * units).toFixed(2)}
                             </Typography>
 
@@ -290,7 +303,8 @@ export default function SingleProductPage() {
                         {/* Action Buttons */}
                         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 2 }}>
                             <IconButton
-                                onClick={() => navigate('/wishlist')}
+                                // onClick={() => navigate('/wishlist')}
+                                onClick={handleWishlistClick}
                                 size="large"
                                 aria-label="Add to wishlist"
                                 sx={{
@@ -303,7 +317,12 @@ export default function SingleProductPage() {
                                     '&:hover': { bgcolor: '#f3f1ee' },
                                 }}
                             >
-                                <FavoriteBorder fontSize="medium" />
+                                {/* <FavoriteBorder fontSize="medium" /> */}
+                                {isWishlisted ? (
+                                    <FavoriteIcon sx={{ fontSize: 20, color: 'red' }} />
+                                ) : (
+                                    <FavoriteBorderIcon sx={{ fontSize: 20, color: '#bbb' }} />
+                                )}
                             </IconButton>
                             <IconButton
                                 size="large"
@@ -361,7 +380,7 @@ export default function SingleProductPage() {
                     </Box>
 
                     {/* Product Images */}
-                    <Box sx={{ width: { sm: "58%" } }}>
+                    <Box sx={{ width: { sm: "55%" } }}>
                         <Box
                             sx={{
                                 display: 'flex',
