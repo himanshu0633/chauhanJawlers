@@ -437,12 +437,7 @@ export default function LoginPage() {
                     })
                 }
             }
-
-            console.log(response.data, "ooo");
-
         } catch (error) {
-            console.error("Error:", error);
-
             // Show an error toast if something goes wrong
             if (mode === "login") {
                 toast.error('Login failed. Please check your credentials.');
