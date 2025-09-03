@@ -421,7 +421,6 @@ export default function LoginPage() {
                 await axiosInstance.post('/admin/login', { email: loginData.email, password: loginData.password }) :
                 await axiosInstance.post('/admin/createAdmin', signupData);
 
-
             if (response.status === 200 || response.status === 201) {
                 console.log("saving data to localstorage")
                 localStorage.setItem('authToken', response.data.token);

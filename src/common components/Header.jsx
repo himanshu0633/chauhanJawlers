@@ -284,7 +284,7 @@ export default function Header() {
         </IconsRow>
       </HeaderToolbar>
 
-      {showAccountPopup && <AccountPopup />}
+      {/* {showAccountPopup && <AccountPopup />} */}
 
       {
         !isMdUp && (

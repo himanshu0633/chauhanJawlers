@@ -46,9 +46,28 @@ export default function AccountPopup({ onClose }) {
 
     const handleLogout = (e) => {
         e.preventDefault();
-        localStorage.removeItem('userData');
-        // setShowDropdown(false);
-        navigate('/login');
+        e.stopPropagation();
+
+        if (onClose) {
+            onClose();
+        }
+        setTimeout(() => {
+            localStorage.removeItem('userData');
+            localStorage.removeItem('authToken');
+            navigate('/login');
+        }, 100);
+    };
+    const handleLogin = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        // Close popup first
+        if (onClose) {
+            onClose();
+        }
+        // Small delay to ensure popup closes, then navigate
+        setTimeout(() => {
+            navigate('/login');
+        }, 100);
     };
 
     // Responsive typography and spacing
@@ -76,13 +95,13 @@ export default function AccountPopup({ onClose }) {
                 position: 'fixed',
                 top: paperTop,
                 right: paperRight,
-                zIndex: 1300,
+                zIndex: 13000,
             }}
         >
             {!userData ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <Typography variant="body1" sx={{ fontSize: 16, fontWeight: 500, color: '#6a2322', cursor: 'pointer' }}
-                        onClick={() => navigate('/login')}
+                        onClick={handleLogin}
                     >
                         Please login to view your account
                     </Typography>
@@ -160,21 +179,22 @@ export default function AccountPopup({ onClose }) {
                                 borderRadius: 2,
                                 py: itemPaddingY,
                                 px: itemPaddingX,
-                                minHeight: '28px'
+                                minHeight: '28px',
+                                cursor: 'pointer !important'
                             }}
+                            onClick={handleLogout}
                         >
                             <ListItemIcon sx={{ minWidth: iconMinWidth }}>
                                 <LogoutOutlinedIcon sx={{ color: '#6a2322' }} />
                             </ListItemIcon>
                             <ListItemText
-                                onClick={handleLogout}
                                 primary="Log Out"
                                 primaryTypographyProps={{
                                     fontSize,
                                     fontWeight: 500,
                                     color: '#661e1b',
                                     fontFamily: 'serif',
-                                    cursor: 'pointer'
+
                                 }}
                             />
                         </ListItem>
