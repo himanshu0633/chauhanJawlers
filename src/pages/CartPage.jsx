@@ -364,12 +364,13 @@ export default function CartPage() {
       toast.warn('Please select an address before checkout.');
       return;
     }
-    if (!window.Razorpay) {
-      toast.error('Payment SDK not loaded. Please add Razorpay script on the page.');
-      return;
-    }
+    // if (!window?.Razorpay) {
+    //   toast.error('Payment SDK not loaded. Please add Razorpay script on the page.');
+    //   return;
+    // }
+ 
     const options = {
-      key: 'rzp_live_hgk55iUzVRpKZ1',
+      key: 'rzp_live_RCKnQvruACO5FH',
       amount: Math.round(total * 100), // paise
       currency: 'INR',
       name: 'My Shop',
@@ -555,7 +556,7 @@ export default function CartPage() {
                   boxShadow: '0 2px 8px rgba(125,42,37,0.3)'
                 }}
               >
-                Proceed to Checkout
+                Proceed to Checkoutnbvnb
               </Button>
 
               <Box sx={{ mt: 3, pt: 2, borderTop: '1px solid #f0f0f0', textAlign: 'center' }}>
