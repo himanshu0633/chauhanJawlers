@@ -133,9 +133,12 @@ export default function AccountPopup({ onClose }) {
                                 <text x={isMobile ? 1 : 3} y={isMobile ? 10 : 14} fontSize={isMobile ? "10" : "16"} fill="#fff" fontFamily="serif" style={{ opacity: 0.9 }}>✨</text>
                             </svg>
                         </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box 
+                        onClick={()=>{navigate('/profileEdit')}}
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <PersonOutlineIcon sx={{ fontSize: iconSize, mr: 1 }} />
-                            <Typography sx={{ fontWeight: 500, fontSize: headerFont, letterSpacing: 0.1, textTransform: 'capitalize', cursor: 'pointer' }}>
+                            <Typography sx={{ fontWeight: 500, fontSize: headerFont, letterSpacing: 0.1, textTransform: 'capitalize', cursor: 'pointer' }}
+                            >
                                 {userData.name}
                             </Typography>
                         </Box>

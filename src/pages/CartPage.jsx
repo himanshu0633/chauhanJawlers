@@ -18,25 +18,6 @@ import { publicUrl } from '../common components/PublicUrl';
 const formatINR = (n) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(Number(n || 0));
 
-const getItemPriceNumber = (item) => parseFloat(item?.consumer_price ?? item?.price ?? 0) || 0;
-
-// per-item cart quantity (fallback to old 'quantity' if you have legacy items)
-const getCartQty = (item) =>
-  typeof item?.cartQty === 'number'
-    ? item.cartQty
-    : (typeof item?.quantity === 'number' ? item.quantity : 1);
-
-// robust unit price (variant > unitPrice > consumer_price > price)
-const getUnitPrice = (item) =>
-  Number(
-    item?.unitPrice ??
-    item?.selectedVariant?.final_price ??
-    item?.selectedVariant?.finalPrice ??
-    item?.consumer_price ??
-    item?.price ??
-    0
-  );
-
 
 // ---------- Empty state ----------
 function EmptyCart({ onContinueShopping }) {
