@@ -34,7 +34,7 @@ import ShippingPolicy from './ContactJewellers/ShippingPolicy';
 import TermsConditions from './ContactJewellers/TermsConditions';
 import Privacy from './ContactJewellers/Privacy';
 import UserOrders from './AccountPages/UserOrders';
-import GetInTouchCard from './common components/GetInTouchCard';
+import GetInTouchCard from './popUp/GetInTouchCard';
 import ProfileEdit from './AccountPages/ProfileEdit';
 
 function App() {

@@ -84,7 +84,7 @@ export const MobileBottomNav = () => {
                         </Badge>
                     }
                 />
-                <BottomNavigationAction onClick={() => navigate("/profile")} label="You" icon={<PersonOutline />} />
+                <BottomNavigationAction onClick={() => navigate("/profileEdit")} label="You" icon={<PersonOutline />} />
             </BottomNavigation>
         </Paper>
     );
