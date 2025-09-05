@@ -19,10 +19,10 @@ import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { useNavigate } from 'react-router-dom';
 
 const menu = [
-    { icon: <HistoryOutlinedIcon sx={{ color: '#6a2322' }} />, label: "Order History" },
+    { icon: <HistoryOutlinedIcon sx={{ color: '#6a2322' }} />, label: "Order History", navigateTo: "/userOrder" },
     // { icon: <CardGiftcardOutlinedIcon sx={{ color: '#6a2322' }} />, label: "Gift Card Balance" },
     // { icon: <LocalShippingOutlinedIcon sx={{ color: '#6a2322' }} />, label: "Track Order" },
-    { icon: <ChatBubbleOutlineOutlinedIcon sx={{ color: '#6a2322' }} />, label: "Contact Us" }
+    { icon: <ChatBubbleOutlineOutlinedIcon sx={{ color: '#6a2322' }} />, label: "Contact Us", navigateTo: "/getintouch" }
 ];
 
 export default function AccountPopup({ onClose }) {
@@ -154,6 +154,11 @@ export default function AccountPopup({ onClose }) {
                                     px: itemPaddingX,
                                     minHeight: '28px',
                                     cursor: 'pointer'
+                                }}
+                                onClick={() => {
+                                    if (item.navigateTo) {
+                                        navigate(item.navigateTo);
+                                    }
                                 }}
                             >
                                 <ListItemIcon sx={{ minWidth: iconMinWidth }}>

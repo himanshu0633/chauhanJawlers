@@ -5,28 +5,22 @@ import {
     Typography,
     Button,
     Paper,
-    InputAdornment,
-    useTheme
 } from "@mui/material";
-import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
-import DiamondIcon from "@mui/icons-material/Diamond"; // substitute for jewel graphic
+import DiamondIcon from "@mui/icons-material/Diamond"; 
 
 export default function GetInTouchCard() {
-    const theme = useTheme();
 
     return (
         <Box
-            // minHeight="100vh"
-            // py={5}
+            py={3}
             display="flex"
             justifyContent="center"
             alignItems="center"
-            sx={{ background: "#f9f6f4" }}
         >
             <Paper
                 elevation={3}
                 sx={{
-                    maxWidth: 340,
+                    maxWidth: { sm: "400px" },
                     width: "95%",
                     borderRadius: "18px",
                     p: { xs: 2.5, sm: 4 },
@@ -89,9 +83,8 @@ export default function GetInTouchCard() {
                         fullWidth
                         InputProps={{
                             sx: {
-                                borderRadius: "40px",
-                                background: "#fff7f4",
-                                fontSize: "1.05rem"
+                                borderRadius: "10px",
+                                fontSize: "1rem"
                             }
                         }}
                         sx={{
@@ -104,9 +97,8 @@ export default function GetInTouchCard() {
                         fullWidth
                         InputProps={{
                             sx: {
-                                borderRadius: "40px",
-                                background: "#fff7f4",
-                                fontSize: "1.05rem"
+                                borderRadius: "10px",
+                                fontSize: "1rem"
                             },
                             inputMode: "tel",
                         }}
@@ -117,35 +109,21 @@ export default function GetInTouchCard() {
                 {/* CTA Button */}
                 <Button
                     variant="contained"
-                    disableElevation
-                    endIcon={
-                        <Box
-                            sx={{
-                                bgcolor: "#e2bbb1",
-                                borderRadius: "50%",
-                                p: "7px",
-                                ml: 1,
-                                display: "flex",
-                                alignItems: "center"
-                            }}
-                        >
-                            <ChevronRightRoundedIcon sx={{ fontSize: 23, color: "#7b2329" }} />
-                        </Box>
-                    }
+                    // disableElevation
                     sx={{
                         width: "100%",
-                        background: "linear-gradient(90deg, #dcb8a7 0%, #be9792 100%)",
-                        color: "#7b2329",
+                        background: "#44170D",
+                        color: "#fff",
                         fontWeight: 600,
                         borderRadius: "22px",
                         textTransform: "none",
                         fontSize: "1.1rem",
                         py: 1.1,
-                        boxShadow: "0 2px 18px 0 #efe3d8",
+                        // boxShadow: "0 2px 18px 0 #efe3d8",
                         transition: "background 0.2s, box-shadow 0.2s",
                         "&:hover": {
-                            background: "linear-gradient(90deg, #f5d1bf 0%, #cdabb3 100%)",
-                            boxShadow: "0 4px 28px #e4cac2"
+                            background: "#44170db9",
+                            // boxShadow: "0 4px 28px #e4cac2"
                         }
                     }}
                 >

@@ -34,6 +34,7 @@ import ShippingPolicy from './ContactJewellers/ShippingPolicy';
 import TermsConditions from './ContactJewellers/TermsConditions';
 import Privacy from './ContactJewellers/Privacy';
 import UserOrders from './AccountPages/UserOrders';
+import GetInTouchCard from './common components/GetInTouchCard';
 
 function App() {
   const location = useLocation();
@@ -74,6 +75,7 @@ function App() {
         <Route path="/terms" element={<TermsConditions />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/userOrder" element={<UserOrders />} />
+        <Route path="/getintouch" element={<GetInTouchCard />} />
 
 
         {/* admin panel  */}
