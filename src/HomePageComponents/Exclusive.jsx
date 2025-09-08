@@ -338,6 +338,10 @@ export default function Exclusive() {
     );
   }, [products, genderFilter]);
 
+  const handleCategoryClick = (gender) => {
+    navigate(`/allJewellery?gender=${gender}`);
+  };
+
   return (
     <>
       <RootBox>
@@ -349,7 +353,8 @@ export default function Exclusive() {
               <Slider {...sliderSettings}>
                 {filteredProducts.map((item) => (
                   <Box key={item._id} sx={{ px: 1.3 }}>
-                    <CategoryCard onClick={() => navigate(`/allJewellery`)}>
+                    <CategoryCard onClick={() => handleCategoryClick(item.genderVariety)}
+                      sx={{ cursor: 'pointer', '&:hover img': { transform: 'scale(1.05)' } }}>
                       <CategoryImg
                         component="img"
                         src={publicUrl(item.media[0].url)}
