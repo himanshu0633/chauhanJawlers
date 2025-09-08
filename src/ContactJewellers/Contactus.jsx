@@ -13,10 +13,51 @@ import FacebookIcon from "@mui/icons-material/Facebook";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import axiosInstance from "../common components/AxiosInstance";
+import { toast, ToastContainer } from "react-toastify";
 
 const Contactus = () => {
     const theme = useTheme();
     const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
+
+    const handleSubmit = async (formData) => {
+        try {
+            const { data } = await axiosInstance.post('/send-contact-form', formData);
+            toast.success(data.message || 'Form submitted successfully!');
+            return true;
+        } catch (err) {
+            const msg = err?.response?.data?.message || err.message || 'Error submitting form';
+            toast.error(msg);
+            return true;
+        }
+    };
+
+    const onFormSubmit = async (e) => {
+        e.preventDefault();
+        const form = e.target;
+
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const formData = {
+            name: form.name.value,
+            email: form.email.value,
+            mobile: form.mobile.value,
+            location: form.location.value,
+            message: form.message.value,
+        };
+
+        // handleSubmit(formData);
+        const ok = await handleSubmit(formData);
+        if (ok) {
+            form.reset();              
+            form.querySelector('#name')?.focus(); 
+        }
+    };
+
+
     return (
         <Box
             component="section"
@@ -31,6 +72,7 @@ const Contactus = () => {
                 alignItems: "center",
             }}
         >
+            <ToastContainer position="top-right" autoClose={2000} />
             {/* Heading */}
             <Box textAlign="center" mb={6} maxWidth={600} mx="auto">
                 <Typography
@@ -90,8 +132,8 @@ const Contactus = () => {
                         <Box component="span" sx={{ fontSize: 20, color: "#FFD700" }}>
                             📍
                         </Box>
-                        <Typography variant="body2" width={ "90%"} color="#fff">
-                            Chauhan sons jewellers&apos;s ,
+                        <Typography variant="body2" width={"90%"} color="#fff">
+                            Chauhan sons jewellers ,
                             S.C.F 74 PHASE 5  SECTOR 59 , Sahibzada Ajit Singh Nagar, PUNJAB 160059,INDIA
                         </Typography>
                     </Box>
@@ -195,11 +237,8 @@ const Contactus = () => {
                         component="form"
                         noValidate
                         autoComplete="off"
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            alert("Form submitted!");
-                            handleSubmit();
-                        }}
+
+                        onSubmit={onFormSubmit}
                         sx={{ display: "flex", flexDirection: "column", gap: 3 }}
                     >
                         <Box
@@ -317,7 +356,7 @@ const Contactus = () => {
                                 },
                             }}
                         />
-                       
+
                         <Box textAlign="center">
                             <Button
                                 variant="contained"

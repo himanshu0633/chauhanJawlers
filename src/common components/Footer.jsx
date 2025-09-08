@@ -205,6 +205,7 @@ export default function Footer() {
                         <FooterLink onClick={() => navigate('/privacy')}>Privacy Policy</FooterLink>
                         <FooterLink onClick={() => navigate('/shipping')}>Shipping and Delivery Policy</FooterLink>
                         <FooterLink onClick={() => navigate('/return')}>Return, Refund and Cancellation Policy</FooterLink>
+                        <FooterLink onClick={() => navigate('/contact')}>Contact us</FooterLink>
                     </FooterSection>
 
                     <FooterSection1 sx={{ minWidth: 220 }}>
