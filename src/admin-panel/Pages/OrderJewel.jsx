@@ -428,7 +428,7 @@ const OrderJewel = () => {
         {selectedOrder && (
           <>
             <DialogTitle>
-              <Typography variant="h6">Order Details</Typography>
+              <Typography sx={{ fontWeight: 'bold',fontSize: '1.5rem' }} >Order Details</Typography>
             </DialogTitle>
             <DialogContent dividers>
               <Grid container spacing={2}>
@@ -437,7 +437,7 @@ const OrderJewel = () => {
                     Order Information
                   </Typography>
                   <Divider sx={{ mb: 2 }} />
-                  <Typography><strong>Status:</strong>
+                  <div><strong>Status:</strong>
                     <FormControl sx={{ ml: 1, width: 160 }} size="small">
                       <InputLabel>Status</InputLabel>
                       <Select
@@ -451,7 +451,7 @@ const OrderJewel = () => {
                         <MenuItem value="Cancelled">Cancelled</MenuItem>
                       </Select>
                     </FormControl>
-                  </Typography>
+                  </div>
                   <Typography><strong>Payment ID:</strong> {selectedOrder.paymentId || 'N/A'}</Typography>
                   <Typography><strong>Address:</strong> {selectedOrder.address}</Typography>
                   <Typography><strong>Phone:</strong> {selectedOrder.phone}</Typography>

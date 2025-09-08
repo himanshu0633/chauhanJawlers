@@ -40,10 +40,28 @@ const UserOrders = () => {
     const [expanded, setExpanded] = useState(null);
     const userId = localStorage.getItem('userData') ? JSON.parse(localStorage.getItem('userData'))._id : null;
 
+    // useEffect(() => {
+    //     const fetchOrders = async () => {
+    //         try {
+    //             // const response = await axiosInstance.get('/api/orders/');
+    //             const response = await axiosInstance.get(`/api/orders/${userId}`);
+    //             setOrders(response.data.orders);
+    //         } catch (error) {
+    //             setOrders([]);
+    //         }
+    //         setLoading(false);
+    //     };
+    //     fetchOrders();
+    //     // }, []);
+    // }, [userId]);
+
+    
+    // option2: Polling every 10 seconds to fetch latest orders and status
     useEffect(() => {
+        let intervalId;
+
         const fetchOrders = async () => {
             try {
-                // const response = await axiosInstance.get('/api/orders/');
                 const response = await axiosInstance.get(`/api/orders/${userId}`);
                 setOrders(response.data.orders);
             } catch (error) {
@@ -51,9 +69,14 @@ const UserOrders = () => {
             }
             setLoading(false);
         };
+
         fetchOrders();
-        // }, []);
+
+        intervalId = setInterval(fetchOrders, 10000); // 10 seconds
+
+        return () => clearInterval(intervalId); // cleanup
     }, [userId]);
+
 
     const handleExpand = (orderId) => {
         setExpanded(expanded === orderId ? null : orderId);
@@ -105,7 +128,7 @@ const UserOrders = () => {
                                                 <ListItem key={item.productId + idx} disableGutters>
                                                     <Avatar
                                                         variant="rounded"
-                                                        src={publicUrl(item.image) }
+                                                        src={publicUrl(item.image)}
                                                         sx={{ width: 48, height: 48, mr: 2 }}
                                                     >
                                                         {item.name}
