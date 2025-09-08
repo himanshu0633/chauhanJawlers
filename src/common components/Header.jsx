@@ -325,7 +325,8 @@ export default function Header() {
                   }}
 
                   onMouseEnter={() => {
-                    setHoveredMenu('category');  // Trigger the 'category' dropdown
+                    // setHoveredMenu('category');  // Trigger the 'category' dropdown
+                    setHoveredMenu(item.apiId);
                     setDropdownOpen(true);
                   }}
                 >

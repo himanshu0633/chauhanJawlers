@@ -731,8 +731,8 @@ export default function SingleProductPage() {
         fetchData();
     }, [id]);
 
-    if (loading) return <div>Loading...</div>;
-    if (!product) return <div>Product not found</div>;
+    if (loading) return <div style={{ textAlign: 'center', padding: '20px', fontSize: '1.5rem' }}>Loading...</div>;
+    if (!product) return <div style={{ textAlign: 'center', padding: '20px', fontSize: '1.5rem' }}>Product not found</div>;
 
     const selectedVariant = product.quantity[selectedVariantIndex];
     const finalPrice = selectedVariant?.["0"]?.finalPrice;

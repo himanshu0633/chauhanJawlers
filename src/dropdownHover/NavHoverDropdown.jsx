@@ -442,12 +442,12 @@ import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../common components/AxiosInstance";
 import { publicUrl } from "../common components/PublicUrl";
-import { 
-  DropdownContainer, 
-  NavigationGrid, 
-  SideNavigation, 
-  SideNavItem, 
-  ContentArea, 
+import {
+  DropdownContainer,
+  NavigationGrid,
+  SideNavigation,
+  SideNavItem,
+  ContentArea,
   RightPanel,
   CategoryGrid,
   CategoryColumn,
@@ -458,12 +458,12 @@ import {
   BigImageWrapper,
   PromotionalBanner
 } from './NavdropdownStyles';
-import { 
-  SIDENAV_TABS, 
-  PRICE_RANGES, 
-  GENDERS, 
+import {
+  SIDENAV_TABS,
+  PRICE_RANGES,
+  GENDERS,
   API_ENDPOINTS,
-  GRID_BREAKPOINTS 
+  GRID_BREAKPOINTS
 } from './Constants';
 
 /**
@@ -474,11 +474,11 @@ import {
 const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
   const theme = useTheme();
   const navigate = useNavigate();
-  
+
   // Responsive breakpoints
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const canHover = useMediaQuery("(hover: hover)");
-  
+
   // State management
   const [activeTab, setActiveTab] = useState(hoveredFilter || "category");
   const [subcategories, setSubcategories] = useState([]);
@@ -489,10 +489,18 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
   // Early return for non-desktop devices or non-hover capable devices
   if (!isMdUp || !canHover) return null;
 
+  // Filter subcategories based on hovered filter
+  const filteredSubcategories = useMemo(() => {
+    return subcategories.filter(
+      subcat => subcat.category_id?._id === hoveredFilter
+    );
+  }, [subcategories, hoveredFilter]);
+
   // Sync active tab with hovered filter
   useEffect(() => {
     if (hoveredFilter) {
-      setActiveTab(hoveredFilter);
+      // setActiveTab(hoveredFilter);
+      setActiveTab("category");
     }
   }, [hoveredFilter]);
 
@@ -502,17 +510,21 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
       try {
         setLoading(true);
         setError(null);
-        
+
         const response = await axiosInstance.get(API_ENDPOINTS.SUBCATEGORIES);
-        const data = response?.data?.categories ?? 
-                    response?.data?.data ?? 
-                    (Array.isArray(response?.data) ? response.data : []);
-        
-        setSubcategories(Array.isArray(data) ? data : []);
+        // const data = response?.data?.categories ??
+        //   response?.data?.data ??
+        //   (Array.isArray(response?.data) ? response.data : []);
+
+        // setSubcategories(Array.isArray(data) ? data : []);
+
+        const data = response?.data ?? [];
+        setSubcategories(data);
+
       } catch (err) {
-        const errorMessage = err?.response?.data?.message || 
-                           err?.message || 
-                           "Failed to load categories";
+        const errorMessage = err?.response?.data?.message ||
+          err?.message ||
+          "Failed to load categories";
         setError(errorMessage);
         setSubcategories([]);
       } finally {
@@ -529,17 +541,17 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
       try {
         setLoading(true);
         setError(null);
-        
+
         const response = await axiosInstance.get(API_ENDPOINTS.OCCASIONS);
-        const data = response?.data?.categories ?? 
-                    response?.data?.data ?? 
-                    (Array.isArray(response?.data) ? response.data : []);
-        
+        const data = response?.data?.categories ??
+          response?.data?.data ??
+          (Array.isArray(response?.data) ? response.data : []);
+
         setOccasions(Array.isArray(data) ? data : []);
       } catch (err) {
-        const errorMessage = err?.response?.data?.message || 
-                           err?.message || 
-                           "Failed to load occasions";
+        const errorMessage = err?.response?.data?.message ||
+          err?.message ||
+          "Failed to load occasions";
         setError(errorMessage);
         setOccasions([]);
       } finally {
@@ -551,14 +563,14 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
   }, []);
 
   // Calculate responsive grid columns
-  const gridColumns = useMediaQuery(theme.breakpoints.up("xl")) ? GRID_BREAKPOINTS.XL : 
-                     useMediaQuery(theme.breakpoints.up("lg")) ? GRID_BREAKPOINTS.LG : 
-                     GRID_BREAKPOINTS.DEFAULT;
+  const gridColumns = useMediaQuery(theme.breakpoints.up("xl")) ? GRID_BREAKPOINTS.XL :
+    useMediaQuery(theme.breakpoints.up("lg")) ? GRID_BREAKPOINTS.LG :
+      GRID_BREAKPOINTS.DEFAULT;
 
   // Organize categories into balanced columns
   const categoryColumns = useMemo(() => {
     const columns = Array.from({ length: gridColumns }, () => []);
-    subcategories.forEach((item, index) => 
+    subcategories.forEach((item, index) =>
       columns[index % gridColumns].push(item)
     );
     return columns;
@@ -567,7 +579,7 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
   // Handle navigation with proper URL parameters
   const handleNavigation = (type, item) => {
     const params = new URLSearchParams();
-    
+
     switch (type) {
       case 'subcategory':
         navigate(`/allJewellery?subcategory=${item._id}`);
@@ -587,17 +599,17 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
       default:
         console.warn(`Unknown navigation type: ${type}`);
     }
-    
+
     // Close dropdown after navigation
     onClose?.();
   };
 
   // Render loading state
   const renderLoadingState = () => (
-    <Typography sx={{ 
-      color: "#fff", 
-      fontSize: 16, 
-      px: 2, 
+    <Typography sx={{
+      color: "#fff",
+      fontSize: 16,
+      px: 2,
       py: 4,
       fontWeight: 500,
       textAlign: "center"
@@ -608,10 +620,10 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
 
   // Render error state
   const renderErrorState = () => (
-    <Typography sx={{ 
-      color: "#ffb4b4", 
-      fontSize: 14, 
-      px: 2, 
+    <Typography sx={{
+      color: "#ffb4b4",
+      fontSize: 14,
+      px: 2,
       py: 4,
       fontWeight: 500,
       textAlign: "center"
@@ -622,11 +634,11 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
 
   // Render empty state
   const renderEmptyState = (message) => (
-    <Typography sx={{ 
-      color: "#fff", 
-      opacity: 0.7, 
-      fontSize: 14, 
-      px: 2, 
+    <Typography sx={{
+      color: "#fff",
+      opacity: 0.7,
+      fontSize: 14,
+      px: 2,
       py: 4,
       textAlign: "center"
     }}>
@@ -640,7 +652,8 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
       {loading && renderLoadingState()}
       {error && renderErrorState()}
 
-      {subcategories.length > 0 ? (
+      {/* option 1: */}
+      {/* {subcategories.length > 0 ? (
         categoryColumns.map((column, columnIndex) => (
           <CategoryColumn key={columnIndex}>
             {column.map((item) => (
@@ -649,8 +662,8 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
                 onClick={() => handleNavigation('subcategory', item)}
               >
                 <CategoryIcon>
-                  <img 
-                    src={publicUrl(item.image)} 
+                  <img
+                    src={publicUrl(item.image)}
                     alt={item.name}
                     loading="lazy"
                   />
@@ -673,15 +686,52 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
         ))
       ) : (
         !loading && !error && renderEmptyState("No categories available")
+      )} */}
+
+      {/*  option 2: */}
+      {/* Main content: show only filteredSubcategories for hovered category */}
+      {/* Conditionally render subcategory grid for 'category' tab */}
+      {hoveredFilter && filteredSubcategories.length > 0 ? (
+        <CategoryGrid>
+          {filteredSubcategories.map(subcat => (
+            <CategoryItem key={subcat._id} onClick={() => {
+              // Navigate to filtered products by subcategory id
+              navigate(`/allJewellery?subcategory=${subcat._id}`);
+              onClose();
+            }}>
+              <CategoryIcon>
+                <img src={publicUrl(subcat.image)} alt={subcat.name} loading="lazy" />
+              </CategoryIcon>
+              <Typography
+                sx={{
+                  color: "#fff",
+                  fontWeight: 500,
+                  fontSize: { xs: 12, lg: 13 },
+                  textAlign: "center",
+                  lineHeight: 1.3,
+                  mt: 0.5
+                }}
+              >
+                {subcat.name}
+              </Typography>
+            </CategoryItem>
+          ))}
+        </CategoryGrid>
+      ) : (
+        <Typography sx={{ color: "#fff", padding: 2, textAlign: "center" }}>
+          No subcategories available.
+        </Typography>
       )}
+
+
     </CategoryGrid>
   );
 
   // Render big grid content for price, gender, and occasion tabs
   const renderBigGridContent = () => {
-    const data = activeTab === "price" ? PRICE_RANGES : 
-                 activeTab === "gender" ? GENDERS : 
-                 occasions;
+    const data = activeTab === "price" ? PRICE_RANGES :
+      activeTab === "gender" ? GENDERS :
+        occasions;
 
     if (data.length === 0 && activeTab === "occasion") {
       return renderEmptyState("No occasions available");
@@ -695,16 +745,16 @@ const NavHoverDropdown = ({ hoveredFilter, onClose }) => {
             onClick={() => handleNavigation(activeTab, item)}
           >
             <BigImageWrapper>
-              <img 
-                src={item.image ? publicUrl(item.image) : item.img} 
+              <img
+                src={item.image ? publicUrl(item.image) : item.img}
                 alt={item.name}
                 loading="lazy"
               />
             </BigImageWrapper>
-            <Typography sx={{ 
-              color: "#fff", 
-              fontWeight: 600, 
-              fontSize: 15, 
+            <Typography sx={{
+              color: "#fff",
+              fontWeight: 600,
+              fontSize: 15,
               mt: 1,
               textAlign: "center",
               lineHeight: 1.2
