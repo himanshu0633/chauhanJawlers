@@ -53,7 +53,6 @@ const Contactus = () => {
         const ok = await handleSubmit(formData);
         if (ok) {
             form.reset();              
-            form.querySelector('#name')?.focus(); 
         }
     };
 
