@@ -38,6 +38,7 @@ import GetInTouchCard from './popUp/GetInTouchCard';
 import ProfileEdit from './AccountPages/ProfileEdit';
 import Contactus from './ContactJewellers/Contactus';
 import VideoUpload from './admin-panel/Pages/VideoUpload';
+import VideoGallery from './HomePageComponents/VideoGallery';
 
 function App() {
   const location = useLocation();
@@ -48,7 +49,7 @@ function App() {
   return (
     <div
       className="fade-in"
-      >
+    >
       {/* Render Header, Footer, and MobileBottomNav only on non-admin routes */}
       {!isAdminRoute && (
         <>
@@ -83,6 +84,7 @@ function App() {
         <Route path="/getintouch" element={<GetInTouchCard />} />
         <Route path="/profileEdit" element={<ProfileEdit />} />
         <Route path="/contact" element={<Contactus />} />
+        <Route path="/videoGallery" element={<VideoGallery />} />
 
 
         {/* admin panel  */}

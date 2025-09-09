@@ -9,6 +9,7 @@ import ChauhanWorld from '../HomePageComponents/ChauhanWorld'
 import ExchangeOffer from '../HomePageComponents/ExchangeOffer'
 import Exclusive from '../HomePageComponents/Exclusive'
 import ChauhanExperience from '../HomePageComponents/ChauhanExperience'
+import VideoGallery from '../HomePageComponents/VideoGallery'
 // import VideoCardSlider from '../common components/VideoCardSlider'
 
 const HomePage = () => {
@@ -22,6 +23,7 @@ const HomePage = () => {
             <Trending />
             {/* <MasterDaimondSlider /> */}
             {/* <VideoCardSlider /> */}
+            <VideoGallery />
             <NewCollection />
             <ChauhanWorld />
             <ExchangeOffer />
