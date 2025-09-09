@@ -45,7 +45,9 @@ function App() {
   const isAdminRoute = location.pathname.startsWith('/AdminPanel');
 
   return (
-    <>
+    <div
+      className="fade-in"
+      >
       {/* Render Header, Footer, and MobileBottomNav only on non-admin routes */}
       {!isAdminRoute && (
         <>
@@ -114,7 +116,7 @@ function App() {
         <Box sx={{ paddingTop: { xs: 7, sm: 0 } }} />
         <MobileBottomNav />
       </>}
-    </>
+    </div>
   );
 }
 

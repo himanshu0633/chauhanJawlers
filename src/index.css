@@ -4,6 +4,23 @@
     text-decoration: none ! important;
 }
 
+.fade-in {
+    animation: fadeInSlide .5s cubic-bezier(.43, .13, .23, .96);
+}
+
+@keyframes fadeInSlide {
+    from {
+        opacity: 0;
+        transform: translateY(32px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+
 .primary_Bgclr {
     background-color: #44170D !important;
 }
