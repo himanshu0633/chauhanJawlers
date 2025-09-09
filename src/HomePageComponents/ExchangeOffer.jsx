@@ -234,13 +234,13 @@ export default function ExchangeOffer() {
                 </VideoContainer>
 
                 <BottomSection>
-                    <ExploreButton
+                    {/* <ExploreButton
                         variant="contained"
                         endIcon={<ArrowForward sx={{ fontSize: "18px" }} />}
                         onClick={() => console.log("Explore Now clicked")}
                     >
                         Explore Now
-                    </ExploreButton>
+                    </ExploreButton> */}
 
                     <DescriptionText>
                         Join us in celebrating your treasured moments with jewellery designed to last a lifetime.

@@ -77,7 +77,7 @@
 // }
 
 // //2:
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Box, Typography, Grid, Card, CardMedia, CardContent } from '@mui/material';
 import axiosInstance from '../common components/AxiosInstance';
 import { publicUrl } from '../common components/PublicUrl';
@@ -87,6 +87,8 @@ import "slick-carousel/slick/slick-theme.css";
 
 export default function VideoGallery() {
     const [videos, setVideos] = useState([]);
+    const [playingVideoId, setPlayingVideoId] = useState(null);
+    const sliderRef = useRef(null);
 
     useEffect(() => {
         axiosInstance.get('/videos')
@@ -99,7 +101,7 @@ export default function VideoGallery() {
         speed: 500,
         slidesToShow: Math.min(videos.length, 4),
         slidesToScroll: 2,
-        autoplay: true,
+        autoplay: false,
         arrows: true,
         adaptiveHeight: true,
         responsive: [
@@ -117,19 +119,30 @@ export default function VideoGallery() {
     if (videos.length > 4) {
         // Show slick slider
         return (
-            <Box sx={{ py: 5, px: { xs: 1, sm: 2 }, background: '#faf7f8' }}>
+            <Box sx={{ py: 5, px: { xs: 1, sm: 2 }, background: '#faf7f8', overflow: 'hidden' }}>
                 <Typography variant="h4" align="center" fontWeight={700} sx={{ mb: 4, fontFamily: 'serif', color: '#511a1a' }}>
                     Latest Videos
                 </Typography>
-                <Slider {...sliderSettings}>
+                <Slider ref={sliderRef} {...sliderSettings}>
                     {videos.map(video => (
                         <Box key={video._id} sx={{ px: 1 }}>
-                            {/* Keep your card layout or simplified layout inside slider */}
                             <Card
                                 elevation={3} sx={{ width: 240, mx: 'auto', background: '#fff', borderRadius: 3, overflow: 'hidden' }}
                             >
                                 <CardMedia
-                                    component="video" src={publicUrl(video.url)} controls sx={{ height: 260, objectFit: 'cover', background: '#000' }}
+                                    component="video" src={publicUrl(video.url)} controls
+                                    onPlay={() => {
+                                        setPlayingVideoId(video._id);
+                                        sliderRef.current?.slickPause();
+                                    }}
+                                    onEnded={() => {
+                                        setPlayingVideoId(null);
+                                        sliderRef.current?.slickPlay();
+                                    }}
+                                    sx={{
+                                        height: 260, objectFit: 'cover', background: '#000',
+                                        boxShadow: playingVideoId === video._id ? '0 0 15px 4px #dfbce6ff' : undefined,
+                                    }}
                                 />
                                 <Typography align="center" sx={{ p: 1, fontFamily: 'serif', fontWeight: 500, color: '#442f2f' }}>{video.title}</Typography>
                             </Card>
