@@ -112,6 +112,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToWishlist, removeFromWishlist } from '../store/Action';
 import { createSelector } from '@reduxjs/toolkit';
 import { toast, ToastContainer } from 'react-toastify';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
 
 // 1: with filter (isn't showing red heart icon)
 // export const selectWishlist = createSelector(
@@ -134,6 +136,8 @@ export const selectWishlist = createSelector(
 function JewelleryCard({ product }) {
     const dispatch = useDispatch();
     const wishlist = useSelector(selectWishlist);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMsg, setSnackbarMsg] = useState('');
 
     // const isWishlisted = wishlist.some(item => item._id === product._id);
 
@@ -151,17 +155,21 @@ function JewelleryCard({ product }) {
 
         if (isWishlisted) {
             dispatch(removeFromWishlist(product._id));
-            toast.info('Removed from Wishlist');
+            // toast.info('Removed from Wishlist');
+            setSnackbarMsg('Removed from Wishlist');
 
         } else {
             dispatch(addToWishlist(product));
-            toast.success('Added to Wishlist');
+            // toast.success('Added to Wishlist');
+            setSnackbarMsg('Added to Wishlist');
         }
+        setSnackbarOpen(true);
     }
 
     return (
         <Box sx={{ pb: 1, position: 'relative' }}>
-            <ToastContainer position="top-right" autoClose={2000} hideProgressBar={false} />
+            {/* <ToastContainer position="top-right" autoClose={2000}  /> */}
+
             <Box sx={{
                 position: 'relative',
                 borderRadius: 2,
@@ -211,6 +219,18 @@ function JewelleryCard({ product }) {
                     ₹{best.finalPrice}
                 </Typography>
             </Link>
+
+            {/* toast for wishlist */}
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={2000}
+                onClose={() => setSnackbarOpen(false)}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+                <MuiAlert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
+                    {snackbarMsg}
+                </MuiAlert>
+            </Snackbar>
         </Box>
     );
 }
