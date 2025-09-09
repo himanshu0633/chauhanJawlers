@@ -446,7 +446,7 @@ export function JewelleryGrid() {
                         // sx={{ width: '30%' }}
                         sx={{ width: { xs: '48%', sm: '30%' } }}
                     >
-                        <MenuItem value="all">All Prices</MenuItem>
+                        <MenuItem value="all" >All Prices</MenuItem>
                         {priceBuckets.map(bucket => (
                             <MenuItem key={bucket.label} value={bucket.label}>
                                 {bucket.label}
@@ -460,7 +460,7 @@ export function JewelleryGrid() {
                         // sx={{ width: '30%'}}
                         sx={{ width: { xs: '48%', sm: '30%' } }}
                     >
-                        <MenuItem value="relevance">Sort by: Relevance</MenuItem>
+                        <MenuItem value="relevance" >Sort by: Relevance</MenuItem>
                         <MenuItem value="price-asc">Price: Low to High</MenuItem>
                         <MenuItem value="price-desc">Price: High to Low</MenuItem>
                         <MenuItem value="newest">Newest First</MenuItem>
