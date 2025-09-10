@@ -1,3 +1,4 @@
+// // 2: single product without review
 // import React, { useEffect, useState } from 'react';
 // import {
 //     Box,
@@ -569,6 +570,551 @@
 
 
 // // 2: single product with review
+// import React, { useEffect, useState } from 'react';
+// import {
+//     Box,
+//     Typography,
+//     Button,
+//     IconButton,
+//     Accordion,
+//     AccordionSummary,
+//     AccordionDetails,
+//     Chip,
+//     Container,
+//     Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper
+// } from '@mui/material';
+// import {
+//     Share,
+//     ExpandMore,
+//     Settings,
+//     Diamond,
+// } from '@mui/icons-material';
+// import { useNavigate, useParams } from 'react-router-dom';
+// import axiosInstance from '../common components/AxiosInstance';
+// import { publicUrl } from '../common components/PublicUrl';
+// import LocationSelector from '../common components/LocationSelector';
+// import { useDispatch, useSelector } from 'react-redux';
+// import { addData, addToWishlist, removeFromWishlist } from '../store/Action';
+// import { toast, ToastContainer } from 'react-toastify';
+// import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+// import FavoriteIcon from '@mui/icons-material/Favorite';
+// import { createSelector } from '@reduxjs/toolkit';
+// import ProductReviewsSection from '../Reviews/ProductReviewsSection';
+
+// export const selectWishlist = createSelector(
+//     [state => Array.isArray(state.app?.wishlist) ? state.app.wishlist : []],
+//     wishlist => [...wishlist]  // creates a new array to avoid identity reuse warning
+// );
+
+// const normalizeNumber = val => {
+//     const n = parseFloat(val);
+//     return Number.isNaN(n) ? null : n;
+// };
+
+// const parseVariants = (raw) => {
+//     try {
+//         let arr = raw;
+//         if (typeof raw === 'string') arr = JSON.parse(raw);
+//         if (!Array.isArray(arr)) return [];
+
+//         // if inner entries are strings, parse them
+//         arr = arr.map((x) => (typeof x === 'string' ? JSON.parse(x) : x));
+
+//         const num = (x) => (x === '' || x == null ? null : Number(x));
+
+//         return arr.map((v, i) => {
+//             // flatten weird shape: move v["0"] fields to top
+//             const core = (v && typeof v === 'object' && v['0'] && typeof v['0'] === 'object')
+//                 ? { ...v, ...v['0'] }
+//                 : v;
+
+//             return {
+//                 ...core,
+//                 _key: core._key || `v-${i}`,
+//                 label: core.label || '',
+//                 mrp: num(core.mrp),
+//                 discount: num(core.discount),
+//                 gst: num(core.gst),
+//                 retail_price: num(core.retail_price),
+//                 final_price: num(core.final_price ?? core.finalPrice),
+//                 in_stock: core.in_stock ? String(core.in_stock).toLowerCase() === 'yes' : false,
+//             };
+//         });
+//     } catch (e) {
+//         console.error('Error parsing variants:', e);
+//         return [];
+//     }
+// };
+
+
+// export default function SingleProductPage() {
+//     const [product, setProduct] = useState(null);
+//     const [loading, setLoading] = useState(false);
+//     const [activeTab, setActiveTab] = useState('details');
+//     const navigate = useNavigate();
+//     const { id } = useParams();
+//     const best = product?.bestVariant ?? {};
+//     const wishlist = useSelector(selectWishlist);
+//     const isWishlisted = !!product && wishlist.some(item => item._id === product._id);
+//     const dispatch = useDispatch();
+//     const [units, setUnits] = useState(1);
+//     const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
+//     const handleTabChange = (tab) => setActiveTab(tab);
+
+//     const canAddToCart = Boolean(product?.stock === 'yes');
+//     const handleShare = () => {
+//         if (navigator.share) {
+//             navigator.share({
+//                 title: product.name,
+//                 text: `Check out this product: ${product.name}`,
+//                 url: window.location.href,
+//             }).catch(console.error);
+//         } else {
+//             navigator.clipboard.writeText(window.location.href)
+//                 .then(() => toast.success('Link copied to clipboard!'))
+//                 .catch(() => toast.error('Failed to copy link.'));
+//         }
+//     };
+
+//     const handleWishlistClick = (e) => {
+//         e.stopPropagation();
+//         e.preventDefault();
+//         if (isWishlisted) {
+//             dispatch(removeFromWishlist(product._id));
+//             toast.info('Removed from Wishlist');
+//         } else {
+//             // Find the currently selected variant!
+//             const variant = product.quantity[selectedVariantIndex];
+//             delete variant.weight;
+//             const wishlistItem = {
+//                 ...product,
+//                 selectedVariant: variant,
+//                 price: variant.final_price ?? variant.finalPrice ?? 0, // Store price on top level for Wishlist UI
+//             };
+//             dispatch(addToWishlist(wishlistItem));
+//             toast.info('Added to Wishlist');
+//         }
+//     };
+
+
+//     // Fetch product data from the API
+//     const fetchData = async () => {
+//         setLoading(true);
+//         try {
+//             const response = await axiosInstance.get(`/user/product/${id}`);
+//             const p = response.data;
+//             const variants = parseVariants(p.quantity);
+
+//             // Extract relevant data from the response and set it in state
+//             const fetchedProduct = {
+//                 ...p,
+//                 price: parseFloat(p.consumer_price),
+//                 originalPrice: parseFloat(p.mrp),
+//                 frontImage: publicUrl(p?.media[0]?.url) || '',
+//                 sideImage: p?.media[1] ? publicUrl(p?.media[1]?.url) : '',
+//                 quantity: variants,
+//                 bestVariant: variants.find(v => v.in_stock) || variants[0],
+//             };
+//             setProduct(fetchedProduct);
+//             setSelectedVariantIndex(fetchedProduct.bestVariant ? variants.indexOf(fetchedProduct.bestVariant) : 0);
+//         } catch (error) {
+//             console.error("Error fetching data:", error);
+//         } finally {
+//             setLoading(false);
+//         }
+//     };
+
+//     useEffect(() => {
+//         if (!id) {
+//             console.warn('Product ID is undefined!');
+//             return;
+//         }
+//         fetchData();
+//     }, [id]);
+
+//     if (loading) return <div style={{ textAlign: 'center', padding: '20px', fontSize: '1.5rem' }}>Loading...</div>;
+//     if (!product) return <div style={{ textAlign: 'center', padding: '20px', fontSize: '1.5rem' }}>Product not found</div>;
+
+//     const selectedVariant = product.quantity[selectedVariantIndex];
+//     const finalPrice = selectedVariant?.["0"]?.finalPrice;
+//     const gst = selectedVariant?.["0"]?.gst;
+//     const makingPrice = selectedVariant?.["0"]?.makingPrice;
+//     const weight = selectedVariant?.["0"]?.weight;
+//     const pricePerGram = selectedVariant?.["0"]?.pricePerGram;
+//     const totalWeight = selectedVariant?.["0"]?.totalWeight;
+//     const discount = selectedVariant?.["0"]?.discount;
+//     // console.log('Final Price:', finalPrice);
+
+//     // const unitPrice = finalPrice ?? 0;
+//     const unitPrice = Number(
+//         selectedVariant?.final_price ?? selectedVariant?.finalPrice ?? 0
+//     );
+
+//     // //2:
+//     const handleAddToCart = () => {
+//         if (!product) return;
+//         const variant = product.quantity[selectedVariantIndex];
+//         if (!variant) return;
+
+//         const unit = Number(variant.final_price ?? variant.finalPrice ?? 0);
+
+//         const cartItem = {
+//             ...product,                   // keeps quantity = [flat variants]
+//             selectedVariant: { ...variant },
+//             cartQty: units,               // cart line count
+//             unitPrice: unit,              // per-unit price
+//             totalPrice: unit * units,     // line total
+//         };
+
+//         toast.success('Item added to cart!', { position: 'top-right', autoClose: 2000 });
+//         dispatch(addData(cartItem));
+//     };
+
+//     // Handle increase/decrease in units, while ensuring the total price is updated correctly
+//     const increaseUnits = () => {
+//         setUnits((prev) => {
+//             const updatedUnits = prev + 1;
+//             // Update the total price whenever the unit changes
+//             const updatedTotal = unitPrice * updatedUnits;
+//             return updatedUnits;
+//         });
+//     };
+
+//     const decreaseUnits = () => {
+//         setUnits((prev) => {
+//             const updatedUnits = prev > 1 ? prev - 1 : 1;
+//             // Update the total price whenever the unit changes
+//             const updatedTotal = unitPrice * updatedUnits;
+//             return updatedUnits;
+//         });
+//     };
+
+//     const subTotal = Number(pricePerGram) * Number(totalWeight) + Number(makingPrice);
+
+//     const discountAmount = discount ? subTotal * (Number(discount) / 100) : 0;
+
+//     const discountedValue = subTotal - discountAmount;
+
+
+//     return (
+//         <Box bgcolor="#fff" py={6}>
+//             <ToastContainer position="top-right" autoClose={2000} hideProgressBar={false} />
+//             <Container maxWidth="xl" sx={{ maxWidth: 1140 }}>
+//                 <Box display="flex" alignItems="center" justifyContent="space-between" flexDirection={{ xs: "column", sm: "row" }} gap={{ xs: 3, md: 0 }} mb={4}>
+//                     <Box sx={{ width: { sm: "46%" } }}>
+//                         {/* Product Specs Chips */}
+//                         <Box sx={{ display: 'flex', justifyContent: "center", textAlign: 'center', mb: 1 }}>
+//                             <Chip
+//                                 icon={<Diamond sx={{ color: '#fff' }} />}
+//                                 label={product?.productvariety}
+//                                 sx={{
+//                                     bgcolor: '#44170D',
+//                                     color: '#fff',
+//                                     fontSize: 13,
+//                                     fontWeight: 600,
+//                                     mx: 1,
+//                                     height: 32,
+//                                     px: 1.5,
+//                                     boxShadow: '0 1px 3px rgba(230, 120, 30, 0.3)',
+//                                     textTransform: 'capitalize',
+//                                 }}
+//                             />
+//                             <Chip
+//                                 label={`Stock: ${product?.stock === 'yes' ? 'In Stock' : 'Out of Stock'}`}
+//                                 sx={{
+//                                     bgcolor: '#44170D',
+//                                     color: '#fff',
+//                                     fontSize: 13,
+//                                     fontWeight: 600,
+//                                     mx: 1,
+//                                     height: 32,
+//                                     px: 1.5,
+//                                     boxShadow: '0 1px 3px rgba(230, 120, 30, 0.3)',
+//                                 }}
+//                             />
+//                         </Box>
+
+//                         {/* Title */}
+//                         <Typography
+//                             component="h1"
+//                             sx={{
+//                                 fontFamily: 'serif',
+//                                 fontWeight: 400,
+//                                 fontSize: { xs: 24, md: 34 },
+//                                 color: '#2C2C2C',
+//                                 textAlign: 'center',
+//                                 mb: 1,
+//                                 letterSpacing: '0.03em',
+//                                 textTransform: 'capitalize',
+//                             }}
+//                         >
+//                             {product?.name}
+//                         </Typography>
+
+//                         {/* Price with old price */}
+//                         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
+//                             <Typography sx={{ fontSize: 20, fontWeight: 600, color: '#2C2C2C' }}>
+//                                 {Number(unitPrice * units).toFixed(2)}
+//                             </Typography>
+
+//                         </Box>
+
+//                         <Typography variant="caption" display="block" textAlign="center" sx={{ fontSize: 13, color: '#666', mb: 1 }}>
+//                             incl taxes and charges
+//                         </Typography>
+
+//                         {/* Action Buttons */}
+//                         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 2 }}>
+//                             <IconButton
+//                                 // onClick={() => navigate('/wishlist')}
+//                                 onClick={handleWishlistClick}
+//                                 size="large"
+//                                 aria-label="Add to wishlist"
+//                                 sx={{
+//                                     border: '1px solid #ddd',
+//                                     color: '#666',
+//                                     borderRadius: '50%',
+//                                     width: 46,
+//                                     height: 46,
+//                                     transition: 'background-color 0.3s',
+//                                     '&:hover': { bgcolor: '#f3f1ee' },
+//                                 }}
+//                             >
+//                                 {/* <FavoriteBorder fontSize="medium" /> */}
+//                                 {isWishlisted ? (
+//                                     <FavoriteIcon sx={{ fontSize: 20, color: 'red' }} />
+//                                 ) : (
+//                                     <FavoriteBorderIcon sx={{ fontSize: 20, color: '#bbb' }} />
+//                                 )}
+//                             </IconButton>
+//                             <IconButton
+//                                 onClick={handleShare}
+//                                 size="large"
+//                                 aria-label="Share"
+//                                 sx={{
+//                                     border: '1px solid #ddd',
+//                                     color: '#666',
+//                                     borderRadius: '50%',
+//                                     width: 46,
+//                                     height: 46,
+//                                     transition: 'background-color 0.3s',
+//                                     '&:hover': { bgcolor: '#f3f1ee' },
+//                                 }}
+//                             >
+//                                 <Share fontSize="medium" />
+//                             </IconButton>
+//                         </Box>
+
+//                         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 3 }} >
+//                             <div className="input-group" style={{ maxWidth: '160px' }}>
+//                                 <button
+//                                     className="btn btn-outline-secondary"
+//                                     type="button"
+//                                     onClick={decreaseUnits}
+//                                     aria-label="Decrease quantity"
+//                                 >
+//                                     -
+//                                 </button>
+//                                 <input
+//                                     type="text"
+//                                     className="form-control text-center"
+//                                     value={units}
+//                                     readOnly
+//                                     aria-label="Current quantity"
+//                                 />
+//                                 <button
+//                                     className="btn btn-outline-secondary"
+//                                     type="button"
+//                                     onClick={increaseUnits}
+//                                     aria-label="Increase quantity"
+//                                 >
+//                                     +
+//                                 </button>
+//                             </div>
+
+//                             <Box sx={{ textAlign: 'center' }}>
+//                                 <Button variant="contained" onClick={handleAddToCart} disabled={!canAddToCart} title={!canAddToCart ? 'Selected variant is out of stock' : 'Add to Cart'}>
+//                                     Add to Cart
+//                                 </Button>
+//                             </Box>
+//                         </Box>
+
+
+//                     </Box>
+
+//                     {/* Product Images */}
+//                     <Box sx={{ width: { sm: "55%" } }}>
+//                         <Box
+//                             sx={{
+//                                 display: 'flex',
+//                                 justifyContent: 'center',
+//                                 alignItems: 'center',
+//                                 gap: 2,
+//                                 borderRadius: 3,
+//                                 position: 'relative',
+//                             }}
+//                         >
+//                             <Box>
+//                                 <Box component="img" src={product?.frontImage} alt="Front view" sx={{ height: 300, width: '100%', objectFit: 'cover', userSelect: 'none', boxShadow: '0 6px 20px rgb(0 0 0 / 0.10)', borderRadius: 2 }} draggable={false} />
+//                             </Box>
+//                             <Box>
+//                                 {product?.sideImage && (
+//                                     <Box component="img" src={product?.sideImage} alt="Side view" sx={{ height: 300, width: '100%', objectFit: 'cover', userSelect: 'none', boxShadow: '0 8px 28px rgb(0 0 0 / 0.08)', borderRadius: 4 }} draggable={false} />
+//                                 )}
+//                             </Box>
+//                         </Box>
+//                     </Box>
+//                 </Box>
+
+
+//                 {/* reviews section */}
+//                 {product && <ProductReviewsSection
+//                     product={product}
+//                     onRefreshProduct={fetchData}
+//                 />}
+
+
+//                 {/* Delivery Details */}
+//                 <Box sx={{ bgcolor: '#fff', py: 2, borderRadius: 2, border: '1px solid #eee', mb: { xs: 6, sm: 8 }, maxWidth: 580, mx: 'auto', textAlign: 'center' }}>
+//                     <Typography variant="h6" sx={{ fontWeight: 700, color: '#2C2C2C', mb: 3, fontFamily: 'serif' }}>
+//                         Delivery Details
+//                     </Typography>
+
+//                     {/* location pincode */}
+//                     <LocationSelector />
+//                 </Box>
+
+//                 {/* Jewellery Details */}
+//                 <Box sx={{ bgcolor: '#fff', borderRadius: 2, p: { xs: 3, sm: 5 }, maxWidth: 920, mx: 'auto', boxShadow: '0 4px 32px rgb(242 227 213 / 0.8)' }}>
+//                     <Typography sx={{ fontFamily: 'serif', fontWeight: 400, fontSize: { xs: 24, sm: 28 }, color: '#2C2C2C', textAlign: 'center', mb: 5, letterSpacing: 0.5 }}>
+//                         Jewellery Details
+//                     </Typography>
+
+//                     {/* Tabs */}
+//                     <Box sx={{ display: 'flex', justifyContent: 'center', mb: 5, borderBottom: '1px solid #eee', gap: 3, flexWrap: 'wrap' }}>
+//                         {[{ key: 'details', label: 'Product Details' }, { key: 'breakup', label: 'Price Breakup' }].map(({ key, label }) => (
+//                             <Button key={key} onClick={() => handleTabChange(key)} sx={{ px: 4, py: 1.4, borderRadius: 30, fontWeight: 600, textTransform: 'none', fontSize: 16, minWidth: 160, bgcolor: activeTab === key ? '#44170D' : 'transparent', color: activeTab === key ? '#fff' : '#757575', boxShadow: activeTab === key ? '0 6px 15px rgb(139 69 19 / 0.45)' : 'none', transition: 'all 0.3s ease', '&:hover': { bgcolor: activeTab === key ? '#7A3A0F' : '#f5f5f5', color: activeTab === key ? '#fff' : '#5a5a5a' } }}>
+//                                 {label}
+//                             </Button>
+//                         ))}
+//                     </Box>
+
+//                     {/* Tab Content */}
+//                     {activeTab === 'details' && (
+//                         <Accordion defaultExpanded sx={{ mb: 3, borderRadius: 3, boxShadow: 'none', border: '1px solid #eee' }}>
+//                             <AccordionSummary expandIcon={<ExpandMore sx={{ color: '#E65100' }} />}>
+//                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+//                                     <Settings sx={{ color: '#E65100', fontSize: 20 }} />
+//                                     <Typography fontWeight={700} fontSize={16} color="#2C2C2C" letterSpacing={0.5}>
+//                                         METAL DETAILS
+//                                     </Typography>
+//                                 </Box>
+//                             </AccordionSummary>
+//                             <AccordionDetails>
+//                                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+//                                     {[{ label: 'Material', value: product?.productvariety }, { label: 'Description', value: product?.description }].map(({ label, value }) => (
+//                                         <Box key={label} sx={{ flex: '1 1 45%', minWidth: '140px' }}>
+//                                             <Typography fontSize={13} color="#666" fontWeight={500} mb={0.8} letterSpacing={0.3} textTransform={'capitalize'}>
+//                                                 {label}
+//                                             </Typography>
+//                                             <Typography fontWeight={600} fontSize={15} color="#2C2C2C" letterSpacing={0.3} textTransform={'capitalize'}>
+//                                                 {value}
+//                                             </Typography>
+//                                         </Box>
+//                                     ))}
+//                                 </Box>
+//                             </AccordionDetails>
+//                         </Accordion>
+//                     )}
+
+//                     {/* {activeTab === 'breakup' && (
+//                         <Box>
+//                             <Typography variant="body1">Price Per Gram - ₹{pricePerGram}/g</Typography>
+//                             <Typography variant="body1">Total Weight - {totalWeight}</Typography>
+//                             <Typography variant="body1">Total Price - ₹{pricePerGram * totalWeight}</Typography>
+//                             <Typography variant="body1">Discount: {discount}%</Typography>
+//                             <Typography variant="body1">GST: {gst}%</Typography>
+//                             <Typography variant="body1">Making Charges: {makingPrice}</Typography>
+//                             <Typography variant="body1">Final Price - ₹{Math.round(finalPrice)}</Typography>
+//                         </Box>
+//                     )} */}
+
+//                     {activeTab === 'breakup' && (
+//                         <TableContainer component={Paper} sx={{
+//                             borderRadius: 2, overflowX: 'auto', boxShadow: 'none', border: '1px solid #eee', mt: 2, '&::-webkit-scrollbar': {
+//                                 display: 'none'
+//                             },
+//                         }}>
+//                             <Table sx={{ minWidth: 550 }} >
+//                                 <TableHead>
+//                                     <TableRow>
+//                                         <TableCell sx={{ fontWeight: 700, fontSize: 13 }}>PRODUCT DETAILS</TableCell>
+//                                         <TableCell sx={{ fontWeight: 700, fontSize: 13 }}>RATE</TableCell>
+//                                         <TableCell sx={{ fontWeight: 700, fontSize: 13 }}>WEIGHT</TableCell>
+//                                         <TableCell sx={{ fontWeight: 700, fontSize: 13 }}>VALUE</TableCell>
+//                                     </TableRow>
+//                                 </TableHead>
+//                                 <TableBody>
+//                                     {/* variety Row */}
+//                                     <TableRow>
+//                                         <TableCell>
+//                                             <Box>
+//                                                 <Typography sx={{ fontSize: 15, fontWeight: 600, textTransform: 'capitalize' }}>  {product?.productvariety}</Typography>
+//                                                 {/* <Typography sx={{ fontSize: 11, color: '#888', mt: -0.4 }}>18KT</Typography> */}
+//                                             </Box>
+//                                         </TableCell>
+//                                         <TableCell>₹ {pricePerGram}/g</TableCell>
+//                                         <TableCell>{totalWeight}g</TableCell>
+//                                         <TableCell>₹ {Number(pricePerGram * totalWeight).toFixed(2)}</TableCell>
+
+//                                     </TableRow>
+//                                     {/* Making Charges Row */}
+//                                     <TableRow>
+//                                         <TableCell>Making Charges</TableCell>
+//                                         <TableCell>-</TableCell>
+//                                         <TableCell>-</TableCell>
+//                                         <TableCell>₹ {makingPrice}</TableCell>
+//                                     </TableRow>
+
+//                                     {/* Discount Row */}
+//                                     <TableRow>
+//                                         <TableCell>Discount</TableCell>
+//                                         <TableCell>-</TableCell>
+//                                         <TableCell>-</TableCell>
+//                                         <TableCell> {discount ? <> ₹ {discountAmount.toFixed(2)}</> : <>-</>}</TableCell>
+//                                         {/* <TableCell>{discount}%</TableCell> */}
+//                                     </TableRow>
+
+//                                     {/* GST Row */}
+//                                     <TableRow>
+//                                         <TableCell>GST</TableCell>
+//                                         <TableCell>-</TableCell>
+//                                         <TableCell>-</TableCell>
+//                                         <TableCell>{gst ? <>₹ {(Number(discountedValue) * (Number(gst) / 100)).toFixed(2)}</> : <>-</>}</TableCell>
+//                                         {/* <TableCell>{gst}%</TableCell> */}
+//                                     </TableRow>
+
+//                                 </TableBody>
+//                             </Table>
+//                             <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', px: 3, py: 2 }}>
+//                                 <Typography sx={{ fontWeight: 700, fontFamily: 'serif', fontSize: 19, letterSpacing: 0.5, mr: 2 }}>
+//                                     Grand Total :
+//                                 </Typography>
+//                                 <Typography sx={{ fontWeight: 700, fontFamily: 'serif', fontSize: 22 }}>
+//                                     {/* ₹ {Math.round(finalPrice)} */}
+//                                     {Number(finalPrice).toFixed(2)}
+//                                 </Typography>
+//                             </Box>
+//                         </TableContainer>
+//                     )}
+//                 </Box>
+//             </Container>
+//         </Box>
+//     );
+// }
+
+
+// 3: single product with multiple quantities
 import React, { useEffect, useState } from 'react';
 import {
     Box,
@@ -605,45 +1151,36 @@ export const selectWishlist = createSelector(
     wishlist => [...wishlist]  // creates a new array to avoid identity reuse warning
 );
 
-const normalizeNumber = val => {
-    const n = parseFloat(val);
-    return Number.isNaN(n) ? null : n;
-};
-
 const parseVariants = (raw) => {
     try {
         let arr = raw;
-        if (typeof raw === 'string') arr = JSON.parse(raw);
+        // CASE 1: Single string (the whole array as a string): JSON.parse it first
+        if (typeof arr === 'string') arr = JSON.parse(arr);
+
+        // CASE 2: Array with a single string element (the array is [string])
+        if (Array.isArray(arr) && arr.length === 1 && typeof arr[0] === 'string') {
+            arr = JSON.parse(arr[0]);
+        }
+
         if (!Array.isArray(arr)) return [];
 
-        // if inner entries are strings, parse them
-        arr = arr.map((x) => (typeof x === 'string' ? JSON.parse(x) : x));
-
-        const num = (x) => (x === '' || x == null ? null : Number(x));
-
-        return arr.map((v, i) => {
-            // flatten weird shape: move v["0"] fields to top
-            const core = (v && typeof v === 'object' && v['0'] && typeof v['0'] === 'object')
-                ? { ...v, ...v['0'] }
-                : v;
-
-            return {
-                ...core,
-                _key: core._key || `v-${i}`,
-                label: core.label || '',
-                mrp: num(core.mrp),
-                discount: num(core.discount),
-                gst: num(core.gst),
-                retail_price: num(core.retail_price),
-                final_price: num(core.final_price ?? core.finalPrice),
-                in_stock: core.in_stock ? String(core.in_stock).toLowerCase() === 'yes' : false,
-            };
-        });
+        return arr.map((v, i) => ({
+            ...v,
+            _key: v._key || `v-${i}`,
+            label: v.label || '',
+            mrp: v.mrp ? Number(v.mrp) : null,
+            discount: v.discount ? Number(v.discount) : null,
+            gst: v.gst ? Number(v.gst) : null,
+            retail_price: v.retail_price ? Number(v.retail_price) : null,
+            final_price: v.final_price ? Number(v.final_price) : (v.finalPrice ? Number(v.finalPrice) : null),
+            in_stock: v.in_stock ? String(v.in_stock).toLowerCase() === 'yes' : false,
+        }));
     } catch (e) {
         console.error('Error parsing variants:', e);
         return [];
     }
 };
+
 
 
 export default function SingleProductPage() {
@@ -734,15 +1271,26 @@ export default function SingleProductPage() {
     if (loading) return <div style={{ textAlign: 'center', padding: '20px', fontSize: '1.5rem' }}>Loading...</div>;
     if (!product) return <div style={{ textAlign: 'center', padding: '20px', fontSize: '1.5rem' }}>Product not found</div>;
 
+    // const selectedVariant = product.quantity[selectedVariantIndex];
     const selectedVariant = product.quantity[selectedVariantIndex];
-    const finalPrice = selectedVariant?.["0"]?.finalPrice;
-    const gst = selectedVariant?.["0"]?.gst;
-    const makingPrice = selectedVariant?.["0"]?.makingPrice;
-    const weight = selectedVariant?.["0"]?.weight;
-    const pricePerGram = selectedVariant?.["0"]?.pricePerGram;
-    const totalWeight = selectedVariant?.["0"]?.totalWeight;
-    const discount = selectedVariant?.["0"]?.discount;
-    // console.log('Final Price:', finalPrice);
+
+    // const finalPrice = selectedVariant?.["0"]?.finalPrice;
+    // const gst = selectedVariant?.["0"]?.gst;
+    // const makingPrice = selectedVariant?.["0"]?.makingPrice;
+    // const weight = selectedVariant?.["0"]?.weight;
+    // const pricePerGram = selectedVariant?.["0"]?.pricePerGram;
+    // const totalWeight = selectedVariant?.["0"]?.totalWeight;
+    // const discount = selectedVariant?.["0"]?.discount;
+    // // console.log('Final Price:', finalPrice);
+
+    const finalPrice = selectedVariant.final_price ?? selectedVariant.finalPrice;
+    const gst = selectedVariant.gst;
+    const makingPrice = selectedVariant.makingPrice;
+    const weight = selectedVariant.weight;
+    const pricePerGram = selectedVariant.pricePerGram;
+    const totalWeight = selectedVariant.totalWeight;
+    const discount = selectedVariant.discount;
+
 
     // const unitPrice = finalPrice ?? 0;
     const unitPrice = Number(
@@ -789,9 +1337,7 @@ export default function SingleProductPage() {
     };
 
     const subTotal = Number(pricePerGram) * Number(totalWeight) + Number(makingPrice);
-
     const discountAmount = discount ? subTotal * (Number(discount) / 100) : 0;
-
     const discountedValue = subTotal - discountAmount;
 
 
@@ -849,6 +1395,24 @@ export default function SingleProductPage() {
                         >
                             {product?.name}
                         </Typography>
+
+                        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2, gap: 1 }}>
+                            {product.quantity.map((variant, idx) => (
+                                <Chip
+                                    key={variant._key || idx}
+                                    label={`${variant.weight}g / ${variant.carat}kt`}
+                                    color={selectedVariantIndex === idx ? 'primary' : 'default'}
+                                    onClick={() => setSelectedVariantIndex(idx)}
+                                    sx={{
+                                        border: selectedVariantIndex === idx ? '2px solid #68171b' : '1px solid #ddd',
+                                        fontWeight: 600,
+                                        fontSize: 15,
+                                        cursor: 'pointer',
+                                    }}
+                                />
+                            ))}
+                        </Box>
+
 
                         {/* Price with old price */}
                         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
@@ -1111,4 +1675,5 @@ export default function SingleProductPage() {
         </Box>
     );
 }
+
 
