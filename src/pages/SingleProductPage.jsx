@@ -660,7 +660,7 @@ export default function SingleProductPage() {
     const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
     const handleTabChange = (tab) => setActiveTab(tab);
 
-
+    const canAddToCart = Boolean(product?.stock === 'yes');
     const handleShare = () => {
         if (navigator.share) {
             navigator.share({
@@ -931,9 +931,8 @@ export default function SingleProductPage() {
                                 </button>
                             </div>
 
-
                             <Box sx={{ textAlign: 'center' }}>
-                                <Button variant="contained" onClick={handleAddToCart}>
+                                <Button variant="contained" onClick={handleAddToCart} disabled={!canAddToCart} title={!canAddToCart ? 'Selected variant is out of stock' : 'Add to Cart'}>
                                     Add to Cart
                                 </Button>
                             </Box>
