@@ -1305,12 +1305,18 @@ export default function SingleProductPage() {
 
         const unit = Number(variant.final_price ?? variant.finalPrice ?? 0);
 
+        // const cartItem = {
+        //     ...product,                   // keeps quantity = [flat variants]
+        //     selectedVariant: { ...variant },
+        //     cartQty: units,               // cart line count
+        //     unitPrice: unit,              // per-unit price
+        //     totalPrice: unit * units,     // line total
+        // };
         const cartItem = {
-            ...product,                   // keeps quantity = [flat variants]
-            selectedVariant: { ...variant },
-            cartQty: units,               // cart line count
-            unitPrice: unit,              // per-unit price
-            totalPrice: unit * units,     // line total
+            ...product,
+            selectedVariant: variant,
+            cartQty: 1,  // initial quantity
+            unitPrice: Number(variant.final_price ?? variant.finalPrice ?? 0),
         };
 
         toast.success('Item added to cart!', { position: 'top-right', autoClose: 2000 });
