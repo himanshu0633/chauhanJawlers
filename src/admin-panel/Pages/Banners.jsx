@@ -52,20 +52,40 @@ const Banners = () => {
     { id: 3, title: 'EndSlider' },
   ];
 
+  // const handleInputChange = (e) => {
+  //   const { name, value, files } = e.target;
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     [name]: files ? files[0] : value,
+  //   }));
+  // };
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: files ? files[0] : value,
-    }));
+    if (files) {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: files[0],
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
+
 
   const handleBannerSubmit = async (e) => {
     e.preventDefault();
+    console.log('Banner submit triggered', formData);
+    // const selectedType = bannerList.find(
+    //   (b) => b.id === parseInt(formData.banner_type)
+    // )?.title;
 
     const selectedType = bannerList.find(
-      (b) => b.id === parseInt(formData.banner_type)
+      (b) => String(b.id) === formData.banner_type
     )?.title;
+
 
     if (!selectedType || !formData.image) {
       toast.error('Please select a banner type and upload an image.');
@@ -80,10 +100,12 @@ const Banners = () => {
     try {
       await axiosInstance.post('/user/createBanner', data);
       toast.success('Banner uploaded successfully!');
+      console.log("object", formData)
       setFormData({ image: '', banner_type: '', variety: '' });
       setShowModal(false);
       fetchData();
     } catch (error) {
+      console.error('Error submitting banner:', error);
       toast.error('There was an error submitting the banner. Please try again.');
       console.error('Error submitting banner:', error);
     }
@@ -133,7 +155,7 @@ const Banners = () => {
   );
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 5 }}>
+    <Container maxWidth="xl" sx={{ mt: 5 }}>
       <Typography
         variant="h4"
         gutterBottom
@@ -253,8 +275,7 @@ const Banners = () => {
         </DialogTitle>
 
         <DialogContent dividers>
-          <Box
-            component="form"
+          <form
             id="banner-form"
             onSubmit={handleBannerSubmit}
             noValidate
@@ -273,8 +294,8 @@ const Banners = () => {
                     <em>Select Banner Type</em>
                   </MenuItem>
                   {bannerList.map((item) => (
-                    <MenuItem key={item._id} value={item._id}>
-                      {item.name}
+                    <MenuItem key={item.id} value={String(item.id)}>
+                      {item.title}
                     </MenuItem>
                   ))}
                 </Select>
@@ -338,7 +359,7 @@ const Banners = () => {
                 />
               )}
             </Stack>
-          </Box>
+          </form>
         </DialogContent>
 
         <DialogActions sx={{ px: 3, py: 2 }}>
