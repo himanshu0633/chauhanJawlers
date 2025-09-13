@@ -132,7 +132,7 @@ const Privacy = () => (
         <Typography>
           Phone:&nbsp;
           <Link href="tel:+911234567890" color="inherit" underline="hover">
-            +91 123 456 7890
+            +91 9876535881
           </Link>
         </Typography>
       </Box>

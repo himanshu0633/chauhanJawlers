@@ -172,7 +172,7 @@ const DescriptionText = styled(Typography)({
     color: "#666",
     lineHeight: "1.6",
     maxWidth: "600px",
-    margin: "0 auto",
+    margin: "20px auto",
     "@media (max-width: 600px)": {
         fontSize: "16px",
         padding: "0 20px",
