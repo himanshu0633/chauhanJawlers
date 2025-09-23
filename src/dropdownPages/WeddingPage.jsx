@@ -206,7 +206,9 @@ const WeddingPage = () => {
       {/* Featured Articles */}
       <Box sx={{ py: 8, backgroundColor: "#fff" }}>
         <Container maxWidth="lg">
-          <h1 className="text-center">Featured Articles</h1>
+          {banners.length > 0 ?
+            (<h1 className="text-center">Featured Articles</h1>) : ""}
+
           <Swiper
             modules={[Navigation, Autoplay]}
             spaceBetween={30}
@@ -223,7 +225,7 @@ const WeddingPage = () => {
                       <img
                         src={publicUrl(item.slider_image)}
                         alt={item.type}
-                        style={{ width: "100%", height: "220px", objectFit: "cover",cursor:"pointer",borderRadius:"12px" }}
+                        style={{ width: "100%", height: "220px", objectFit: "cover", cursor: "pointer", borderRadius: "12px" }}
                         onClick={() => navigate(`/allJewellery/${(item.variety || 'all').toLowerCase()}`)}
                       />
                     </Box>

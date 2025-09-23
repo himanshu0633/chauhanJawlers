@@ -311,7 +311,7 @@ export default function Header() {
             >
 
               {/* {categories.filter(cat => cat._id === cat._id).map(item => ( */}
-              {categories.slice(0, 8).filter(cat => cat._id === cat._id).map(item => (
+              {categories.slice(0, 6).filter(cat => cat._id === cat._id).map(item => (
                 <NavButton
                   key={item.apiId}
                   startIcon={item.icon}

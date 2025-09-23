@@ -369,7 +369,6 @@ const CategoryJewel = () => {
                                         <MenuItem value="diamond">Diamond</MenuItem>
                                         <MenuItem value="gold">Gold</MenuItem>
                                         <MenuItem value="silver">Silver</MenuItem>
-                                        {/* <MenuItem value="dialyWear">dailyWear</MenuItem> */}
                                         <MenuItem value="wedding">Wedding</MenuItem>
                                         <MenuItem value="gifting">Gifting</MenuItem>
                                         <MenuItem value="collection">Collection</MenuItem>
