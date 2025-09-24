@@ -228,6 +228,8 @@ export default function CartPage() {
   const cartItems = useSelector((state) => state.app.data || []);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  // const userData = localStorage.getItem('userData');
+  const userData = JSON.parse(localStorage.getItem('userData'));
 
   // ----- auth check -----
   useEffect(() => {
@@ -286,42 +288,15 @@ export default function CartPage() {
 
   const handleContinueShopping = () => navigate(-1);
 
-  // ----- address: add/save/select -----
-  // const handleAddAddress = async () => {
-  //   const userData = JSON.parse(localStorage.getItem('userData'));
-  //   const userId = userData?._id;
-  //   if (!userId) {
-  //     toast.error('User ID not found.');
-  //     return;
-  //   }
-  //   const fullAddress = `${formData.flat}, ${formData.landmark}, ${formData.city}, ${formData.state}, ${formData.country} ,${formData.pincode}`;
-  //   try {
-  //     const response = await axiosInstance.put(`admin/updateAdmin/${userId}`, {
-  //       address: [...addresses, fullAddress],
-  //       phone: formData.phone,
-  //     });
-  //     if (response.status === 200) {
-  //       toast.success('Address added successfully');
-  //       setAddresses((prev) => [...prev, fullAddress]);
-  //       setFormData((p) => ({ ...p, selectedAddress: fullAddress }));
-  //       setShowModal(false);
-  //     }
-  //   } catch (error) {
-  //     toast.error('Failed to update address');
-  //     console.error('Address update error:', error);
-  //   }
-  // };
-
-  // // 2:
   const handleAddAddress = async () => {
     if (!formData.flat?.trim()) {
       toast.error('Flat / House is required');
       return;
     }
-    if (!formData.landmark?.trim()) {
-      toast.error('Landmark is required');
-      return;
-    }
+    // if (!formData.landmark?.trim()) {
+    //   toast.error('Landmark is required');
+    //   return;
+    // }
     if (!formData.state) {
       toast.error('State is required');
       return;
@@ -421,7 +396,7 @@ export default function CartPage() {
       key: 'rzp_live_RCKnQvruACO5FH',
       amount: Math.round(total * 100), // paise
       currency: 'INR',
-      name: 'My Shop',
+      name: 'Chauhan Sons Jewellers',
       description: 'Order Payment',
       handler: async function (response) {
         try {
@@ -431,13 +406,6 @@ export default function CartPage() {
 
           const orderPayload = {
             userId: userData?._id,
-            // checkout payload price/qty (inside handleCheckout)
-            // items: cartItems.map(item => ({
-            //   productId: item._id,
-            //   name: item.name,
-            //   quantity: item.cartQty ?? (typeof item.quantity === 'number' ? item.quantity : 1),
-            //   price: item.unitPrice ?? 0,
-            // })),
             items: cartItems.map((item) => {
               const qty = item.cartQty ?? (typeof item.quantity === 'number' ? item.quantity : 1);
               const price = Number(
@@ -473,8 +441,8 @@ export default function CartPage() {
         }
       },
       prefill: {
-        name: 'Test User',
-        email: 'test@example.com',
+        name: userData?.name,
+        email: userData?.email,
         contact: phoneNumber,
       },
       notes: { address: formData.selectedAddress },
@@ -484,22 +452,11 @@ export default function CartPage() {
     rz.open();
   };
 
-  // const handlePhoneChange = (e) => {
-  //   const value = e.target.value;
-  //   if (/^\d{0,10}$/.test(value)) {
-  //     setFormData((p) => ({ ...p, phone: value }));
-  //   }
-  // };
-
   const handlePhoneChange = (e) => {
     let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
     if (value.length > 10) value = value.slice(0, 10);
     setFormData((p) => ({ ...p, phone: value }));
   };
-
-  // const handlePhoneBlur = () => {
-  //   setPhoneError(formData.phone.length !== 10);
-  // };
 
   const handlePhoneBlur = () => {
     setPhoneError(formData.phone.length !== 10 || !/^[1-9][0-9]{9}$/.test(formData.phone));
