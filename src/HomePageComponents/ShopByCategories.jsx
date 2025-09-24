@@ -297,7 +297,8 @@
 // export default ShopByCategories;
 
 
-import { Box, Typography, Grid, Card, CardMedia, CardContent, Container } from "@mui/material";
+// // 2:
+import { Box, Typography, Card, CardMedia, Container } from "@mui/material";
 import { useEffect, useState } from "react";
 import Slider from "react-slick";
 import axiosInstance from "../common components/AxiosInstance";
@@ -306,8 +307,15 @@ import { useNavigate } from "react-router-dom";
 
 const ShopByCategories = () => {
     const [categoryName, setCategoryName] = useState([]);
-    const [loading, setLoading] = useState(true)
-    const navigate = useNavigate()
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
+
+    const assignedRouteToPath = {
+        allJewellery: '/allJewellery',
+        wedding: '/wedding',
+        gifting: '/gifting',
+        collection: '/collection',
+    };
 
     useEffect(() => {
         fetchData();
@@ -316,23 +324,47 @@ const ShopByCategories = () => {
     const fetchData = async () => {
         try {
             const response = await axiosInstance.get(`/user/allcategories`);
-            setCategoryName(response?.data ?? []);
+            const data = response?.data || [];
+            const mapped = data.map(cat => ({
+                apiId: cat._id,
+                label: cat.name,
+                variety: cat.variety,
+                image: cat.image, // keep image path only
+                assignedRoute: cat.assignedRoute
+            }));
+            setCategoryName(mapped);
         } catch (error) {
             console.error("Error fetching categories:", error);
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
     };
 
-    const assignedRouteToPath = {
-        allJewellery: '/allJewellery',
-        diamond: '/allJewellery',
-        gold: '/allJewellery',
-        silver: '/allJewellery',
-        // dailywear: '/allJewellery',
-        wedding: '/wedding',
-        gifting: '/gifting',
-        collection: '/collection',
+    const handleCategoryNavigation = (item) => {
+        try {
+            const route = assignedRouteToPath[item.assignedRoute] || '/allJewellery';
+
+            if (item.label && item.label.toLowerCase() === "all jewellery") {
+                navigate(route);
+                return;
+            }
+
+            if (item.assignedRoute && item.assignedRoute !== 'allJewellery') {
+                navigate(route);
+                return;
+            }
+
+            if (item.label && item.label.trim()) {
+                navigate(`/allJewellery?category=${item.label.toLowerCase()}`);
+                return;
+            }
+
+            navigate('/allJewellery');
+
+        } catch (error) {
+            console.error("Navigation error:", error);
+            navigate('/allJewellery');
+        }
     };
 
     const settings = {
@@ -397,34 +429,31 @@ const ShopByCategories = () => {
                 </Box>
 
                 <Box sx={{ px: { xs: 1, sm: 2 } }}>
-                    {loading ? "Loading..." : (
-                        categoryName.length > 1 ? (
-                            <Slider {...settings}>
-                                {categoryName.map((item, id) => (
-                                    <Box key={item?.id ?? id} sx={{ px: 1 }}>
-                                        <Card
-                                            sx={{
-                                                cursor: "pointer",
-                                                transition: "0.3s",
-                                                width: "100%",
-                                                borderRadius: 4,
-                                                "&:hover": { transform: "translateY(-4px)" },
-                                                display: "flex",
-                                                flexDirection: "column",
-                                            }}
-                                            onClick={() => {
-                                                const route = assignedRouteToPath[item.assignedRoute] || `/category/${item.apiId}`;
-                                                navigate(route + `?category=${item.name.toLowerCase()}`);
-                                            }}
-                                        >
-                                            <CardMedia
-                                                component="img"
-                                                src={publicUrl(item.image)}
-                                                alt={item.name}
-                                                loading="lazy"
-                                                sx={{ height: { xs: 100, md: 130 }, objectFit: "cover" }}
-                                            />
-                                        </Card>
+                    {loading ? (
+                        "Loading..."
+                    ) : categoryName.length > 1 ? (
+                        <Slider {...settings}>
+                            {categoryName.map((item, id) => (
+                                <Box key={item.apiId ?? id} sx={{ px: 1 }}>
+                                    <Card
+                                        sx={{
+                                            cursor: "pointer",
+                                            transition: "0.3s",
+                                            width: "100%",
+                                            borderRadius: 4,
+                                            "&:hover": { transform: "translateY(-4px)" },
+                                            display: "flex",
+                                            flexDirection: "column",
+                                        }}
+                                        onClick={() => handleCategoryNavigation(item)}
+                                    >
+                                        <CardMedia
+                                            component="img"
+                                            src={publicUrl(item.image)}
+                                            alt={item.label}
+                                            loading="lazy"
+                                            sx={{ height: { xs: 100, md: 130 }, objectFit: "cover" }}
+                                        />
                                         <Typography
                                             variant="body2"
                                             fontWeight={600}
@@ -433,58 +462,49 @@ const ShopByCategories = () => {
                                             paddingBottom={{ xs: 0, sm: "20px" }}
                                             sx={{ letterSpacing: 1, textTransform: "uppercase", textAlign: "center", my: 1 }}
                                         >
-                                            {item.name}
+                                            {item.label}
                                         </Typography>
-                                    </Box>
-                                ))}
-                            </Slider>
-                        ) : (
-                            <Grid container justifyContent="center">
-                                {categoryName.map((item) => (
-                                    <Grid item key={item?._id}>
-                                        <Box sx={{ px: 1 }}>
-                                            <Card
-                                                sx={{
-                                                    cursor: "pointer",
-                                                    transition: "0.3s",
-                                                    borderRadius: "50%",
-                                                    display: "inline-block",
-                                                    "&:hover": { transform: "translateY(-4px)" },
-                                                }}
-                                                onClick={() => {
-                                                    const route = assignedRouteToPath[item.assignedRoute] || `/category/${item.apiId}`;
-                                                    navigate(route + `?category=${item.name.toLowerCase()}`);
-                                                }}
-                                            >
-                                                <CardMedia
-                                                    component="img"
-                                                    src={publicUrl(item.image)}
-                                                    alt={item.name}
-                                                    loading="lazy"
-                                                    sx={{ height: { xs: 100, md: 130 }, width: { xs: 100, md: 130 }, objectFit: "cover", borderRadius: "50%" }}
-                                                />
-                                            </Card>
-                                            <Typography
-                                                variant="body2"
-                                                fontWeight={600}
-                                                color="#2C2C2C"
-                                                fontSize="0.7rem"
-                                                sx={{ letterSpacing: 1, textTransform: "uppercase", textAlign: "center", my: 1 }}
-                                            >
-                                                {item.name}
-                                            </Typography>
-                                        </Box>
-                                    </Grid>
-                                ))}
-                            </Grid>
-                        )
+                                    </Card>
+                                </Box>
+                            ))}
+                        </Slider>
+                    ) : (
+                        categoryName.map((item) => (
+                            <Box key={item.apiId ?? item.label} sx={{ px: 1, textAlign: 'center' }}>
+                                <Card
+                                    sx={{
+                                        cursor: "pointer",
+                                        transition: "0.3s",
+                                        borderRadius: "50%",
+                                        display: "inline-block",
+                                        "&:hover": { transform: "translateY(-4px)" },
+                                    }}
+                                    onClick={() => handleCategoryNavigation(item)}
+                                >
+                                    <CardMedia
+                                        component="img"
+                                        src={publicUrl(item.image)}
+                                        alt={item.label}
+                                        loading="lazy"
+                                        sx={{ height: { xs: 100, md: 130 }, width: { xs: 100, md: 130 }, objectFit: "cover", borderRadius: "50%" }}
+                                    />
+                                </Card>
+                                <Typography
+                                    variant="body2"
+                                    fontWeight={600}
+                                    color="#2C2C2C"
+                                    fontSize="0.7rem"
+                                    sx={{ letterSpacing: 1, textTransform: "uppercase", textAlign: "center", my: 1 }}
+                                >
+                                    {item.label}
+                                </Typography>
+                            </Box>
+                        ))
                     )}
                 </Box>
-
-            </Container >
-        </Box >
+            </Container>
+        </Box>
     );
 };
 
 export default ShopByCategories;
-
