@@ -48,7 +48,8 @@ export default function VideoGallery() {
                     {videos.map(video => (
                         <Box key={video._id} sx={{ px: 1 }}>
                             <Card
-                                elevation={3} sx={{ width: 240, mx: 'auto', background: '#fff', borderRadius: 3, overflow: 'hidden' }}
+                                elevation={3} 
+                                // sx={{ width: 240, mx: 'auto', background: '#fff', borderRadius: 3, overflow: 'hidden' }}
                             >
                                 <CardMedia
                                     component="video" src={publicUrl(video.url)} controls
