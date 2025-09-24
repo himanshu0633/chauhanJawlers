@@ -1071,16 +1071,6 @@ export function JewelleryGrid() {
                     {getCurrentCategoryName()}
                 </Typography>
 
-                {/* Debug info (only in development) */}
-                {process.env.NODE_ENV === 'development' && (
-                    <Box sx={{ mb: 2, p: 2, bgcolor: '#f5f5f5', borderRadius: 1 }}>
-                        <Typography variant="caption" display="block">
-                            Debug - Category: {categoryParam || 'none'} | 
-                            Total Products: {allProducts.length} | Filtered: {filteredProducts.length}
-                        </Typography>
-                    </Box>
-                )}
-
                 {/* Filters and Sort Controls */}
                 <Box sx={{
                     display: 'flex',
@@ -1121,11 +1111,7 @@ export function JewelleryGrid() {
                     </Select>
                 </Box>
 
-                {/* Results count */}
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    Showing {productsToDisplay.length} of {sortedProducts.length} products
-                    {categoryParam && ` in ${getCurrentCategoryName()}`}
-                </Typography>
+               
             </Box>
 
             {/* Product Grid */}
