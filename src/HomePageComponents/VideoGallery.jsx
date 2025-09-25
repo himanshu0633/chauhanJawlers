@@ -41,8 +41,8 @@ export default function VideoGallery() {
         // Show slick slider
         return (
             <Box sx={{ py: 5, px: { xs: 1, sm: 2 }, background: '#faf7f8', overflow: 'hidden' }}>
-                <Typography variant="h4" align="center" fontWeight={700} sx={{ mb: 4, fontFamily: 'serif', color: '#511a1a' }}>
-                    Latest Videos
+                <Typography  align="center" fontWeight={700} sx={{ mb: 4, fontFamily: 'serif', color: '#2C2C2C', fontSize: { xs: '32px', md: '40px', lg: '48px' } }}>
+                   Traditional Jewellery
                 </Typography>
                 <Slider ref={sliderRef} {...sliderSettings}>
                     {videos.map(video => (

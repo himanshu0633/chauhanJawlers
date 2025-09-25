@@ -13,8 +13,8 @@ const SectionContainer = styled(Box)({
 
 const MainTitle = styled(Typography)({
     fontFamily: "serif",
-    fontSize: "42px",
-    fontWeight: 400,
+    fontSize: "48px",
+    fontWeight: 600,
     color: "#2C2C2C",
     textAlign: "center",
     marginBottom: 8,

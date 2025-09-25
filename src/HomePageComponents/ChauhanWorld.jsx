@@ -20,7 +20,7 @@ const HeaderContainer = styled(Container)({
 const MainTitle = styled(Typography)({
     fontFamily: "serif",
     fontSize: "48px",
-    fontWeight: 400,
+    fontWeight: 600,
     color: "#2C2C2C",
     marginBottom: "12px",
     lineHeight: "1.2",

@@ -45,13 +45,12 @@ const RootBox = styled(Box)(({ theme }) => ({
 const Title = styled(Typography)(({ theme }) => ({
   fontFamily: "serif",
   fontWeight: 600,
-  fontSize: 32,
-  color: "#18191F",
+  fontSize: '48px',
+  color: "#2C2C2C",
   textAlign: "center",
   marginBottom: 4,
-  [theme.breakpoints.down("sm")]: {
-    fontSize: 22,
-  },
+  "@media (max-width: 960px)": { fontSize: "36px" },
+  "@media (max-width: 600px)": { fontSize: "28px" },
 }));
 
 const SubTitle = styled(Typography)(({ theme }) => ({

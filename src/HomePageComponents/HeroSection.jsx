@@ -27,6 +27,7 @@ const SliderContainer = styled(Box)({
 //         height: 250,
 //     },
 // }))
+
 const Slide = styled(Box)(({ theme }) => ({
     width: "100%",
     height: "auto",

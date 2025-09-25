@@ -411,9 +411,9 @@ const ShopByCategories = () => {
                     <Typography
                         variant="h3"
                         fontFamily="serif"
-                        fontWeight={400}
+                        fontWeight={600}
                         color="#2C2C2C"
-                        fontSize={{ xs: "1.8rem", sm: "2.2rem", md: "2.5rem" }}
+                        fontSize={{ xs: "32px", sm: "40px", md: "48px" }}
                     >
                         Find Your Perfect Match
                     </Typography>
