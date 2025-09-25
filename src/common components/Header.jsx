@@ -651,7 +651,7 @@ export default function Header() {
 
         <IconsRow>
           <TopIconButton size="small">
-            <DiamondOutlined onClick={() => navigate("/allJewellery?category=diamond")} sx={{ fontSize: 20 }} />
+            <DiamondOutlined onClick={() => navigate("/diamond")} sx={{ fontSize: 20 }} />
           </TopIconButton>
           <TopIconButton size="small">
             <FavoriteBorder onClick={() => navigate("/wishlist")} sx={{ fontSize: 20 }} />
