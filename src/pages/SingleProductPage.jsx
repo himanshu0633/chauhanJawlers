@@ -179,8 +179,17 @@ export default function SingleProductPage() {
         fetchData();
     }, [id]);
 
-    if (loading) return <div style={{ textAlign: 'center', padding: '20px', fontSize: '1.5rem' }}>Loading...</div>;
-    if (!product) return <div style={{ textAlign: 'center', padding: '20px', fontSize: '1.5rem' }}>Product not found</div>;
+    if (loading) return <div style={{ textAlign: 'center', padding: '20px', fontSize: '3rem', minHeight: "50vh" }}>Loading...</div>;
+
+    // if (!product) return <div style={{
+    //     minHeight: "50vh",
+    //     display: "flex",
+    //     flexDirection: "column"
+    // }}>
+    //     <div style={{ textAlign: 'center', padding: '20px', fontSize: '1.5rem', flexGrow: 1 }}>Product not found</div>
+    // </div >;
+
+    if (!product) return <div style={{ textAlign: 'center', padding: '20px', fontSize: '3rem', minHeight: "50vh" }}>Product not found</div>;
 
     const selectedVariant = product.quantity[selectedVariantIndex];
 
