@@ -172,7 +172,7 @@ function Collection() {
                     flexDirection={{ xs: "column", sm: "row" }}
                 >
                     {/* Left Large Card */}
-                    <Box flex={1} minWidth={0} 
+                    <Box flex={1} minWidth={0}
                     // mb={{ xs: 3, md: 0 }}
                     >
                         {banners.length > 0 && (
@@ -205,8 +205,8 @@ function Collection() {
                     <Box
                         flex={1}
                         display="flex"
-                        flexDirection={{xs: "row", sm: "column"}}
-                        // flexDirection= "column"
+                        // flexDirection={{xs: "row", sm: "column"}}
+                        flexDirection="column"
                         gap={1}
                         minWidth={0}
                     >
