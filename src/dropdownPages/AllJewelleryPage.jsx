@@ -799,9 +799,13 @@ function JewelleryCard({ product }) {
                 }}>
                     {product.name}
                 </Typography>
-                <Typography variant="subtitle1" sx={{ fontWeight: 500, fontSize: 17, color: '#222',fontFamily:'cursive' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 500, fontSize: 17, color: '#222', fontFamily: 'cursive' }}>
                     ₹{best.finalPrice}
                 </Typography>
+
+                {/* <Button variant="contained" onClick={handleAddToCart} disabled={!canAddToCart} title={!canAddToCart ? 'Selected variant is out of stock' : 'Add to Cart'}>
+                    Add to Cart
+                </Button> */}
 
             </Link>
 
@@ -1151,7 +1155,7 @@ export function JewelleryGrid() {
                             display: 'flex',
                             flexWrap: 'wrap',
                             justifyContent: 'center',
-                            gap: 2, 
+                            gap: 2,
                         }}
                     >
                         {productsToDisplay.map((product) => (
