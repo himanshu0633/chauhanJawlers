@@ -434,7 +434,7 @@ const ShopByCategories = () => {
                     ) : categoryName.length > 1 ? (
                         <Slider {...settings}>
                             {categoryName.map((item, id) => (
-                                <Box key={item.apiId ?? id} sx={{ px: 1 }}>
+                                <Box key={item.apiId ?? id} sx={{ px: 1,pb:1 }}>
                                     <Card
                                         sx={{
                                             cursor: "pointer",
