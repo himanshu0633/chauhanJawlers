@@ -743,7 +743,8 @@ function JewelleryCard({ product }) {
                 position: 'relative',
                 borderRadius: 2,
                 overflow: 'hidden',
-                width: { xs: 170, sm: 200 },
+                // width: { xs: 170, sm: 200 },
+                width: "100%",
                 height: { xs: 200 },
                 mx: 'auto',
                 bgcolor: 'transparent',
@@ -786,19 +787,21 @@ function JewelleryCard({ product }) {
             </Box>
 
             <Link to={`/singleProduct/${product._id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
-                <Typography variant="subtitle1" sx={{ 
-                    fontSize: 18, 
-                    fontWeight: 600, 
-                    fontFamily: 'serif', 
-                    color: '#222', 
-                    textAlign: 'left', 
-                    textTransform: 'capitalize' 
+                <Typography variant="subtitle1" sx={{
+                    fontSize: 18,
+                    fontWeight: 600,
+                    fontFamily: 'serif',
+                    color: '#222',
+                    textAlign: 'left',
+                    textTransform: 'capitalize',
+                    mt: 1
                 }}>
                     {product.name}
                 </Typography>
                 <Typography variant="subtitle1" sx={{ fontWeight: 500, fontSize: 17, color: '#222' }}>
                     ₹{best.finalPrice}
                 </Typography>
+                
             </Link>
 
             <Snackbar
@@ -962,17 +965,17 @@ export function JewelleryGrid() {
 
             // Category filter based on category name (not variety)
             let matchesCategory = true;
-            
+
             if (categoryParam && categoryParam.trim()) {
                 const normalizedCategoryParam = categoryParam.toLowerCase().trim();
-                
+
                 // Match by category name or product variety
-                const matchesByName = product.category && 
+                const matchesByName = product.category &&
                     product.category.toLowerCase().trim() === normalizedCategoryParam;
-                    
-                const matchesByVariety = product.productvariety && 
+
+                const matchesByVariety = product.productvariety &&
                     product.productvariety.toLowerCase().trim() === normalizedCategoryParam;
-                
+
                 matchesCategory = matchesByName || matchesByVariety;
             }
             // If no category param, show all products (for "All Jewellery")
@@ -1015,7 +1018,7 @@ export function JewelleryGrid() {
             switch (sortOption) {
                 case 'price-asc': return (a.price || 0) - (b.price || 0);
                 case 'price-desc': return (b.price || 0) - (a.price || 0);
-                case 'newest': 
+                case 'newest':
                     const dateA = new Date(a.createdAt || 0);
                     const dateB = new Date(b.createdAt || 0);
                     return dateB - dateA;
@@ -1054,7 +1057,7 @@ export function JewelleryGrid() {
         );
 
         if (category) return category.name;
-        
+
         // Fallback to formatted category param
         return categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1);
     };
@@ -1111,7 +1114,7 @@ export function JewelleryGrid() {
                     </Select>
                 </Box>
 
-               
+
             </Box>
 
             {/* Product Grid */}
@@ -1121,11 +1124,11 @@ export function JewelleryGrid() {
                 <Typography align="center" color="error" sx={{ py: 4 }}>{error}</Typography>
             ) : sortedProducts.length === 0 ? (
                 <Box sx={{ textAlign: 'center', py: 8 }}>
-                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                    <Typography variant="h5" color="text.secondary" gutterBottom>
                         No products found
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        {categoryParam 
+                        {categoryParam
                             ? `No products available in ${getCurrentCategoryName()} category. Try browsing other categories.`
                             : "Try adjusting your filters or search terms"
                         }
@@ -1133,13 +1136,42 @@ export function JewelleryGrid() {
                 </Box>
             ) : (
                 <>
-                    <Grid container spacing={2} justifyContent="center">
+                    {/* <Grid container spacing={2} justifyContent="center">
                         {productsToDisplay.map((product) => (
                             <Grid key={product._id} item xs={12} sm={6} md={4} lg={3}>
                                 <JewelleryCard product={product} />
                             </Grid>
                         ))}
-                    </Grid>
+                    </Grid> */}
+
+                    {/* 2 */}
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            justifyContent: 'center',
+                            gap: 2, 
+                        }}
+                    >
+                        {productsToDisplay.map((product) => (
+                            <Box
+                                key={product._id}
+                                sx={{
+                                    width: {
+                                        xs: '47%',
+                                        sm: '30%',
+                                        md: '23%',
+                                        lg: '15%',
+                                    },
+                                    boxSizing: 'border-box',
+                                    mb: 2,
+                                }}
+                            >
+                                <JewelleryCard product={product} />
+                            </Box>
+                        ))}
+                    </Box>
+
 
                     {/* Load More Button */}
                     {shownCount < sortedProducts.length && (
