@@ -405,7 +405,7 @@ const ShopByCategories = () => {
     };
 
     return (
-        <Box sx={{ bgcolor: "#F0E5CB", py: { xs: 4, sm: 6, md: 6 } }}>
+        <Box sx={{ bgcolor: "#fff", py: { xs: 4, sm: 6, md: 6 } }}>
             <Container maxWidth="xl">
                 <Box textAlign="center" mb={{ xs: 4, sm: 5, md: 6 }}>
                     <Typography
