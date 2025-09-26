@@ -794,14 +794,15 @@ function JewelleryCard({ product }) {
                     color: '#222',
                     textAlign: 'left',
                     textTransform: 'capitalize',
-                    mt: 1
+                    mt: 1,
+                    lineHeight: 1.2
                 }}>
                     {product.name}
                 </Typography>
-                <Typography variant="subtitle1" sx={{ fontWeight: 500, fontSize: 17, color: '#222' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 500, fontSize: 17, color: '#222',fontFamily:'cursive' }}>
                     ₹{best.finalPrice}
                 </Typography>
-                
+
             </Link>
 
             <Snackbar
