@@ -495,7 +495,7 @@ export default function SingleProductPage() {
                                             <Typography fontSize={13} color="#666" fontWeight={500} mb={0.8} letterSpacing={0.3} textTransform={'capitalize'}>
                                                 {label}
                                             </Typography>
-                                            <Typography fontWeight={600} fontSize={15} color="#2C2C2C" letterSpacing={0.3} textTransform={'capitalize'}>
+                                            <Typography fontWeight={600} fontSize={15} color="#2C2C2C" letterSpacing={0.3} textTransform={'capitalize'} sx={{ wordBreak: 'break-all' }} >
                                                 {value}
                                             </Typography>
                                         </Box>
@@ -504,18 +504,6 @@ export default function SingleProductPage() {
                             </AccordionDetails>
                         </Accordion>
                     )}
-
-                    {/* {activeTab === 'breakup' && (
-                        <Box>
-                            <Typography variant="body1">Price Per Gram - ₹{pricePerGram}/g</Typography>
-                            <Typography variant="body1">Total Weight - {totalWeight}</Typography>
-                            <Typography variant="body1">Total Price - ₹{pricePerGram * totalWeight}</Typography>
-                            <Typography variant="body1">Discount: {discount}%</Typography>
-                            <Typography variant="body1">GST: {gst}%</Typography>
-                            <Typography variant="body1">Making Charges: {makingPrice}</Typography>
-                            <Typography variant="body1">Final Price - ₹{Math.round(finalPrice)}</Typography>
-                        </Box>
-                    )} */}
 
                     {activeTab === 'breakup' && (
                         <TableContainer component={Paper} sx={{
