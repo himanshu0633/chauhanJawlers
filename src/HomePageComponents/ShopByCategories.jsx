@@ -143,7 +143,7 @@ const ShopByCategories = () => {
                                     key={item.apiId ?? id}
                                     sx={{
                                         px: 1,
-                                        pb: 1,
+                                        py: 1,
                                         width: CARD_W,        
                                         boxSizing: "border-box"
                                     }}
@@ -171,7 +171,7 @@ const ShopByCategories = () => {
                                                 width: "100%",
                                                 height: MEDIA_H,    
                                                 objectFit: "contain",
-                                                p: 1,             
+                                                pt: 1,             
                                                 backgroundColor: "#fff",
                                                borderRadius:4
                                             }}
