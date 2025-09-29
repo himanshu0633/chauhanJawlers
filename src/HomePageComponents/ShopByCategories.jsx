@@ -459,8 +459,8 @@ const ShopByCategories = () => {
                                             fontWeight={600}
                                             color="#2C2C2C"
                                             fontSize="0.7rem"
-                                            paddingBottom={{ xs: 0, sm: "20px" }}
-                                            sx={{ letterSpacing: 1, textTransform: "uppercase", textAlign: "center", my: 1 }}
+                                            fontFamily="monospace"
+                                            sx={{ letterSpacing: 1, textTransform: "uppercase", textAlign: "center",py:1 }}
                                         >
                                             {item.label}
                                         </Typography>

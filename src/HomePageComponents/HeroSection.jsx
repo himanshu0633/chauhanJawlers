@@ -1,6 +1,5 @@
 import Slider from "react-slick"
-import { Box, GlobalStyles, styled } from "@mui/material"
-import { useTheme } from "@mui/material/styles"
+import { Box, styled } from "@mui/material"
 import "slick-carousel/slick/slick.css"
 import "slick-carousel/slick/slick-theme.css"
 import { useNavigate } from "react-router-dom"
@@ -9,52 +8,37 @@ import { useEffect, useState } from "react"
 import { publicUrl } from "../common components/PublicUrl"
 
 const SliderContainer = styled(Box)({
-    // position: "relative",
     width: "100%",
     overflow: "hidden",
 })
 
-// const Slide = styled(Box)(({ theme }) => ({
-//     width: "100%",
-//     height: 420,
-//     maxHeight: 470,
-//     position: "relative",
-//     overflow: "hidden",
-//     [theme.breakpoints.down("lg")]: {
-//         height: 400,
-//     },
-//     [theme.breakpoints.down("sm")]: {
-//         height: 250,
-//     },
-// }))
-
 const Slide = styled(Box)(({ theme }) => ({
     width: "100%",
     height: "auto",
-    [theme.breakpoints.down("lg")]: {
-        // height: 400,
-    },
+    padding: "0 10px",
     [theme.breakpoints.down("sm")]: {
-        // height: 250,
         width: "100%",
+        padding: "0",
     },
 }));
 
-const SlideImage = styled("img")({
-    // height: "auto",
-    height: "200px",
-    width: "auto",
+const SlideImage = styled("img")(({ theme }) => ({
+    height: "auto",
+    // height: "230px",
+    // width: "auto",
+    width: "100%",
     maxWidth: "100%",
     display: "block",
     margin: "0 auto",
-});
-
+    [theme.breakpoints.down("lg")]: {
+        width: "auto",
+        height: "230px",
+    },
+}));
 const SliderWrapper = styled(Box)(({ theme }) => ({
-    // position: "relative",
     width: "100%",
     overflow: "hidden",
     backgroundColor: "#fff",
-
 
     // scoped slick styles
     "& .slick-dots": {
@@ -144,8 +128,21 @@ function HeroSection() {
         autoplay: true,
         autoplaySpeed: 3000,
         pauseOnHover: true,
+        centerMode: true,
+        centerPadding: "100px",
         arrows: false,
-    }
+        responsive: [
+            {
+                breakpoint: 1024,
+                settings: {
+                    slidesToShow: 1,
+                    centerMode: false,      // Full-width on small screens
+                    centerPadding: "0px",   // Remove peeking effect on mobile
+                }
+            }
+        ]
+    };
+
 
     return (
         <SliderContainer>
