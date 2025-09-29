@@ -14,6 +14,7 @@ const Theme = createTheme({
     text: {
       primary: '#44170D',     // dark text on light bg
       secondary: '#44170D',
+      light: '#fff',          // light text on dark bg
     },
     action: {
       hover: '#f5f5f5',
@@ -22,3 +23,5 @@ const Theme = createTheme({
 });
 
 export default Theme;
+
+

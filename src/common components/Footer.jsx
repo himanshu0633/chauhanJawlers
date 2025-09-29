@@ -1,9 +1,11 @@
 import { Box, Typography, Link, IconButton, styled, Container } from "@mui/material";
 import { WhatsApp, Email, Facebook, Instagram, Twitter, YouTube } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import Theme from "../../Theme";
 
 const FooterContainer = styled(Box)({
-    color: "#fff",
+    // color: "#fff",
+    color: Theme.palette.primary.contrastText,
     paddingTop: 30,
     paddingBottom: 15,
     fontFamily: "'Roboto', sans-serif",
@@ -25,7 +27,7 @@ const LogoAndDesc = styled(Box)({
 const CompanyDescription = styled(Typography)({
     fontSize: 14,
     lineHeight: 1.6,
-    color: "rgba(255,255,255,0.9)",
+    color: Theme.palette.primary.contrastText,
     maxWidth: "100%",
     "@media (max-width: 600px)": {
         fontSize: 13,
@@ -58,7 +60,8 @@ const FooterSection1 = styled(Box)({
 const SectionTitle = styled(Typography)({
     fontSize: 18,
     fontWeight: 600,
-    color: "#fff",
+    // color: "#fff",
+    color: Theme.palette.primary.contrastText,
     marginBottom: 16,
     "@media (max-width: 600px)": {
         fontSize: 16,
@@ -68,7 +71,8 @@ const SectionTitle = styled(Typography)({
 
 const FooterLink = styled(Link)({
     fontSize: 14,
-    color: "rgba(255,255,255,0.8)",
+    // color: "rgba(255,255,255,0.8)",
+    color: Theme.palette.primary.contrastText,
     textDecoration: "none",
     cursor: "pointer",
     transition: "color 0.3s ease",
@@ -83,7 +87,8 @@ const FooterLink = styled(Link)({
 
 const ContactInfo = styled(Typography)({
     fontSize: 14,
-    color: "rgba(255,255,255,0.9)",
+    // color: "rgba(255,255,255,0.9)",
+    color: Theme.palette.primary.contrastText,
     marginBottom: 8,
     "@media (max-width: 600px)": {
         fontSize: 13,
@@ -97,7 +102,8 @@ const ChatSection = styled(Box)({
 const ChatTitle = styled(Typography)({
     fontSize: 16,
     fontWeight: 600,
-    color: "#fff",
+    // color: "#fff",
+    color: Theme.palette.primary.contrastText,
     marginBottom: 1,
 });
 
@@ -114,7 +120,8 @@ const SocialIcons = styled(Box)({
 
 const SocialIcon = styled(IconButton)({
     backgroundColor: "rgba(255,255,255,0.1)",
-    color: "#fff",
+    // color: "#fff",
+    color: Theme.palette.primary.contrastText,
     width: 36,
     height: 36,
     "&:hover": {
@@ -154,41 +161,20 @@ const SocialSection = styled(Box)({
 const SocialTitle = styled(Typography)({
     fontSize: 16,
     fontWeight: 500,
-    color: "#fff",
-});
-
-const FooterLinksRow = styled(Box)({
-    display: "flex",
-    gap: 16,
-    flexWrap: "wrap",
-    "@media (max-width: 800px)": {
-        gap: 10,
-    },
-});
-
-const BottomLink = styled(Link)({
-    fontSize: 12,
-    color: "rgba(255,255,255,0.7)",
-    textDecoration: "none",
-    cursor: "pointer",
-    whiteSpace: "nowrap",
-    "&:hover": {
-        color: "#FFD700",
-        textDecoration: "none",
-    },
+    // color: "#fff",
+    color: Theme.palette.primary.contrastText,
 });
 
 const Copyright = styled(Typography)({
     fontSize: 12,
     color: "rgba(255,255,255,0.7)",
-    // whiteSpace: "nowrap",
 });
 
 
 export default function Footer() {
     const navigate = useNavigate();
     return (
-        <div className="primary_Bgclr">
+        <div style={{ backgroundColor: Theme.palette.primary.main }}>
             <FooterContainer>
                 <Container maxWidth="xl" sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'space-between' }}>
                     {/* Left: Logo and description */}
@@ -249,7 +235,7 @@ export default function Footer() {
                                     <Facebook fontSize="small" />
                                 </SocialIcon>
                                 <SocialIcon aria-label="Instagram">
-                                    <a className="text-white" target="blank" href="https://www.instagram.com/chauhansonsjewellers/?hl=en">
+                                    <a style={{color:Theme.palette.primary.contrastText}} target="blank" href="https://www.instagram.com/chauhansonsjewellers/?hl=en">
                                         <Instagram fontSize="small" />
                                     </a>
                                 </SocialIcon>
