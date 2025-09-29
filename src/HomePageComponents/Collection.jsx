@@ -82,7 +82,6 @@ const ImageOverlay = styled(Box)({
         "linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.4) 100%)",
     display: "flex",
     alignItems: "flex-end",
-    // padding: 24,
 });
 
 const CollectionText = styled(Box)({
