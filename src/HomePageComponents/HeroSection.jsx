@@ -30,6 +30,7 @@ const SlideImage = styled("img")(({ theme }) => ({
     maxWidth: "100%",
     display: "block",
     margin: "0 auto",
+    borderRadius: "10px",
     [theme.breakpoints.down("lg")]: {
         width: "auto",
         height: "230px",
