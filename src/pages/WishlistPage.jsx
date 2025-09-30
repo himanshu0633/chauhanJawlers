@@ -320,7 +320,7 @@ export default function WishlistPage() {
     <Box sx={{
       px: { xs: 2, sm: 3, md: 5 },
       py: { xs: 2, md: 3 },
-      // minHeight: '100vh',
+      minHeight: '50vh',
       backgroundColor: '#fafafa'
     }}>
       {/* Header */}

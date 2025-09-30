@@ -74,11 +74,18 @@ export default function SingleProductPage() {
     const { id } = useParams();
     const best = product?.bestVariant ?? {};
     const wishlist = useSelector(selectWishlist);
-    const isWishlisted = !!product && wishlist.some(item => item._id === product._id);
     const dispatch = useDispatch();
     const [units, setUnits] = useState(1);
     const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
     const handleTabChange = (tab) => setActiveTab(tab);
+
+    // // 1:
+    // const isWishlisted = !!product && wishlist.some(item => item._id === product._id);
+
+    // //2:
+    const variant = product?.quantity?.[selectedVariantIndex];
+    const combinedId = `${product?._id}-${variant?.weight ?? 'undef'}-${variant?.carat ?? 'undef'}`;
+    const isWishlisted = wishlist.some(item => item._id === combinedId);
 
     const canAddToCart = Boolean(product?.stock === 'yes');
     const handleShare = () => {
