@@ -11,6 +11,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { publicUrl } from '../common components/PublicUrl';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
+import Theme from '../../Theme';
 
 export default function CollectionPage() {
   const { variety } = useParams();
@@ -168,9 +169,9 @@ export default function CollectionPage() {
                   sx={{
                     fontSize: { xs: 12, md: 14 },
                     fontWeight: 500,
-                    color: '#2C2C2C',
+                    // color: '#2C2C2C',
+                    color: Theme.palette.primary.contrastText,
                     marginBottom: 1,
-                    // lineHeight: 1.3,
                     textAlign: 'center',
                   }}
                 >
