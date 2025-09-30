@@ -41,14 +41,10 @@ const FlexCardGrid = styled(Box)({
     position: "relative",
     display: "flex",
     flexWrap: "wrap",
-    // width: 1100,
     overflow: "hidden",
     margin: "0 auto",
-    // minHeight: 600,
     justifyContent: "center",
     alignItems: "center",
-    // "@media (max-width: 1140px)": { width: 800, minHeight: 440 },
-    // "@media (max-width: 600px)": { width: 340, minHeight: 300 }
 });
 
 const CategoryCard = styled(Box)({
@@ -61,24 +57,25 @@ const CategoryCard = styled(Box)({
     width: 480,
     height: 290,
     margin: 16,
+    // padding: 10,
     background: "#f6f1ed",
     "&:hover": {
         transform: "translateY(-8px)",
         boxShadow: "0 16px 40px rgba(0,0,0,0.22)"
     },
-    // "@media (max-width: 1390px)": { width: 370, height: 300, margin: 16 },
     "@media (max-width: 1100px)": { width: 350, height: 250, margin: 10 },
     "@media (max-width: 780px)": { width: 250, height: 250, margin: 5 },
     "@media (max-width: 700px)": { width: 200, height: 220, margin: 5 },
-    "@media (max-width: 500px)": { width: 170, height: 220, margin: 5 },
-    "@media (max-width: 400px)": { width: 150, height: 220, margin: 5 }
+    "@media (max-width: 500px)": { width: 170, height: 160, margin: 5 },
+    "@media (max-width: 400px)": { width: 150, height: 160, margin: 5 }
 });
 
 const CategoryImage = styled("img")({
     width: "100%",
     height: "100%",
-    objectFit: "cover",
-    objectPosition: "center"
+    objectFit: "contain", 
+    objectPosition: "center",
+    backgroundColor: "#fff", 
 });
 
 const CategoryOverlay = styled(Box)({
