@@ -233,7 +233,10 @@ function WishlistCard({ product, onRemove }) {
         borderRadius: 1,
         cursor: 'pointer'
       }}
-        onClick={() => navigate(`/singleProduct/${product._id}`)}
+        // //1: error causes because: Likely to encode productId-weight-carat together — which is not valid for MongoDB queries, hence the cast error:
+        // onClick={() => navigate(`/singleProduct/${product._id}`)}
+        // // 2: 
+        onClick={() => navigate(`/singleProduct/${product._id?.split('-')[0]}`)}
       >
         <img
           src={publicUrl(product.media[0]?.url)}
@@ -317,7 +320,7 @@ export default function WishlistPage() {
     <Box sx={{
       px: { xs: 2, sm: 3, md: 5 },
       py: { xs: 2, md: 3 },
-      minHeight: '100vh',
+      // minHeight: '100vh',
       backgroundColor: '#fafafa'
     }}>
       {/* Header */}
