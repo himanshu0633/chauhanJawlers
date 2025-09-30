@@ -197,7 +197,7 @@ function WishlistCard({ product, onRemove }) {
     toast.success('Item added to cart!', { position: 'top-right', autoClose: 2000 });
     dispatch(addData(cartItem));
   };
-  
+
   return (
     <Box sx={{
       background: '#fff',
@@ -270,7 +270,8 @@ function WishlistCard({ product, onRemove }) {
             width: '100%',
             height: '100%',
             objectFit: 'contain',
-            objectPosition: 'center'
+            objectPosition: 'center',
+            borderBottom: '1px solid #ddd'
           }}
         />
       </Box>
