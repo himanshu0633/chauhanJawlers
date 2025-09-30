@@ -677,6 +677,7 @@ import { addToWishlist, removeFromWishlist } from '../store/Action';
 import { createSelector } from '@reduxjs/toolkit';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
+import Theme from '../../Theme';
 
 const jewelleryData = [
     {
@@ -1074,7 +1075,7 @@ export function JewelleryGrid() {
                 <Typography
                     variant="h4"
                     align="center"
-                    sx={{ fontWeight: 700, mb: 4, fontFamily: 'serif' }}
+                    sx={{ fontWeight: 700, mb: 4, fontFamily: 'serif', color: Theme.palette.primary, fontSize: { xs: '28px', sm: '36px', md: '48px' } }}
                 >
                     {getCurrentCategoryName()}
                 </Typography>
