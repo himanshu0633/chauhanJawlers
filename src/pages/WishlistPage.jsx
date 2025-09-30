@@ -4,10 +4,10 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from "react-redux";
-import { addToCart, removeFromWishlist } from "../store/Action";
+import { addToCart, removeFromWishlist, addData } from "../store/Action";
 import { publicUrl } from '../common components/PublicUrl';
 import { normalizeCartProduct } from '../utils/ProductsUtils';
-
+import { toast } from 'react-toastify';
 
 function EmptyWishlist({ onContinueShopping }) {
   return (
@@ -173,6 +173,31 @@ function EmptyWishlist({ onContinueShopping }) {
 
 function WishlistCard({ product, onRemove }) {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const isInStock = String(product.stock).toLowerCase() === 'yes';
+  const handleAddToCart = (product) => {
+    if (!product || !product.bestVariant) return;
+
+    const variant = product.bestVariant;
+
+    // Check product-level stock status
+    const isInStock = String(product.stock).toLowerCase() === 'yes';
+    if (!isInStock) {
+      toast.error('This product is out of stock!', { position: 'top-right', autoClose: 2000 });
+      return;
+    }
+
+    const cartItem = {
+      ...product,
+      selectedVariant: variant,
+      cartQty: 1,
+      unitPrice: Number(variant.final_price ?? variant.finalPrice ?? 0),
+    };
+
+    toast.success('Item added to cart!', { position: 'top-right', autoClose: 2000 });
+    dispatch(addData(cartItem));
+  };
+  
   return (
     <Box sx={{
       background: '#fff',
@@ -244,7 +269,7 @@ function WishlistCard({ product, onRemove }) {
           style={{
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
+            objectFit: 'contain',
             objectPosition: 'center'
           }}
         />
@@ -268,6 +293,15 @@ function WishlistCard({ product, onRemove }) {
       >
         {product.name}
       </Typography>
+      <Button
+        variant="contained"
+        sx={{ mt: 1 }}
+        onClick={() => handleAddToCart(product)}
+        disabled={!isInStock}
+        title={!isInStock ? 'Out of stock' : 'Add to Cart'}
+      >
+        {isInStock ? 'ADD TO CART' : 'OUT OF STOCK'}
+      </Button>
     </Box>
   );
 }
@@ -403,473 +437,3 @@ export default function WishlistPage() {
   );
 }
 
-// // option1: use it when only one product is added to the cart
-// import React, { useState } from 'react';
-// import { Box, Typography, Button, Grid, IconButton, Chip, Snackbar, Alert } from '@mui/material';
-// import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-// import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
-// import { useNavigate } from 'react-router-dom';
-// import { useSelector, useDispatch } from "react-redux";
-// import { addToCart, removeFromWishlist } from "../store/Action";
-// import { publicUrl } from '../common components/PublicUrl';
-// import { normalizeCartProduct } from '../utils/ProductsUtils';
-
-// function EmptyWishlist({ onContinueShopping }) {
-//   return (
-//     <Box sx={{
-//       width: '100%',
-//       minHeight: '70vh',
-//       display: 'flex',
-//       flexDirection: { xs: 'column', md: 'row' },
-//       alignItems: { xs: 'center', md: 'flex-start' },
-//       justifyContent: 'center',
-//       gap: { xs: 3, md: 5 },
-//       pt: { xs: 2, md: 4 }
-//     }}>
-//       {/* Empty wishlist illustration */}
-//       <Box sx={{
-//         minWidth: { xs: 150, md: 190 },
-//         textAlign: 'center',
-//         order: { xs: 1, md: 1 }
-//       }}>
-//         <Box sx={{
-//           width: { xs: 100, md: 130 },
-//           height: { xs: 80, md: 110 },
-//           position: 'relative',
-//           display: 'flex',
-//           alignItems: 'center',
-//           justifyContent: 'center',
-//           mx: 'auto'
-//         }}>
-//           {/* Box */}
-//           <Box sx={{
-//             width: { xs: 70, md: 90 },
-//             height: { xs: 45, md: 60 },
-//             backgroundColor: '#e0d9d5',
-//             borderRadius: '2.5px',
-//             position: 'relative',
-//             '&::before': {
-//               content: '""',
-//               position: 'absolute',
-//               top: { xs: -8, md: -10 },
-//               left: { xs: -4, md: -5 },
-//               width: { xs: 78, md: 100 },
-//               height: { xs: 12, md: 15 },
-//               backgroundColor: '#c2bcb8',
-//               borderRadius: '2.5px',
-//               transform: 'rotate(-5deg)'
-//             },
-//             '&::after': {
-//               content: '""',
-//               position: 'absolute',
-//               top: { xs: -6, md: -8 },
-//               right: { xs: -2, md: -3 },
-//               width: { xs: 73, md: 95 },
-//               height: { xs: 10, md: 12 },
-//               backgroundColor: '#c2bcb8',
-//               borderRadius: '2.5px',
-//               transform: 'rotate(5deg)'
-//             }
-//           }}>
-//             {/* Box details */}
-//             <Box sx={{
-//               position: 'absolute',
-//               top: { xs: 15, md: 20 },
-//               left: { xs: 15, md: 20 },
-//               width: { xs: 40, md: 50 },
-//               height: { xs: 8, md: 10 },
-//               backgroundColor: '#c2bcb8',
-//               borderRadius: '2.5px'
-//             }} />
-//             <Box sx={{
-//               position: 'absolute',
-//               bottom: { xs: 6, md: 8 },
-//               left: { xs: 12, md: 15 },
-//               width: { xs: 25, md: 30 },
-//               height: { xs: 4, md: 5 },
-//               backgroundColor: '#c2bcb8',
-//               borderRadius: '2.5px'
-//             }} />
-//             <Typography sx={{
-//               position: 'absolute',
-//               top: { xs: 12, md: 16 },
-//               left: { xs: 30, md: 38 },
-//               color: '#c2bcb8',
-//               fontSize: { xs: '14px', md: '16px' },
-//               fontWeight: 'bold'
-//             }}>
-//               ×
-//             </Typography>
-//           </Box>
-//           {/* Floating heart */}
-//           <Box sx={{
-//             position: 'absolute',
-//             top: { xs: 8, md: 10 },
-//             right: { xs: 15, md: 20 },
-//             width: { xs: 16, md: 20 },
-//             height: { xs: 16, md: 20 },
-//             backgroundColor: '#f4dddd',
-//             borderRadius: '50%',
-//             display: 'flex',
-//             alignItems: 'center',
-//             justifyContent: 'center',
-//             border: '2px dashed #d5888c'
-//           }}>
-//             <Typography sx={{
-//               color: '#d5888c',
-//               fontSize: { xs: '12px', md: '14px' },
-//               lineHeight: 1
-//             }}>
-//               ♥
-//             </Typography>
-//           </Box>
-//         </Box>
-//       </Box>
-
-//       {/* Text content */}
-//       <Box sx={{
-//         textAlign: { xs: 'center', md: 'left' },
-//         mt: { xs: 2, md: 10 },
-//         order: { xs: 2, md: 2 },
-//         maxWidth: { xs: '100%', md: '400px' }
-//       }}>
-//         <Typography
-//           variant="h6"
-//           sx={{
-//             color: '#702626',
-//             fontWeight: 600,
-//             mb: 0.75,
-//             fontSize: { xs: '18px', md: '20px' }
-//           }}
-//         >
-//           Your Wishlist Is Empty !
-//         </Typography>
-//         <Typography
-//           variant="body2"
-//           sx={{
-//             mb: 3,
-//             color: '#702626',
-//             fontSize: { xs: '14px', md: '16px' }
-//           }}
-//         >
-//           Add Chauhan Jewellers To Your Jewellery Wardrobe
-//         </Typography>
-//         <Button
-//           variant="contained"
-//           onClick={onContinueShopping}
-//           sx={{
-//             background: '#7d2a25',
-//             color: '#fff',
-//             borderRadius: '4px',
-//             px: { xs: 3, md: 4 },
-//             py: { xs: 1, md: 1.5 },
-//             textTransform: 'none',
-//             fontWeight: 500,
-//             fontSize: { xs: '14px', md: '16px' },
-//             '&:hover': { background: '#611f18' }
-//           }}
-//         >
-//           Continue Shopping
-//         </Button>
-//       </Box>
-//     </Box>
-//   );
-// }
-
-// function WishlistCard({ product, onRemove, onMoveToCart }) {
-//   const displayPrice = product.selectedVariant?.final_price
-//     ?? product.selectedVariant?.finalPrice
-//     ?? product.price
-//     ?? product.final_price
-//     ?? product.finalPrice
-//     ?? 0;
-
-//   return (
-//     <Box sx={{
-//       background: '#fff',
-//       borderRadius: 2,
-//       boxShadow: '0 .5px 4px 0 rgba(70,21,7,0.08)',
-//       border: '1px solid #eee',
-//       p: { xs: 1.5, sm: 2, md: 2 },
-//       mb: 1.5,
-//       position: 'relative',
-//       // height: { xs: 260, sm: 280, md: 300, lg: 320 },
-//       width: { xs: 160, sm: 200, md: 240, lg: 280 },
-//       maxWidth: '100%',
-//       mx: 'auto',
-//       display: 'flex',
-//       flexDirection: 'column',
-//       justifyContent: 'space-between',
-//       gap: 1,
-//       transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-//       '&:hover': {
-//         transform: 'translateY(-2px)',
-//         boxShadow: '0 4px 12px rgba(70,21,7,0.15)'
-//       }
-//     }}>
-//       {/* Delete button */}
-//       <IconButton
-//         size="small"
-//         onClick={() => onRemove(product._id)}
-//         sx={{
-//           position: 'absolute',
-//           top: { xs: 4, sm: 6, md: 8 },
-//           right: { xs: 4, sm: 6, md: 8 },
-//           backgroundColor: '#fff',
-//           border: '1px solid #bbb',
-//           zIndex: 2,
-//           width: { xs: 24, sm: 28, md: 32 },
-//           height: { xs: 24, sm: 28, md: 32 },
-//           '&:hover': {
-//             backgroundColor: '#f5f5f5',
-//             border: '1px solid #999'
-//           }
-//         }}
-//       >
-//         <DeleteOutlineIcon sx={{
-//           color: '#bbb',
-//           fontSize: { xs: '14px', sm: '16px', md: '18px' }
-//         }} />
-//       </IconButton>
-
-//       {/* Product image container - responsive dimensions */}
-//       <Box sx={{
-//         width: '100%',
-//         height: { xs: 100, sm: 120, md: 140, lg: 160 },
-//         display: 'flex',
-//         alignItems: 'center',
-//         justifyContent: 'center',
-//         mb: { xs: 0.5, sm: 0.8, md: 1 },
-//         overflow: 'hidden',
-//         borderRadius: 1
-//       }}>
-//         <img
-//           src={publicUrl(product.media[0]?.url)}
-//           alt={product.name}
-//           style={{
-//             width: '100%',
-//             height: '100%',
-//             objectFit: 'cover',
-//             objectPosition: 'center'
-//           }}
-//         />
-//       </Box>
-
-//       {/* Content section - flexible height */}
-//       <Box sx={{
-//         flex: 1,
-//         display: 'flex',
-//         flexDirection: 'column',
-//         justifyContent: 'space-between'
-//       }}>
-//         {/* Title and price */}
-//         <Box>
-//           <Typography
-//             variant="body1"
-//             sx={{
-//               fontWeight: 400,
-//               color: '#333',
-//               fontFamily: 'serif',
-//               lineHeight: 1.2,
-//               mb: { xs: 0.3, sm: 0.5, md: 0.5 },
-//               fontSize: { xs: 11, sm: 12, md: 13, lg: 14 },
-//               display: '-webkit-box',
-//               WebkitLineClamp: 2,
-//               WebkitBoxOrient: 'vertical',
-//               overflow: 'hidden',
-//               textTransform: 'capitalize'
-//             }}
-//           >
-//             {product.name}
-//           </Typography>
-
-//           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.3, sm: 0.5, md: 0.5 }, mb: { xs: 0.3, sm: 0.5, md: 0.5 } }}>
-//             <Typography
-//               sx={{
-//                 fontWeight: 500,
-//                 color: '#272727',
-//                 fontSize: { xs: 11, sm: 12, md: 13, lg: 14 }
-//               }}
-//             >
-//               {Number(displayPrice).toLocaleString("en-IN", { style: "currency", currency: "INR" })}
-//             </Typography>
-//           </Box>
-//         </Box>
-
-//         {/* Move to cart button - fixed at bottom */}
-//         <Button
-//           variant="contained"
-//           onClick={() => onMoveToCart(product)}
-//           sx={{
-//             background: '#7d2a25',
-//             color: '#fff',
-//             borderRadius: '3px',
-//             textTransform: 'none',
-//             fontWeight: 500,
-//             py: { xs: 0.5, sm: 0.6, md: 0.7, lg: 0.8 },
-//             fontSize: { xs: 10, sm: 11, md: 12, lg: 14 },
-//             '&:hover': { background: '#611f18' }
-//           }}
-//           fullWidth
-//         >
-//           Move To Cart
-//         </Button>
-//       </Box>
-//     </Box>
-//   );
-// }
-
-// export default function WishlistPage() {
-//   // const [wishlistItems, setWishlistItems] = useState([]);
-//   const [showSnackbar, setShowSnackbar] = useState(false);
-//   const [snackbarMessage, setSnackbarMessage] = useState('');
-//   const navigate = useNavigate();
-//   const wishlistItems = useSelector(state => state.app?.wishlist || []);
-//   const dispatch = useDispatch();
-
-
-//   const handleRemoveFromWishlist = (productId) => {
-//     dispatch(removeFromWishlist(productId));
-//     setSnackbarMessage('Item removed from wishlist');
-//     setShowSnackbar(true);
-//   };
-
-//   const handleMoveToCart = (product) => {
-//     const normalized = normalizeCartProduct(product);
-//     dispatch(addToCart(normalized));
-//     dispatch(removeFromWishlist(product._id));
-//     setSnackbarMessage(`${product.name} moved to cart`);
-//     setShowSnackbar(true);
-//   };
-
-//   const handleContinueShopping = () => {
-//     navigate('/'); // Navigate to home page
-//   };
-
-//   const handleShare = () => {
-//     // In a real app, implement sharing functionality
-//     if (navigator.share) {
-//       navigator.share({
-//         title: 'My Wishlist',
-//         text: 'Check out my jewellery wishlist!',
-//         url: window.location.href
-//       });
-//     } else {
-//       // Fallback for browsers that don't support Web Share API
-//       navigator.clipboard.writeText(window.location.href);
-//       setSnackbarMessage('Wishlist link copied to clipboard!');
-//       setShowSnackbar(true);
-//     }
-//   };
-
-//   const isEmpty = wishlistItems.length === 0;
-
-//   return (
-//     <Box sx={{
-//       px: { xs: 2, sm: 3, md: 5 },
-//       py: { xs: 2, md: 3 },
-//       minHeight: '100vh',
-//       backgroundColor: '#fafafa'
-//     }}>
-//       {/* Header */}
-//       <Box sx={{
-//         display: 'flex',
-//         alignItems: 'center',
-//         mb: { xs: 2, md: 3 },
-//         gap: 2,
-//         flexWrap: 'wrap'
-//       }}>
-//         <Typography
-//           variant="h6"
-//           sx={{
-//             fontWeight: 400,
-//             color: '#222',
-//             flex: 1,
-//             fontSize: { xs: '20px', md: '24px' }
-//           }}
-//         >
-//           Wishlist
-//         </Typography>
-//         {!isEmpty && (
-//           <Button
-//             startIcon={<ShareOutlinedIcon />}
-//             variant="outlined"
-//             onClick={handleShare}
-//             sx={{
-//               borderRadius: '18px',
-//               textTransform: 'none',
-//               fontWeight: 500,
-//               minWidth: { xs: 70, md: 80 },
-//               background: '#fff',
-//               border: '1px solid #bbb',
-//               color: '#7d2a25',
-//               fontSize: { xs: '13px', md: '14px' },
-//               '&:hover': {
-//                 border: '1px solid #7d2a25',
-//                 background: '#fafafa'
-//               }
-//             }}
-//             size="small"
-//           >
-//             Share
-//           </Button>
-//         )}
-//       </Box>
-
-//       {/* Content */}
-//       {isEmpty ? (
-//         <EmptyWishlist onContinueShopping={handleContinueShopping} />
-//       ) : (
-//         <Grid
-//           container
-//           spacing={{ xs: 1, sm: 1.5, md: 2, lg: 2.5 }}
-//           justifyContent="center"
-//         >
-//           {wishlistItems.map((item) => (
-//             <Grid
-//               key={item._id}
-//               xs={6}
-//               sm={4}
-//               md={3}
-//               lg={3}
-//               xl={2}
-//               sx={{
-//                 display: 'flex',
-//                 justifyContent: 'center'
-//               }}
-//             >
-//               <WishlistCard
-//                 key={item._id}
-//                 product={item}
-//                 onRemove={() => handleRemoveFromWishlist(item._id)}
-//                 onMoveToCart={handleMoveToCart}
-//               />
-//             </Grid>
-//           ))}
-//         </Grid>
-//       )}
-
-//       {/* Snackbar for notifications */}
-//       <Snackbar
-//         open={showSnackbar}
-//         autoHideDuration={3000}
-//         onClose={() => setShowSnackbar(false)}
-//         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-//         sx={{
-//           bottom: { xs: 80, sm: 20, md: 20 }
-//         }}
-//       >
-//         <Alert
-//           onClose={() => setShowSnackbar(false)}
-//           severity="success"
-//           sx={{
-//             width: '100%',
-//             fontSize: { xs: '14px', sm: '16px' }
-//           }}
-//         >
-//           {snackbarMessage}
-//         </Alert>
-//       </Snackbar>
-//     </Box>
-//   );
-// }
