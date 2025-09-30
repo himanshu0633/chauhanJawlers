@@ -4,6 +4,7 @@ import axiosInstance from "../common components/AxiosInstance";
 import { publicUrl } from "../common components/PublicUrl";
 import { useEffect, useState } from "react";
 import CustomLoader from "../common components/CustomLoader";
+import Theme from "../../Theme";
 
 const SectionContainer = styled(Box)({
     backgroundColor: "#fff",
@@ -21,7 +22,7 @@ const MainTitle = styled(Typography)({
     fontFamily: "serif",
     fontSize: "48px",
     fontWeight: 600,
-    color: Theme.palette.primary.contrastText,
+    color: Theme.palette.primary,
     marginBottom: "12px",
     lineHeight: "1.2",
     "@media (max-width: 960px)": { fontSize: "40px" },

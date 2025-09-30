@@ -118,8 +118,8 @@ const ShopByCategories = () => {
                         variant="h3"
                         fontFamily="serif"
                         fontWeight={600}
-                        // color="#2C2C2C"
-                        Theme={Theme.palette.primary.contrastText}
+                        color={Theme.palette.primary}
+                        // Theme={Theme.palette.primary.contrastText}
                         fontSize={{ xs: "32px", sm: "40px", md: "48px" }}
                     >
                         Find Your Perfect Match of Jewellery
@@ -243,8 +243,8 @@ const ShopByCategories = () => {
                         ))
                     )}
                 </Box>
-            </Container>
-        </Box>
+            </Container >
+        </Box >
     );
 };
 

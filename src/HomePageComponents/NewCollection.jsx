@@ -3,6 +3,7 @@ import { Box, Typography, Container, Card, CardMedia, CardContent, Button, Chip,
 import axiosInstance from "../common components/AxiosInstance";
 import { useNavigate } from "react-router-dom";
 import { publicUrl } from "../common components/PublicUrl";
+import Theme from "../../Theme";
 
 // ---- Styled Components ----
 const SectionContainer = styled(Box)({
@@ -21,7 +22,8 @@ const MainTitle = styled(Typography)({
   fontFamily: "serif",
   fontSize: 48,
   fontWeight: 600,
-  color: "#2C2C2C",
+  // color: "#2C2C2C",
+  color: Theme.palette.primary,
   marginBottom: 12,
   lineHeight: 1.2,
   "@media (max-width:960px)": { fontSize: 40 },

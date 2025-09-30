@@ -5,6 +5,7 @@ import { publicUrl } from '../common components/PublicUrl';
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import Theme from '../../Theme';
 
 export default function VideoGallery() {
     const [videos, setVideos] = useState([]);
@@ -40,16 +41,20 @@ export default function VideoGallery() {
     if (videos.length > 4) {
         // Show slick slider
         return (
-            <Box sx={{ py: 5, px: { xs: 1, sm: 2 }, background: '#faf7f8', overflow: 'hidden' }}>
-                <Typography  align="center" fontWeight={700} sx={{ mb: 4, fontFamily: 'serif', color: '#2C2C2C', fontSize: { xs: '32px', md: '40px', lg: '48px' } }}>
-                   Traditional Jewellery
+            <Box sx={{ py: 5, px: { xs: 1, sm: 2 }, overflow: 'hidden' }}>
+                <Typography align="center" fontWeight={700}
+                    // Theme={Theme.palette.primary.contrastText} 
+                    sx={{
+                        mb: 4, fontSize: { xs: '32px', md: '40px', lg: '48px' }, color: Theme.palette.primary,
+                    }}>
+                    Traditional Jewellery
                 </Typography>
                 <Slider ref={sliderRef} {...sliderSettings}>
                     {videos.map(video => (
                         <Box key={video._id} sx={{ px: 1 }}>
                             <Card
-                                elevation={3} 
-                                // sx={{ width: 240, mx: 'auto', background: '#fff', borderRadius: 3, overflow: 'hidden' }}
+                                elevation={3}
+                            // sx={{ width: 240, mx: 'auto', background: '#fff', borderRadius: 3, overflow: 'hidden' }}
                             >
                                 <CardMedia
                                     component="video" src={publicUrl(video.url)} controls

@@ -3,6 +3,7 @@
 import { Box, Typography, Container, Button, styled } from "@mui/material"
 import { PlayArrow, ArrowForward } from "@mui/icons-material"
 import { useState, useRef } from "react"
+import Theme from "../../Theme"
 
 const SectionContainer = styled(Box)({
     backgroundColor: "#fff",
@@ -23,7 +24,7 @@ const MainTitle = styled(Typography)({
     fontFamily: "serif",
     fontSize: "48px",
     fontWeight: "600",
-    color: "#2C2C2C",
+     color: Theme.palette.primary,
     marginBottom: "8px",
     lineHeight: "1.2",
     "@media (max-width: 960px)": {

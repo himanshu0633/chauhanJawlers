@@ -3,19 +3,18 @@ import React, { useEffect, useState } from "react";
 import { publicUrl } from "../common components/PublicUrl";
 import axiosInstance from "../common components/AxiosInstance";
 import { useNavigate } from "react-router-dom";
+import Theme from "../../Theme";
 
 const SectionContainer = styled(Box)({
-    backgroundColor: "#F2EDED",
     padding: "80px 0",
     "@media (max-width: 600px)": { padding: "40px 0" },
-    // minHeight: "700px",
 });
 
 const MainTitle = styled(Typography)({
     fontFamily: "serif",
     fontSize: "48px",
     fontWeight: 600,
-    color: "#2C2C2C",
+    color: Theme.palette.primary,
     textAlign: "center",
     marginBottom: 8,
     lineHeight: 1.2,
@@ -41,7 +40,7 @@ const Card = styled(Box)(({ height }) => ({
     transition: "transform 0.3s ease, box-shadow 0.3s ease",
     boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
     height,
-    background: "#fff",
+    // background: "#fff",
     "&:hover": {
         transform: "translateY(-4px)",
         boxShadow: "0 12px 32px rgba(0,0,0,0.2)",
@@ -159,7 +158,9 @@ function Collection() {
     return (
         <SectionContainer>
             <Container maxWidth="xl">
-                <MainTitle>Chauhan Son's Collections</MainTitle>
+                <MainTitle 
+                // Theme={Theme.palette.primary.contrastText}
+                >Chauhan Son's Collections</MainTitle>
                 <SubTitle>Explore Our Newly Launched Collection</SubTitle>
 
                 {/* Flex Row: Left Large Card, Right Two Stack Cards */}
