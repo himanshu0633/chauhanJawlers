@@ -21,7 +21,7 @@ const MainTitle = styled(Typography)({
     fontFamily: "serif",
     fontSize: "48px",
     fontWeight: 600,
-    color: "#2C2C2C",
+    color: Theme.palette.primary.contrastText,
     marginBottom: "12px",
     lineHeight: "1.2",
     "@media (max-width: 960px)": { fontSize: "40px" },

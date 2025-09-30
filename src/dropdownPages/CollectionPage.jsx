@@ -168,11 +168,11 @@ export default function CollectionPage() {
                 <Typography
                   sx={{
                     fontSize: { xs: 12, md: 14 },
-                    fontWeight: 500,
-                    // color: '#2C2C2C',
-                    color: Theme.palette.primary.contrastText,
+                    fontWeight: 700,
+                    color: '#2C2C2C',
                     marginBottom: 1,
                     textAlign: 'center',
+                    textTransform: 'capitalize',
                   }}
                 >
                   {item.productvariety}
@@ -185,6 +185,7 @@ export default function CollectionPage() {
                     marginBottom: 1,
                     lineHeight: 1.1,
                     textAlign: 'center',
+                    textTransform: 'capitalize',
                   }}
                 >
                   {item.name}
