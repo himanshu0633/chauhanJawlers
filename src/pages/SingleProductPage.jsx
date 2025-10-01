@@ -65,7 +65,6 @@ const parseVariants = (raw) => {
 };
 
 
-
 export default function SingleProductPage() {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -78,6 +77,22 @@ export default function SingleProductPage() {
     const [units, setUnits] = useState(1);
     const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
     const handleTabChange = (tab) => setActiveTab(tab);
+    // Track current main image index
+    const [mainImage, setMainImage] = useState(product?.media[0]?.url || '');
+    // For zoom effect
+    const [isZoomed, setIsZoomed] = useState(false);
+    const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
+
+    const handleMouseMove = (e) => {
+        const { left, top, width, height } = e.target.getBoundingClientRect();
+        const x = ((e.clientX - left) / width) * 100;
+        const y = ((e.clientY - top) / height) * 100;
+        setZoomPos({ x, y });
+    };
+
+    const handleMouseEnter = () => setIsZoomed(true);
+    const handleMouseLeave = () => setIsZoomed(false);
+
 
     // // 1:
     // const isWishlisted = !!product && wishlist.some(item => item._id === product._id);
@@ -170,6 +185,13 @@ export default function SingleProductPage() {
                 bestVariant: variants.find(v => v.in_stock) || variants[0],
             };
             setProduct(fetchedProduct);
+
+            // Set the first image in media array as the main image
+            if (fetchedProduct?.media?.length > 0) {
+                setMainImage(publicUrl(fetchedProduct.media[0]?.url));
+            }
+
+
             setSelectedVariantIndex(fetchedProduct.bestVariant ? variants.indexOf(fetchedProduct.bestVariant) : 0);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -220,15 +242,6 @@ export default function SingleProductPage() {
         const variant = product.quantity[selectedVariantIndex];
         if (!variant) return;
 
-        const unit = Number(variant.final_price ?? variant.finalPrice ?? 0);
-
-        // const cartItem = {
-        //     ...product,                   // keeps quantity = [flat variants]
-        //     selectedVariant: { ...variant },
-        //     cartQty: units,               // cart line count
-        //     unitPrice: unit,              // per-unit price
-        //     totalPrice: unit * units,     // line total
-        // };
         const cartItem = {
             ...product,
             selectedVariant: variant,
@@ -263,6 +276,10 @@ export default function SingleProductPage() {
     const discountAmount = discount ? subTotal * (Number(discount) / 100) : 0;
     const discountedValue = subTotal - discountAmount;
 
+    const handleThumbnailClick = (imageUrl) => {
+        // Update the main image when a thumbnail is clicked
+        setMainImage(imageUrl);
+    };
 
     return (
         <Box bgcolor="#fff" py={6}>
@@ -430,24 +447,162 @@ export default function SingleProductPage() {
 
                     {/* Product Images */}
                     <Box sx={{ width: { xs: "100%", sm: "55%" } }}>
-                        <Box
+                        {/* <Box
                             sx={{
                                 display: 'flex',
                                 justifyContent: 'center',
                                 alignItems: 'center',
-                                // gap: { md: 2 },
+                                gap: { md: 2 },
                                 borderRadius: 3,
                                 position: 'relative',
                             }}
                         >
                             <Box sx={{ width: "100%" }}>
-                                <Box component="img" src={product?.frontImage} alt="Front view" sx={{ height: 300, width: '100%', objectFit: 'contain', userSelect: 'none', boxShadow: '0 6px 20px rgb(0 0 0 / 0.10)', borderRadius: 2 }} draggable={false} />
+                                    <Box component="img" src={product?.frontImage} alt="Front view" sx={{ height: 300, width: '100%', objectFit: 'contain', userSelect: 'none', boxShadow: '0 6px 20px rgb(0 0 0 / 0.10)', borderRadius: 2 }} draggable={false} />
+                            </Box>  
+                            <Box>
+                                {product?.sideImage && (
+                                    <Box component="img" src={product?.sideImage} alt="Side view" sx={{ height: 300, width: '100%', objectFit: 'cover', userSelect: 'none', boxShadow: '0 8px 28px rgb(0 0 0 / 0.08)', borderRadius: 4 }} draggable={false} />
+                                )}
+                            </Box>
+                        </Box> */}
+
+                        {/* 2: zoom view */}
+                        {/* <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                gap: { md: 2 },
+                                borderRadius: 3,
+                                position: 'relative',
+                                overflow: 'hidden',
+                            }}
+                        >
+                            <Box sx={{ width: "100%" }}>
+                                <Box sx={{ width: '100%', height: 300, borderRadius: 2 }}>
+                                    <Box
+                                        component="img"
+                                        src={product?.frontImage}
+                                        alt="Front view"
+                                        sx={{
+                                            height: '100%',
+                                            width: '100%',
+                                            objectFit: 'contain',
+                                            userSelect: 'none',
+                                            boxShadow: '0 6px 20px rgb(0 0 0 / 0.10)',
+                                            borderRadius: 2,
+                                            transition: 'filter 0.3s',
+                                            filter: isZoomed ? 'brightness(80%)' : 'none',
+                                            cursor: 'zoom-in',
+                                            display: 'block'
+                                        }}
+                                        draggable={false}
+                                        onMouseMove={handleMouseMove}
+                                        onMouseEnter={handleMouseEnter}
+                                        onMouseLeave={handleMouseLeave}
+                                    />
+                                    {isZoomed && (
+                                        <Box
+                                            sx={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                height: '100%',
+                                                pointerEvents: 'none',
+                                                borderRadius: 3,
+                                                zIndex: 10,
+                                            }}
+                                        >
+                                            <Box
+                                                component="img"
+                                                src={product?.frontImage}
+                                                alt="Zoom view"
+                                                sx={{
+                                                    position: 'absolute',
+                                                    top: `${-zoomPos.y * 2}%`,
+                                                    left: `${-zoomPos.x * 2}%`,
+                                                    width: '300%',
+                                                    height: '300%',
+                                                    objectFit: 'cover',
+                                                    borderRadius: 4,
+                                                    boxShadow: '0 0 20px #2226',
+                                                    pointerEvents: 'none',
+                                                    transition: 'top 0.05s, left 0.05s',
+                                                }}
+                                            />
+                                        </Box>
+                                    )}
+                                </Box>
+
                             </Box>
                             <Box>
                                 {product?.sideImage && (
                                     <Box component="img" src={product?.sideImage} alt="Side view" sx={{ height: 300, width: '100%', objectFit: 'cover', userSelect: 'none', boxShadow: '0 8px 28px rgb(0 0 0 / 0.08)', borderRadius: 4 }} draggable={false} />
                                 )}
                             </Box>
+                        </Box> */}
+
+                        {/* 3: */}
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                gap: { md: 2 },
+                                borderRadius: 3,
+                                position: 'relative',
+                                overflow: 'hidden',
+                            }}
+                        >
+                            <Box sx={{ width: "100%" }}>
+                                <Box sx={{ width: '100%', height: 300, borderRadius: 2 }}>
+                                    <Box
+                                        component="img"
+                                        src={mainImage}
+                                        alt="Main view"
+                                        sx={{
+                                            height: '100%',
+                                            width: '100%',
+                                            objectFit: 'contain',
+                                            userSelect: 'none',
+                                            boxShadow: '0 6px 20px rgb(0 0 0 / 0.10)',
+                                            borderRadius: 2,
+                                        }}
+                                        draggable={false}
+                                    />
+                                </Box>
+                            </Box>
+                        </Box>
+
+                        {/* Thumbnails Below Main Image */}
+                        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
+                            {product?.media?.map((image, index) => (
+                                <Box
+                                    key={index}
+                                    sx={{
+                                        width: 60,
+                                        height: 60,
+                                        borderRadius: 2,
+                                        overflow: 'hidden',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    <Box
+                                        component="img"
+                                        src={publicUrl(image?.url)}  // Adjust the publicUrl if needed
+                                        alt={`Thumbnail ${index}`}
+                                        sx={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'cover',
+                                            border: mainImage === image?.url ? '2px solid #68171b' : 'none',
+                                        }}
+                                        onClick={() => handleThumbnailClick((publicUrl(image?.url)))}
+                                    />
+                                </Box>
+                            ))}
                         </Box>
                     </Box>
                 </Box>
@@ -464,10 +619,12 @@ export default function SingleProductPage() {
 
 
                 {/* reviews section */}
-                {product && <ProductReviewsSection
-                    product={product}
-                    onRefreshProduct={fetchData}
-                />}
+                {
+                    product && <ProductReviewsSection
+                        product={product}
+                        onRefreshProduct={fetchData}
+                    />
+                }
 
                 {/* Jewellery Details */}
                 <Box sx={{ bgcolor: '#fff', borderRadius: 2, p: { xs: 3, sm: 5 }, maxWidth: 920, mx: 'auto', boxShadow: '0 4px 32px rgb(242 227 213 / 0.8)' }}>
@@ -581,8 +738,8 @@ export default function SingleProductPage() {
                         </TableContainer>
                     )}
                 </Box>
-            </Container>
-        </Box>
+            </Container >
+        </Box >
     );
 }
 
