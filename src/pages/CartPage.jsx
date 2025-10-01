@@ -70,6 +70,7 @@ function CartCard({ product, onRemove, onUpdateQuantity }) {
   const quantity = product.cartQty ?? 1;
   const variant = product.selectedVariant ?? {};
   const fp = Number(variant.final_price ?? variant.finalPrice ?? 0);
+  const navigate = useNavigate();
 
   const parsedQuantities = useMemo(() => {
     const src = product?.quantity;
@@ -124,12 +125,13 @@ function CartCard({ product, onRemove, onUpdateQuantity }) {
         <DeleteOutlineIcon sx={{ color: '#bbb', fontSize: { xs: '14px', sm: '16px', md: '18px' } }} />
       </IconButton>
 
-      <Box sx={{
-        width: '100%', height: { xs: 100, sm: 120, md: 140, lg: 160 }, display: 'flex',
-        alignItems: 'center', justifyContent: 'center', mb: { xs: 0.5, sm: 0.8, md: 1 }, overflow: 'hidden', borderRadius: 1
-      }}>
+      <Box
+        onClick={() => navigate(`/singleProduct/${product._id}`)}
+        sx={{
+          width: '100%', height: { xs: 100, sm: 120, md: 140, lg: 160 }, display: 'flex',
+          alignItems: 'center', justifyContent: 'center', mb: { xs: 0.5, sm: 0.8, md: 1 }, overflow: 'hidden', borderRadius: 1
+        }}>
         <img src={publicUrl(product?.media?.[0]?.url)} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }}
-        // onClick={() => navigate(`/singleProduct/${product._id}`)}
         />
       </Box>
 
