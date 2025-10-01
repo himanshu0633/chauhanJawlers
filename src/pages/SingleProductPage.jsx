@@ -554,6 +554,7 @@ export default function SingleProductPage() {
                                 borderRadius: 3,
                                 position: 'relative',
                                 overflow: 'hidden',
+                                border:'1px solid #ccc'
                             }}
                         >
                             <Box sx={{ width: "100%" }}>
@@ -587,6 +588,7 @@ export default function SingleProductPage() {
                                         borderRadius: 2,
                                         overflow: 'hidden',
                                         cursor: 'pointer',
+                                        border: mainImage === publicUrl(image?.url) ? '2px solid #68171b' : '1px solid #ddd',
                                     }}
                                 >
                                     <Box
