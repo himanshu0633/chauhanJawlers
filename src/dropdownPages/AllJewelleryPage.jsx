@@ -744,12 +744,13 @@ function JewelleryCard({ product }) {
                 position: 'relative',
                 borderRadius: 2,
                 overflow: 'hidden',
-                // width: { xs: 170, sm: 200 },
                 width: "100%",
                 height: { xs: 200 },
                 mx: 'auto',
                 bgcolor: 'transparent',
-                boxShadow: 'none'
+                boxShadow: 'none',
+                pt:1,
+                backgroundColor: '#fff'
             }}>
                 <Link to={`/singleProduct/${product._id}`} style={{ textDecoration: 'none' }}>
                     <img
@@ -757,9 +758,10 @@ function JewelleryCard({ product }) {
                         alt={product.name}
                         style={{
                             margin: 'auto',
-                            objectFit: 'cover',
+                            objectFit: 'contain',
                             width: '100%',
-                            height: 200,
+                            // height: 200,
+                            height: "100%",
                             borderRadius: '8px'
                         }}
                     />

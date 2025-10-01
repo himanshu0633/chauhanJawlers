@@ -73,6 +73,7 @@ const CategoryCard = styled(Card)(({ theme }) => ({
   position: "relative",
   width: 230,
   height: 335,
+  backgroundColor: "#fff",
   margin: "0 auto",
   [theme.breakpoints.down("md")]: {
     width: 172,
@@ -83,13 +84,12 @@ const CategoryCard = styled(Card)(({ theme }) => ({
     height: 188,
     borderRadius: 12,
   },
-  background: "#F9F9F9",
 }));
 
 const CategoryImg = styled(CardMedia)(({ theme }) => ({
   width: "100%",
   height: "100%",
-  objectFit: "cover",
+  objectFit: "contain",
   objectPosition: "center",
   transition: ".23s transform",
 }));
