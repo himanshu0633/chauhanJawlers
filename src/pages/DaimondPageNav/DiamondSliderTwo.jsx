@@ -361,7 +361,7 @@ export default DiamondSliderTwo;
 // import 'swiper/css/navigation';
 // import 'swiper/css/scrollbar';
 // import 'swiper/css/effect-coverflow';
-// import axiosInstance from '../../common components/AxiosInstance';
+// import axiosInstance from '../../commonComponents/AxiosInstance';
 
 // const DiamondSliderContainer = styled(Box)(({ theme }) => ({
 //   backgroundColor: '#ffffff',

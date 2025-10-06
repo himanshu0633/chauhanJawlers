@@ -8,7 +8,7 @@ import Theme from '../Theme.js'
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistor, store } from './store/Store.js'
-import ScrollToTop from './common components/ScrollToTop.jsx'
+import ScrollToTop from './commonComponents/ScrollToTop.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

@@ -286,7 +286,7 @@ export default function SingleProductPage() {
             <ToastContainer position="top-right" autoClose={2000} hideProgressBar={false} />
             <Container maxWidth="xl" sx={{ maxWidth: 1140 }}>
                 <Box display="flex" alignItems="center" justifyContent="space-between" flexDirection={{ xs: "column-reverse", sm: "row" }} gap={{ xs: 3, md: 0 }} mb={4}>
-                    <Box sx={{ width: { sm: "46%" } }}>
+                    <Box sx={{ width: { sm: "56%" } }}>
                         {/* Product Specs Chips */}
                         <Box sx={{ display: 'flex', justifyContent: "center", textAlign: 'center', mb: 1 }}>
                             <Chip
@@ -446,7 +446,7 @@ export default function SingleProductPage() {
                     </Box>
 
                     {/* Product Images */}
-                    <Box sx={{ width: { xs: "100%", sm: "55%" } }}>
+                    <Box sx={{ width: { sm: "45%" } }}>
                         {/* <Box
                             sx={{
                                 display: 'flex',
@@ -554,7 +554,7 @@ export default function SingleProductPage() {
                                 borderRadius: 3,
                                 position: 'relative',
                                 overflow: 'hidden',
-                                border:'1px solid #ccc'
+                                border: '1px solid #ccc'
                             }}
                         >
                             <Box sx={{ width: "100%" }}>

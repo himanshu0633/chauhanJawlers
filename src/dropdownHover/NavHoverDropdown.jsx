@@ -3,8 +3,8 @@
 // import { useEffect, useMemo, useState } from "react";
 // import { Box, Typography, Button, Paper, styled, useMediaQuery, useTheme } from "@mui/material";
 // import { useNavigate } from "react-router-dom";
-// import axiosInstance from "../common components/AxiosInstance";
-// import { publicUrl } from "../common components/PublicUrl";
+// import axiosInstance from "../commonComponents/AxiosInstance";
+// import { publicUrl } from "../commonComponents/PublicUrl";
 
 // const DropdownMenu = styled(Paper)(({ theme }) => ({
 //     position: "fixed",
@@ -440,8 +440,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import axiosInstance from "../common components/AxiosInstance";
-import { publicUrl } from "../common components/PublicUrl";
+import axiosInstance from "../commonComponents/AxiosInstance";
+import { publicUrl } from "../commonComponents/PublicUrl";
 import {
   DropdownContainer,
   NavigationGrid,

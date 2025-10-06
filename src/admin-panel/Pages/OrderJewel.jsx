@@ -1,5 +1,5 @@
 // import React, { useEffect, useState } from 'react';
-// import axiosInstance from '../../common components/AxiosInstance';
+// import axiosInstance from '../../commonComponents/AxiosInstance';
 // import {
 //   Box, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
 //   Typography, CircularProgress, Chip, Button, Dialog, DialogTitle, DialogContent, DialogActions,

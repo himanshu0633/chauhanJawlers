@@ -1,6 +1,6 @@
 // import { Box, Button, TextField, Typography } from '@mui/material';
 // import { useState } from 'react';
-// import axiosInstance from '../../common components/AxiosInstance';
+// import axiosInstance from '../../commonComponents/AxiosInstance';
 
 // export default function VideoUpload() {
 //     const [video, setVideo] = useState(null);

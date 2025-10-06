@@ -1,6 +1,6 @@
 // import React, { useEffect, useState } from 'react';
 // import { Link, useNavigate } from 'react-router-dom';
-// import axiosInstance from '../../common components/AxiosInstance';
+// import axiosInstance from '../../commonComponents/AxiosInstance';
 // import API_URL from '../../../config';
 // import {
 //   Box,
@@ -31,7 +31,7 @@
 // } from '@mui/material';
 // import { Add, Edit, Delete, Close, Visibility } from '@mui/icons-material';
 // import { styled } from '@mui/material/styles';
-// import { publicUrl } from '../../common components/PublicUrl';
+// import { publicUrl } from '../../commonComponents/PublicUrl';
 
 // const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
 //   marginTop: theme.spacing(3),

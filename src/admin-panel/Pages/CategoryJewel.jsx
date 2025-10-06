@@ -431,7 +431,7 @@ export default CategoryJewel;
 
 // // 2:
 // import React, { useEffect, useState } from 'react';
-// import axiosInstance from '../../common components/AxiosInstance';
+// import axiosInstance from '../../commonComponents/AxiosInstance';
 // import {
 //     Box,
 //     Button,
@@ -463,7 +463,7 @@ export default CategoryJewel;
 // } from '@mui/material';
 // import { Add, Edit, Delete, Close, CloudUpload, Info } from '@mui/icons-material';
 // import { styled } from '@mui/material/styles';
-// import { publicUrl } from '../../common components/PublicUrl';
+// import { publicUrl } from '../../commonComponents/PublicUrl';
 
 // const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
 //     marginTop: theme.spacing(3),

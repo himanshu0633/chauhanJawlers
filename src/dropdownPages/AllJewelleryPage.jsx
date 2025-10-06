@@ -13,9 +13,9 @@
 // import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 // import FavoriteIcon from '@mui/icons-material/Favorite';
 // import { useEffect, useState } from 'react';
-// import axiosInstance from '../common components/AxiosInstance';
+// import axiosInstance from '../commonComponents/AxiosInstance';
 // import { Link, useLocation, useParams } from 'react-router-dom';
-// import { publicUrl } from '../common components/PublicUrl';
+// import { publicUrl } from '../commonComponents/PublicUrl';
 
 // const jewelleryData = [
 //     {

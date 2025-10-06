@@ -1,5 +1,5 @@
 // import React, { useState, useEffect } from 'react';
-// import axiosInstance from '../../common components/AxiosInstance';
+// import axiosInstance from '../../commonComponents/AxiosInstance';
 // import API_URL from '../../../config';
 // import { toast } from 'react-toastify';
 // import {
@@ -32,7 +32,7 @@
 // } from '@mui/material';
 // import { Add, Edit, Delete, Close, CloudUpload } from '@mui/icons-material';
 // import { styled } from '@mui/material/styles';
-// import { publicUrl } from '../../common components/PublicUrl';
+// import { publicUrl } from '../../commonComponents/PublicUrl';
 
 // const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
 //   marginTop: theme.spacing(3),

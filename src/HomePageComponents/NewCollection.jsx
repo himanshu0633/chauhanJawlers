@@ -1,8 +1,8 @@
 // import React, { useEffect, useState } from "react";
 // import { Box, Typography, Container, Card, CardMedia, CardContent, Button, Chip, styled } from "@mui/material";
-// import axiosInstance from "../common components/AxiosInstance";
+// import axiosInstance from "../commonComponents/AxiosInstance";
 // import { useNavigate } from "react-router-dom";
-// import { publicUrl } from "../common components/PublicUrl";
+// import { publicUrl } from "../commonComponents/PublicUrl";
 // import Theme from "../../Theme";
 
 // // ---- Styled Components ----

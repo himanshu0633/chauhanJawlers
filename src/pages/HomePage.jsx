@@ -10,8 +10,8 @@ import ExchangeOffer from '../HomePageComponents/ExchangeOffer'
 import Exclusive from '../HomePageComponents/Exclusive'
 import ChauhanExperience from '../HomePageComponents/ChauhanExperience'
 import VideoGallery from '../HomePageComponents/VideoGallery'
-// import AnimatedSection from '../common components/AnimatedSection'
-// import VideoCardSlider from '../common components/VideoCardSlider'
+// import AnimatedSection from '../commonComponents/AnimatedSection'
+// import VideoCardSlider from '../commonComponents/VideoCardSlider'
 
 const HomePage = () => {
 

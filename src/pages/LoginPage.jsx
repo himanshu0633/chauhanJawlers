@@ -7,7 +7,7 @@
 //     Email, Lock, Person, Visibility, VisibilityOff
 // } from '@mui/icons-material';
 // import { useNavigate } from 'react-router-dom';
-// import axiosInstance from '../common components/AxiosInstance';
+// import axiosInstance from '../commonComponents/AxiosInstance';
 // import { toast, ToastContainer } from 'react-toastify';
 
 // const themeColors = {
