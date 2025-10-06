@@ -423,6 +423,7 @@ export default function CartPage() {
 
           const orderPayload = {
             userId: userData?._id,
+              email: userData?.email,
             items: cartItems.map((item) => {
               const qty = item.cartQty ?? (typeof item.quantity === 'number' ? item.quantity : 1);
               const price = Number(
