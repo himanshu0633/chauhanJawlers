@@ -13,6 +13,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import axiosInstance from '../commonComponents/AxiosInstance';
 import { deleteProduct, updateData, clearProducts } from '../store/Action';
 import { publicUrl } from '../commonComponents/PublicUrl';
+import Theme from '../../Theme';
 
 // ---------- helpers ----------
 const formatINR = (n) =>
@@ -417,13 +418,18 @@ export default function CartPage() {
       description: 'Order Payment',
       handler: async function (response) {
         try {
-          toast.success('Payment successful!');
+          toast.success('Payment successful!'); toast.success('Payment successful!');
           const userData = JSON.parse(localStorage.getItem('userData'));
 
+          // Stop if no email
+          if (!userData?.email) {
+            toast.error("Email not found in user data!");
+            console.error("CRITICAL: No email found, order will not send confirmation emails");
+            // You can still proceed with order, but warn user
+          }
 
           const orderPayload = {
             userId: userData?._id,
-            email: userData?.email,
             items: cartItems.map((item) => {
               const qty = item.cartQty ?? (typeof item.quantity === 'number' ? item.quantity : 1);
               const price = Number(
@@ -444,6 +450,7 @@ export default function CartPage() {
             phone: phoneNumber,
             totalAmount: total,
             paymentId: response.razorpay_payment_id,
+            email: userData?.email,
           };
           const res = await axiosInstance.post('/api/createOrder', orderPayload);
           if (res.status === 201) {
@@ -464,11 +471,86 @@ export default function CartPage() {
         contact: phoneNumber,
       },
       notes: { address: formData.selectedAddress },
-      theme: { color: '#3399cc' },
+      theme: { color: Theme.palette.primary.main },
     };
     const rz = new window.Razorpay(options);
     rz.open();
   };
+
+  // // 2:
+  // const handleCheckout = () => {
+
+  //   if (!isAuthenticated) {
+  //     toast.warn('Please log in to proceed with checkout.');
+  //     navigate('/login'); // Redirecting to login page if the user is not logged in
+  //     return;
+  //   }
+
+  //   if (!formData.selectedAddress) {
+  //     toast.warn('Please select an address before checkout.');
+  //     return;
+  //   }
+  //   const phoneNumber = formData.phone || originalAddress?.phone || "";
+
+  //   const options = {
+  //     key: 'rzp_live_RCKnQvruACO5FH',
+  //     amount: Math.round(total * 100), // paise
+  //     currency: 'INR',
+  //     name: 'Chauhan Sons Jewellers',
+  //     description: 'Order Payment',
+  //     handler: async function (response) {
+  //       try {
+  //         toast.success('Payment successful!');
+  //         const userData = JSON.parse(localStorage.getItem('userData'));
+
+  //         const orderPayload = {
+  //           userId: userData?._id,
+  //           items: cartItems.map((item) => {
+  //             const qty = item.cartQty ?? (typeof item.quantity === 'number' ? item.quantity : 1);
+  //             const price = Number(
+  //               item.unitPrice ??
+  //               item.selectedVariant?.final_price ??
+  //               item.selectedVariant?.finalPrice ??
+  //               0
+  //             );
+  //             return {
+  //               productId: item._id,
+  //               name: item.name,
+  //               quantity: qty,
+  //               price,
+  //             };
+  //           }),
+
+  //           address: formData.selectedAddress,
+  //           phone: phoneNumber,
+  //           totalAmount: total,
+  //           paymentId: response.razorpay_payment_id,
+  //           email: userData?.email,
+  //         };
+  //         const res = await axiosInstance.post('/api/createOrder', orderPayload);
+  //         if (res.status === 201) {
+  //           dispatch(clearProducts());
+  //           navigate('/successOrder');
+  //           // toast.success('Order placed successfully!');
+  //         } else {
+  //           toast.error('Failed to place order.');
+  //         }
+  //       } catch (err) {
+  //         console.error('Order creation error:', err);
+  //         toast.error('Something went wrong while placing the order.');
+  //       }
+  //     },
+  //     prefill: {
+  //       name: userData?.name,
+  //       email: userData?.email,
+  //       contact: phoneNumber,
+  //     },
+  //     notes: { address: formData.selectedAddress },
+  //     theme: { color: '#3399cc' },
+  //   };
+  //   const rz = new window.Razorpay(options);
+  //   rz.open();
+  // };
 
   const handlePhoneChange = (e) => {
     let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
