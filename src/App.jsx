@@ -41,6 +41,7 @@ import VideoUpload from './admin-panel/Pages/VideoUpload';
 import VideoGallery from './HomePageComponents/VideoGallery';
 import OrderSuccessPage from './pages/OrderSuccessPage';
 import { ToastContainer } from 'react-toastify';
+import LiveMetalPrice from './commonComponents/LiveMetalPrice';
 
 function App() {
   const location = useLocation();
@@ -57,6 +58,7 @@ function App() {
         <>
           <Header />
           <Box sx={{ paddingTop: { xs: "103px", md: '124px', lg: 14.5 } }} />
+        <LiveMetalPrice/>
         </>
       )}
 
