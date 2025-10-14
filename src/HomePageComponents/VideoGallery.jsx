@@ -1,5 +1,122 @@
+// import { useEffect, useRef, useState } from 'react';
+// import { Box, Typography, Grid, Card, CardMedia, CardContent } from '@mui/material';
+// import axiosInstance from '../commonComponents/AxiosInstance';
+// import { publicUrl } from '../commonComponents/PublicUrl';
+// import Slider from "react-slick";
+// import "slick-carousel/slick/slick.css";
+// import "slick-carousel/slick/slick-theme.css";
+// import Theme from '../../Theme';
+
+// export default function VideoGallery() {
+//     const [videos, setVideos] = useState([]);
+//     const [playingVideoId, setPlayingVideoId] = useState(null);
+//     const sliderRef = useRef(null);
+
+//     useEffect(() => {
+//         axiosInstance.get('/videos')
+//             .then(res => setVideos(res.data));
+//     }, []);
+
+//     const sliderSettings = {
+//         dots: true,
+//         infinite: true,
+//         speed: 500,
+//         slidesToShow: Math.min(videos.length, 4),
+//         slidesToScroll: 2,
+//         autoplay: false,
+//         arrows: true,
+//         adaptiveHeight: true,
+//         responsive: [
+//             {
+//                 breakpoint: 960,
+//                 settings: { slidesToShow: Math.min(videos.length, 2) }
+//             },
+//             {
+//                 breakpoint: 600,
+//                 settings: { slidesToShow: 1 }
+//             }
+//         ]
+//     };
+
+//     if (videos.length > 4) {
+//         // Show slick slider
+//         return (
+//             <Box sx={{ py: 5, px: { xs: 1, sm: 2 }, overflow: 'hidden' }}>
+//                 <Typography align="center" fontWeight={700}
+//                     // Theme={Theme.palette.primary.contrastText} 
+//                     sx={{
+//                         mb: 4, fontSize: { xs: '32px', md: '40px', lg: '48px' }, color: Theme.palette.primary,
+//                     }}>
+//                     Traditional Jewellery
+//                 </Typography>
+//                 <Slider ref={sliderRef} {...sliderSettings}>
+//                     {videos.map(video => (
+//                         <Box key={video._id} sx={{ px: 1 }}>
+//                             <Card
+//                                 elevation={3}
+//                             // sx={{ width: 240, mx: 'auto', background: '#fff', borderRadius: 3, overflow: 'hidden' }}
+//                             >
+//                                 <CardMedia
+//                                     component="video" src={publicUrl(video.url)} controls
+//                                     onPlay={() => {
+//                                         setPlayingVideoId(video._id);
+//                                         sliderRef.current?.slickPause();
+//                                     }}
+//                                     onEnded={() => {
+//                                         setPlayingVideoId(null);
+//                                         sliderRef.current?.slickPlay();
+//                                     }}
+//                                     sx={{
+//                                         height: 260, objectFit: 'cover', background: '#000',
+//                                         boxShadow: playingVideoId === video._id ? '0 0 15px 4px #dfbce6ff' : undefined,
+//                                     }}
+//                                 />
+//                                 <Typography align="center" sx={{ p: 1, fontFamily: 'serif', fontWeight: 500, color: '#442f2f' }}>{video.title}</Typography>
+//                             </Card>
+//                         </Box>
+//                     ))}
+//                 </Slider>
+//             </Box>
+//         );
+//     }
+
+//     // Default grid (your existing code)
+//     return (
+//         <Box sx={{ py: 5, px: { xs: 1, sm: 2 }, background: '#faf7f8' }}>
+//             <Typography variant="h4" align="center" fontWeight={700} sx={{ mb: 4, fontFamily: 'serif', color: '#511a1a' }}>
+//                 Latest Videos
+//             </Typography>
+//             <Grid container spacing={4} justifyContent="center">
+//                 {videos.map(video => (
+//                     <Grid
+//                         item
+//                         key={video._id}
+//                         xs={12}
+//                         sm={6}
+//                         md={3}
+//                         sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+//                     >
+//                         <Card elevation={3} sx={{ width: 240, background: '#fff', borderRadius: 3, overflow: 'hidden' }}>
+//                             <CardMedia component="video" src={publicUrl(video.url)} controls sx={{ height: 260, objectFit: 'cover', background: '#000' }} />
+//                             <Typography
+//                                 gutterBottom
+//                                 align="center"
+//                                 sx={{ fontWeight: 500, fontFamily: 'serif', color: '#442f2f', fontSize: '1rem', py: 1 }}
+//                             >
+//                                 {video.title}
+//                             </Typography>
+//                         </Card>
+//                     </Grid>
+//                 ))}
+//             </Grid>
+//         </Box>
+//     );
+// }
+
+
+// //2
 import { useEffect, useRef, useState } from 'react';
-import { Box, Typography, Grid, Card, CardMedia, CardContent } from '@mui/material';
+import { Box, Typography, Grid, Card, CardMedia, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import axiosInstance from '../commonComponents/AxiosInstance';
 import { publicUrl } from '../commonComponents/PublicUrl';
 import Slider from "react-slick";
@@ -10,12 +127,22 @@ import Theme from '../../Theme';
 export default function VideoGallery() {
     const [videos, setVideos] = useState([]);
     const [playingVideoId, setPlayingVideoId] = useState(null);
+    const [previewVideoUrl, setPreviewVideoUrl] = useState(null);
     const sliderRef = useRef(null);
 
     useEffect(() => {
-        axiosInstance.get('/videos')
-            .then(res => setVideos(res.data));
+        axiosInstance.get('/videos').then(res => setVideos(res.data));
     }, []);
+
+    const handleVideoClick = (url) => {
+        setPreviewVideoUrl(publicUrl(url));
+        sliderRef.current?.slickPause(); // pause slider when dialog opens
+    };
+
+    const handleClosePreview = () => {
+        setPreviewVideoUrl(null);
+        sliderRef.current?.slickPlay(); // resume slider on close
+    };
 
     const sliderSettings = {
         dots: true,
@@ -27,91 +154,74 @@ export default function VideoGallery() {
         arrows: true,
         adaptiveHeight: true,
         responsive: [
-            {
-                breakpoint: 960,
-                settings: { slidesToShow: Math.min(videos.length, 2) }
-            },
-            {
-                breakpoint: 600,
-                settings: { slidesToShow: 1 }
-            }
+            { breakpoint: 960, settings: { slidesToShow: Math.min(videos.length, 2) } },
+            { breakpoint: 600, settings: { slidesToShow: 1 } }
         ]
     };
 
-    if (videos.length > 4) {
-        // Show slick slider
-        return (
-            <Box sx={{ py: 5, px: { xs: 1, sm: 2 }, overflow: 'hidden' }}>
-                <Typography align="center" fontWeight={700}
-                    // Theme={Theme.palette.primary.contrastText} 
-                    sx={{
-                        mb: 4, fontSize: { xs: '32px', md: '40px', lg: '48px' }, color: Theme.palette.primary,
-                    }}>
-                    Traditional Jewellery
-                </Typography>
+    const renderVideoCard = (video) => (
+        <Card elevation={3}>
+            <CardMedia
+                component="video"
+                src={publicUrl(video.url)}
+                onClick={() => handleVideoClick(video.url)}
+                sx={{
+                    height: 260, objectFit: 'cover', background: '#000', cursor: 'pointer',
+                    boxShadow: playingVideoId === video._id ? '0 0 15px 4px #dfbce6ff' : undefined,
+                }}
+            />
+            <Typography align="center" sx={{ p: 1, fontFamily: 'serif', fontWeight: 500, color: '#442f2f' }}>
+                {video.title}
+            </Typography>
+        </Card>
+    );
+
+    return (
+        <Box sx={{ py: 5, px: { xs: 1, sm: 2 }, overflow: 'hidden' }}>
+            <Typography align="center" fontWeight={700}
+                sx={{ mb: 4, fontSize: { xs: '32px', md: '40px', lg: '48px' }, color: Theme.palette.primary }}>
+                Traditional Jewellery
+            </Typography>
+
+            {videos.length > 4 ? (
                 <Slider ref={sliderRef} {...sliderSettings}>
                     {videos.map(video => (
                         <Box key={video._id} sx={{ px: 1 }}>
-                            <Card
-                                elevation={3}
-                            // sx={{ width: 240, mx: 'auto', background: '#fff', borderRadius: 3, overflow: 'hidden' }}
-                            >
-                                <CardMedia
-                                    component="video" src={publicUrl(video.url)} controls
-                                    onPlay={() => {
-                                        setPlayingVideoId(video._id);
-                                        sliderRef.current?.slickPause();
-                                    }}
-                                    onEnded={() => {
-                                        setPlayingVideoId(null);
-                                        sliderRef.current?.slickPlay();
-                                    }}
-                                    sx={{
-                                        height: 260, objectFit: 'cover', background: '#000',
-                                        boxShadow: playingVideoId === video._id ? '0 0 15px 4px #dfbce6ff' : undefined,
-                                    }}
-                                />
-                                <Typography align="center" sx={{ p: 1, fontFamily: 'serif', fontWeight: 500, color: '#442f2f' }}>{video.title}</Typography>
-                            </Card>
+                            {renderVideoCard(video)}
                         </Box>
                     ))}
                 </Slider>
-            </Box>
-        );
-    }
+            ) : (
+                <Grid container spacing={4} justifyContent="center">
+                    {videos.map(video => (
+                        <Grid item key={video._id} xs={12} sm={6} md={3}>
+                            {renderVideoCard(video)}
+                        </Grid>
+                    ))}
+                </Grid>
+            )}
 
-    // Default grid (your existing code)
-    return (
-        <Box sx={{ py: 5, px: { xs: 1, sm: 2 }, background: '#faf7f8' }}>
-            <Typography variant="h4" align="center" fontWeight={700} sx={{ mb: 4, fontFamily: 'serif', color: '#511a1a' }}>
-                Latest Videos
-            </Typography>
-            <Grid container spacing={4} justifyContent="center">
-                {videos.map(video => (
-                    <Grid
-                        item
-                        key={video._id}
-                        xs={12}
-                        sm={6}
-                        md={3}
-                        sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-                    >
-                        <Card elevation={3} sx={{ width: 240, background: '#fff', borderRadius: 3, overflow: 'hidden' }}>
-                            <CardMedia component="video" src={publicUrl(video.url)} controls sx={{ height: 260, objectFit: 'cover', background: '#000' }} />
-                            <Typography
-                                gutterBottom
-                                align="center"
-                                sx={{ fontWeight: 500, fontFamily: 'serif', color: '#442f2f', fontSize: '1rem', py: 1 }}
-                            >
-                                {video.title}
-                            </Typography>
-                        </Card>
-                    </Grid>
-                ))}
-            </Grid>
+            {/* Video Preview Dialog */}
+            <Dialog
+                open={Boolean(previewVideoUrl)}
+                onClose={handleClosePreview}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle align="center">Watch Video</DialogTitle>
+                <DialogContent dividers>
+                    <video
+                        src={previewVideoUrl}
+                        controls
+                        autoPlay
+                        style={{ width: '100%', height: '400px', borderRadius: 8, background: '#000' }}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClosePreview}>Close</Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }
-
-
 
