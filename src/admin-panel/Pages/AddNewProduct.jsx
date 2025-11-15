@@ -762,7 +762,7 @@ const AddNewProduct = () => {
                   onChange={(e) => handleQuantityChange(e, index)}
                   fullWidth
                   type="number"
-                  inputProps={{ min: 0 }}
+                  inputProps={{  min: 0, step: "0.01" }}
                 />
               </Grid>
 
@@ -775,7 +775,7 @@ const AddNewProduct = () => {
                   onChange={(e) => handleQuantityChange(e, index)}
                   fullWidth
                   type="number"
-                  inputProps={{ min: 0 }}
+                  inputProps={{ min: 0, step: "0.01" }}
                 />
               </Grid>
 
@@ -788,7 +788,7 @@ const AddNewProduct = () => {
                   onChange={(e) => handleQuantityChange(e, index)}
                   fullWidth
                   type="number"
-                  inputProps={{ min: 0 }}
+                  inputProps={{  min: 0, step: "0.01" }}
                 />
               </Grid>
 
@@ -801,7 +801,7 @@ const AddNewProduct = () => {
                   onChange={(e) => handleQuantityChange(e, index)}
                   fullWidth
                   type="number"
-                  inputProps={{ min: 0, max: 100 }}
+                  inputProps={{ min: 0, step: "0.01", max: 100 }}
                 />
               </Grid>
 
@@ -814,7 +814,7 @@ const AddNewProduct = () => {
                   onChange={(e) => handleQuantityChange(e, index)}
                   fullWidth
                   type="number"
-                  inputProps={{ min: 0 }}
+                  inputProps={{ min: 0, step: "0.01"}}
                 />
               </Grid>
 
@@ -827,7 +827,7 @@ const AddNewProduct = () => {
                   onChange={(e) => handleQuantityChange(e, index)}
                   fullWidth
                   type="number"
-                  inputProps={{ min: 0 }}
+                  inputProps={{  min: 0, step: "0.01" }}
                 />
               </Grid>
 
@@ -838,6 +838,7 @@ const AddNewProduct = () => {
                   value={qty.totalWeight ?? ''}
                   fullWidth
                   disabled
+                  inputProps={{  min: 0, step: "0.01" }}
                 />
               </Grid>
 
@@ -848,6 +849,7 @@ const AddNewProduct = () => {
                   value={qty.finalPrice ?? ''}
                   fullWidth
                   disabled
+                  inputProps={{  min: 0, step: "0.01" }}
                 />
               </Grid>
 

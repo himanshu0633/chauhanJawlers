@@ -42,7 +42,7 @@ import VideoGallery from './HomePageComponents/VideoGallery';
 import OrderSuccessPage from './pages/OrderSuccessPage';
 import { ToastContainer } from 'react-toastify';
 import LiveMetalPrice from './commonComponents/LiveMetalPrice';
-
+import BuyPage from '../src/pages/BuyPage'
 function App() {
   const location = useLocation();
 
@@ -89,6 +89,7 @@ function App() {
         <Route path="/contact" element={<Contactus />} />
         <Route path="/videoGallery" element={<VideoGallery />} />
         <Route path="/successOrder" element={<OrderSuccessPage />} />
+        <Route path="/buy" element={<BuyPage />} />
 
 
         {/* admin panel  */}
