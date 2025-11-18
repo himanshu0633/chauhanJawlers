@@ -89,7 +89,7 @@ function App() {
         <Route path="/contact" element={<Contactus />} />
         <Route path="/videoGallery" element={<VideoGallery />} />
         <Route path="/successOrder" element={<OrderSuccessPage />} />
-        <Route path="/buy" element={<BuyPage />} />
+        <Route path="/buy-now" element={<BuyPage />} />
 
 
         {/* admin panel  */}

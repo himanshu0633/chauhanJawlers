@@ -4,40 +4,228 @@ import {
   Typography,
   Box,
   useScrollTrigger,
+  IconButton,
+  Button,
+  Snackbar,
+  TextField,
+  Select,
+  MenuItem,
 } from "@mui/material";
-import { keyframes } from "@emotion/react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import MuiAlert from '@mui/material/Alert';
+import { useDispatch, useSelector } from 'react-redux';
+import { addData, addToWishlist, removeFromWishlist } from '../store/Action';
+import { createSelector } from '@reduxjs/toolkit';
 import TrendingKeywordsMarquee from "./WeddingpageParts/TrendingKeywordsMarquee";
 import WeddingOccasionSlider from "./WeddingpageParts/WeddingOccasionSlider";
-import FindMyCommunity from "../commonComponents/FindMyCommunity";
 import { publicUrl } from "../commonComponents/PublicUrl";
 import axiosInstance from "../commonComponents/AxiosInstance";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const titleStyle = {
-  textAlign: "center",
-  mb: 6,
-  fontWeight: 500,
-  color: "#8B1538",
-  fontFamily: '"Playfair Display", serif'
-};
+// Wishlist selector
+export const selectWishlist = createSelector(
+  [state => Array.isArray(state.app?.wishlist) ? state.app.wishlist : []],
+  wishlist => [...wishlist]
+);
 
-const categoryItemStyle = {
-  borderRadius: 3,
-  overflow: "hidden",
-  boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
-  background: "#fff",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  pb: 1.5,
-  width: { xs: 150, md: 170 },
-  // height: { xs: 180, sm: 200 },
-  minWidth: { xs: 150, md: 170 },
-  cursor: "pointer",
-  border: "1px solid rgba(139,21,56,0.08)"
-};
+// Product Card Component for Wedding Page
+function WeddingProductCard({ product }) {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const wishlist = useSelector(selectWishlist);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMsg, setSnackbarMsg] = useState('');
+  const [units, setUnits] = useState(1);
+
+  const isWishlisted = !!product && wishlist.some(item => String(item._id) === String(product._id));
+  const imgUrl = publicUrl(product.media?.[0]?.url) || "no img found";
+  const best = product.bestVariant || {};
+  const canAddToCart = Boolean(product?.stock === "yes");
+
+  const handleWishlistClick = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (isWishlisted) {
+      dispatch(removeFromWishlist(product._id));
+      setSnackbarMsg('Removed from Wishlist');
+    } else {
+      dispatch(addToWishlist(product));
+      setSnackbarMsg('Added to Wishlist');
+    }
+    setSnackbarOpen(true);
+  };
+
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    if (!product) return;
+    
+    const cartItem = {
+      ...product,
+      selectedVariant: best,
+      cartQty: units,
+      unitPrice: Number(best.finalPrice || 0),
+    };
+
+    dispatch(addData(cartItem));
+    // Navigate directly to cart page
+    navigate("/cart");
+  };
+
+  const increaseUnits = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setUnits(prev => prev + 1);
+  };
+
+  const decreaseUnits = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setUnits(prev => (prev > 1 ? prev - 1 : 1));
+  };
+
+  return (
+    <Box sx={{ pb: 1, position: 'relative' }}>
+      <Box sx={{
+        position: 'relative',
+        borderRadius: 2,
+        overflow: 'hidden',
+        width: "100%",
+        height: { xs: 200 },
+        mx: 'auto',
+        bgcolor: 'transparent',
+        boxShadow: 'none',
+        pt: 1,
+        backgroundColor: '#fff'
+      }}>
+        <Box 
+          onClick={() => navigate(`/singleProduct/${product._id}`)} 
+          style={{ textDecoration: 'none', cursor: 'pointer' }}
+        >
+          <img
+            src={imgUrl}
+            alt={product.name}
+            style={{
+              margin: 'auto',
+              objectFit: 'cover',
+              width: '100%',
+              height: "100%",  
+              borderRadius: '8px'
+            }}
+          />
+        </Box>
+        <IconButton
+          onClick={handleWishlistClick}
+          aria-label="add to wishlist"
+          sx={{
+            position: 'absolute',
+            top: 8,
+            right: 12,
+            background: '#fff',
+            zIndex: 2,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            p: '5px',
+            color: 'inherit'
+          }}
+          size="small"
+        >
+          {isWishlisted ? (
+            <FavoriteIcon sx={{ fontSize: 20, color: 'red' }} />
+          ) : (
+            <FavoriteBorderIcon sx={{ fontSize: 20, color: '#bbb' }} />
+          )}
+        </IconButton>
+      </Box>
+
+      <Box 
+        onClick={() => navigate(`/singleProduct/${product._id}`)} 
+        style={{ color: 'inherit', textDecoration: 'none', cursor: 'pointer' }}
+      >
+        <Typography variant="subtitle1" sx={{
+          fontSize: 18,
+          fontWeight: 600,
+          fontFamily: 'serif',
+          color: '#222',
+          textAlign: 'left',
+          textTransform: 'capitalize',
+          mt: 1,
+          lineHeight: 1.2
+        }}>
+          {product.name}
+        </Typography>
+        <Typography variant="subtitle1" sx={{ fontWeight: 500, fontSize: 17, color: '#222', fontFamily: 'cursive' }}>
+          ₹{best.finalPrice}
+        </Typography>
+      </Box>
+
+      {/* Quantity Selector and Add to Cart Button */}
+      <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Typography variant="body2" sx={{ fontSize: 14, fontWeight: 600, color: '#2c2c2c' }}>
+            Quantity:
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, border: '1px solid #e0e0e0', borderRadius: 1, p: 0.5 }}>
+            <IconButton 
+              size="small" 
+              onClick={decreaseUnits}
+              sx={{ width: 24, height: 24, fontSize: 14 }}
+            >
+              -
+            </IconButton>
+            <Typography sx={{ minWidth: 30, textAlign: 'center', fontWeight: 600, fontSize: 14 }}>
+              {units}
+            </Typography>
+            <IconButton 
+              size="small" 
+              onClick={increaseUnits}
+              sx={{ width: 24, height: 24, fontSize: 14 }}
+            >
+              +
+            </IconButton>
+          </Box>
+        </Box>
+
+        <Button 
+          variant="contained" 
+          onClick={handleAddToCart} 
+          disabled={!canAddToCart}
+          sx={{
+            backgroundColor: '#44170d',
+            color: '#fff',
+            fontWeight: 600,
+            fontSize: 14,
+            py: 0.75,
+            '&:hover': {
+              backgroundColor: '#5a1f12',
+            },
+            '&:disabled': {
+              backgroundColor: '#e0e0e0',
+              color: '#999',
+            }
+          }}
+        >
+          {canAddToCart ? "Add to Cart" : "Out of Stock"}
+        </Button>
+      </Box>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={2000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <MuiAlert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
+          {snackbarMsg}
+        </MuiAlert>
+      </Snackbar>
+    </Box>
+  );
+}
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -50,37 +238,140 @@ const WeddingPage = () => {
   const [products, setProducts] = useState([]);
   const [filteredOccasionName, setFilteredOccasionName] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [shownCount, setShownCount] = useState(12);
+  
+  const [filters, setFilters] = useState({
+    query: '',
+    priceRange: 'all',
+  });
+  const [sortOption, setSortOption] = useState('relevance');
+
   const query = useQuery();
   const occasionQuery = query.get('occasion')?.toLowerCase() || '';
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchOccasions();
-    fetchAllProducts();
-    fetchBanners();
-  }, []);
+  // Price buckets for filtering
+  const priceBuckets = [
+    { label: 'Under ₹25K', min: 0, max: 25000 },
+    { label: '₹25K – ₹50K', min: 25000, max: 50000 },
+    { label: '₹50K – ₹1L', min: 50000, max: 100000 },
+    { label: 'Over ₹1L', min: 100000, max: Number.MAX_SAFE_INTEGER },
+  ];
+
+  const loadMoreProducts = () => {
+    setShownCount(prev => prev + 12);
+  };
+
+  const parseQuantityArray = (q) => {
+    if (!q) return [];
+    let arr = q;
+    if (typeof q === "string") {
+      try { arr = JSON.parse(q); } catch { return []; }
+    }
+    return Array.isArray(arr) ? arr : [];
+  };
+
+  const pickBestVariation = (arr) => {
+    if (!arr.length) return null;
+    return arr.reduce((best, cur) =>
+      parseFloat(cur.finalPrice || 0) < parseFloat(best.finalPrice || 0) ? cur : best, arr[0]);
+  };
+
+  const preprocessProducts = (productsRaw) => productsRaw.map((p) => {
+    const quantityArr = parseQuantityArray(p.quantity?.[0]);
+    const bestVariation = pickBestVariation(quantityArr);
+    return {
+      ...p,
+      price: bestVariation ? parseFloat(bestVariation.finalPrice || 0) : 0,
+      gst: bestVariation ? parseFloat(bestVariation.gst || 0) : null,
+      discount: bestVariation ? parseFloat(bestVariation.discount || 0) : 0,
+      weight: bestVariation ? parseFloat(bestVariation.weight || 0) : null,
+      makingPrice: bestVariation ? parseFloat(bestVariation.makingPrice || 0) : null,
+      quantityVariants: quantityArr,
+      bestVariant: bestVariation,
+    };
+  });
 
   // Filter products by occasionQuery after products loaded
   useEffect(() => {
     if (occasionQuery && products.length > 0 && occasion.length > 0) {
-      // Find occasion display name
       const foundOccasion = occasion.find(
         o => o.name.trim().toLowerCase() === occasionQuery.trim()
       );
       setFilteredOccasionName(foundOccasion ? foundOccasion.name : '');
 
-      // Set filtered products in a separate state, do not mutate original products!
-      setFilteredProducts(
-        products.filter(
-          p => p.occasion && p.occasion.trim().toLowerCase() === occasionQuery.trim()
-        )
+      let filtered = products.filter(
+        p => p.occasion && p.occasion.trim().toLowerCase() === occasionQuery.trim()
       );
+
+      // Apply additional filters
+      if (filters.query) {
+        filtered = filtered.filter(p => 
+          p.name && p.name.toLowerCase().includes(filters.query.toLowerCase())
+        );
+      }
+
+      if (filters.priceRange !== 'all') {
+        const priceBucket = priceBuckets.find(b => b.label === filters.priceRange);
+        if (priceBucket) {
+          filtered = filtered.filter(p => 
+            p.price >= priceBucket.min && p.price <= priceBucket.max
+          );
+        }
+      }
+
+      // Apply sorting
+      filtered = filtered.sort((a, b) => {
+        switch (sortOption) {
+          case 'price-asc': return (a.price || 0) - (b.price || 0);
+          case 'price-desc': return (b.price || 0) - (a.price || 0);
+          case 'newest':
+            const dateA = new Date(a.createdAt || 0);
+            const dateB = new Date(b.createdAt || 0);
+            return dateB - dateA;
+          default: return 0;
+        }
+      });
+
+      setFilteredProducts(filtered);
     } else {
-      // Show all products if no query
-      setFilteredProducts(products);
+      let allProducts = preprocessProducts(products);
+      
+      // Apply filters to all products
+      if (filters.query) {
+        allProducts = allProducts.filter(p => 
+          p.name && p.name.toLowerCase().includes(filters.query.toLowerCase())
+        );
+      }
+
+      if (filters.priceRange !== 'all') {
+        const priceBucket = priceBuckets.find(b => b.label === filters.priceRange);
+        if (priceBucket) {
+          allProducts = allProducts.filter(p => 
+            p.price >= priceBucket.min && p.price <= priceBucket.max
+          );
+        }
+      }
+
+      // Apply sorting
+      allProducts = allProducts.sort((a, b) => {
+        switch (sortOption) {
+          case 'price-asc': return (a.price || 0) - (b.price || 0);
+          case 'price-desc': return (b.price || 0) - (a.price || 0);
+          case 'newest':
+            const dateA = new Date(a.createdAt || 0);
+            const dateB = new Date(b.createdAt || 0);
+            return dateB - dateA;
+          default: return 0;
+        }
+      });
+
+      setFilteredProducts(allProducts);
       setFilteredOccasionName('');
     }
-  }, [occasionQuery, products, occasion]);
+  }, [occasionQuery, products, occasion, filters, sortOption]);
 
   const fetchOccasions = async () => {
     try {
@@ -90,12 +381,17 @@ const WeddingPage = () => {
       console.error("Error fetching occasion:", error);
     }
   };
+
   const fetchAllProducts = async () => {
+    setLoading(true);
     try {
       const response = await axiosInstance.get(`/user/allproducts`);
       setProducts(response?.data ?? []);
     } catch (error) {
+      setError('Could not load products. Please try again.');
       console.error("Error fetching categories:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -110,158 +406,224 @@ const WeddingPage = () => {
           banner.slider_image.length > 0
       );
       setBanners(mainBanners);
-
     } catch (error) {
       console.error("Error fetching banners:", error);
     }
   };
 
+  useEffect(() => {
+    fetchOccasions();
+    fetchAllProducts();
+    fetchBanners();
+  }, []);
+
+  // Reset shown count when filters change
+  useEffect(() => {
+    setShownCount(12);
+  }, [filters, sortOption, occasionQuery]);
+
+  const productsToDisplay = filteredProducts.slice(0, shownCount);
+
   const trendingItems = [
-    "Accessories",
-    "Long Necklace",
-    "Bangles",
-    "Necklace Sets",
+    "Bridal Necklace Sets",
+    "Wedding Bangles",
+    "Bridal Earrings",
+    "Maang Tikka",
     "Diamond Jewellery",
   ];
 
   const trendingImages = {
-    Accessories:
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
-    "Long Necklace":
-      "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80",
-    Bangles:
-      "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80",
-    "Necklace Sets":
-      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
-    "Diamond Jewellery":
-      "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
+    "Bridal Necklace Sets": "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=600&q=80",
+    "Wedding Bangles": "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80",
+    "Bridal Earrings": "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80",
+    "Maang Tikka": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=600&q=80",
+    "Diamond Jewellery": "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80",
   };
 
-
   return (
-    <Box sx={{ backgroundColor: "#fff", overflowX: "hidden", position: "relative" }}>
+    <Box sx={{ backgroundColor: '#f9f9f9', overflow: 'hidden' }}>
+      <Container maxWidth="xl">
+        {/* Header Section */}
+        <Box sx={{ pt: 5, pb: 3 }}>
+          <Typography
+            variant="h4"
+            align="center"
+            sx={{ 
+              fontWeight: 700, 
+              mb: 4, 
+              fontFamily: 'serif', 
+              color: '#8B1538', 
+              fontSize: { xs: '28px', sm: '36px', md: '48px' } 
+            }}
+          >
+             {filteredOccasionName && ` ${filteredOccasionName}`}
+          </Typography>
 
-      {/* Handpicked for the occasion */}
-      <Container maxWidth="lg" sx={{ mt: 10 }}>
-        <Typography variant="h4" component="h2" sx={titleStyle}>
-          Handpicked for the {filteredOccasionName || "all occasions"}
-        </Typography>
+          {/* Filters and Sort Controls - Same as JewelleryGrid */}
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            mb: 3,
+            gap: 1
+          }}>
+            <TextField
+              label="Search Wedding Collection"
+              value={filters.query}
+              onChange={(e) => setFilters({ ...filters, query: e.target.value })}
+              sx={{ width: { xs: '48%', sm: '30%' } }}
+            />
+            <Select
+              value={filters.priceRange}
+              onChange={(e) => setFilters({ ...filters, priceRange: e.target.value })}
+              sx={{ width: { xs: '48%', sm: '30%' } }}
+            >
+              <MenuItem value="all">All Prices</MenuItem>
+              {priceBuckets.map(bucket => (
+                <MenuItem key={bucket.label} value={bucket.label}>
+                  {bucket.label}
+                </MenuItem>
+              ))}
+            </Select>
 
-        <Box sx={{
-          display: "flex",
-          justifyContent: "center",
-          flexWrap: "wrap",
-          gap: { xs: 1, sm: 2 },
-          px: { xs: 1, sm: 2 }
-        }}>
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((item, index) => (
-              <Box sx={categoryItemStyle} key={item._id || index}>
-                <Box
-                  component="img"
-                  src={publicUrl(item.media?.[0]?.url)}
-                  onClick={() => navigate(`/singleProduct/${item._id}`)}
-                  alt={item.name}
-                  sx={{
-                    width: "100%",
-                    height: { xs: 110, sm: 130 },
-                    objectFit: "contain ",
-                    borderTopLeftRadius: 12,
-                    borderTopRightRadius: 12,
-                    pt: 1,
-                  }}
-                />
-                <Typography variant="body2" sx={{
-                  mt: 1,
-                  fontWeight: 600,
-                  color: "#8B1538",
-                  textAlign: "center",
-                  fontSize: { xs: "0.85rem", sm: "0.9rem" },
-                  px: 0.5
-                }}>
-                  {item.name}
-                </Typography>
-              </Box>
-            ))
-          ) : (
-            <Typography>No products found for this occasion.</Typography>
-          )}
+            <Select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              sx={{ width: { xs: '48%', sm: '30%' } }}
+            >
+              <MenuItem value="relevance">Sort by: Relevance</MenuItem>
+              <MenuItem value="price-asc">Price: Low to High</MenuItem>
+              <MenuItem value="price-desc">Price: High to Low</MenuItem>
+              <MenuItem value="newest">Newest First</MenuItem>
+            </Select>
+          </Box>
         </Box>
 
-      </Container>
+        {/* Product Grid - Same layout as JewelleryGrid */}
+        {loading ? (
+          <Typography align="center" sx={{ py: 4 }}>Loading wedding collection...</Typography>
+        ) : error ? (
+          <Typography align="center" color="error" sx={{ py: 4 }}>{error}</Typography>
+        ) : filteredProducts.length === 0 ? (
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="h5" color="text.secondary" gutterBottom>
+              No products found
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {occasionQuery
+                ? `No products available for ${filteredOccasionName} occasion. Try browsing other occasions.`
+                : "Try adjusting your filters or search terms"
+              }
+            </Typography>
+          </Box>
+        ) : (
+          <>
+            <Box
+              sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                gap: 2,
+              }}
+            >
+              {productsToDisplay.map((product) => (
+                <Box
+                  key={product._id}
+                  sx={{
+                    width: {
+                      xs: '47%',
+                      sm: '30%',
+                      md: '23%',
+                      lg: '15%',
+                    },
+                    boxSizing: 'border-box',
+                    mb: 2,
+                  }}
+                >
+                  <WeddingProductCard product={product} />
+                </Box>
+              ))}
+            </Box>
 
-      {/* Trending Keywords */}
-      <TrendingKeywordsMarquee
-        trigger={trigger}
-        trendingItems={trendingItems}
-        trendingImages={trendingImages}
-      />
-
-      {/* Wedding Occasions */}
-      <Box sx={{ py: 8, backgroundColor: "#faf5f0" }}>
-        <Container maxWidth="lg">
-          <WeddingOccasionSlider />
-        </Container>
-      </Box>
-
-      {/* Featured Articles */}
-      <Box sx={{ py: 8, backgroundColor: "#fff" }}>
-        <Container maxWidth="xl">
-          {banners.length > 0 ?
-            (<h1 className="text-center">Featured Articles</h1>) : ""}
-
-          <Swiper
-            modules={[Navigation, Autoplay]}
-            spaceBetween={30}
-            slidesPerView={1}
-            breakpoints={{ 640: { slidesPerView: 2 } }}
-            autoplay={{ delay: 4000, disableOnInteraction: false }}
-            loop={true}
-          >
-            {banners.length > 0 && (
-              < >
-                {banners.map((item) => (
-                  // <SwiperSlide key={item._id}>
-                  //   <Box sx={{ height: "auto", width: "100%" }}>
-                  //     <img
-                  //       src={publicUrl(item.slider_image)}
-                  //       alt={item.type}
-                  //       style={{ width: "100%", height: { xs: "200px", md: "100%" }, objectFit: { xs: "cover", md: "contain" }, display: "block", cursor: "pointer", borderRadius: "12px" }}
-                  //       onClick={() => navigate(`/allJewellery/${(item.variety || 'all').toLowerCase()}`)}
-                  //     />
-                  //   </Box>
-                  // </SwiperSlide>
-
-                  // //2
-                  <SwiperSlide key={item._id}>
-                    <Box sx={{ width: "100%" }}>
-                      <img
-                        src={publicUrl(item.slider_image)}
-                        alt={item.type}
-                        style={{ width: "100%", height: "100%", maxWidth: "100%", objectFit: "contain", display: "block", cursor: "pointer", borderRadius: "12px" }}
-                        onClick={() => navigate(`/allJewellery/${(item.variety || 'all').toLowerCase()}`)}
-                      />
-                      {/* <Box
-                        component="img"
-                        src={publicUrl(item.slider_image)}
-                        alt={item.type}
-                        sx={{
-                          width: { xs: "auto", md: "100%" }, height: { xs: "200px", md: "auto" }, maxWidth: "100%", objectFit: "contain", display: "block", cursor: "pointer", borderRadius: "12px"
-                        }}
-                        onClick={() => navigate(`/allJewellery/${(item.variety || 'all').toLowerCase()}`)}
-                      /> */}
-                    </Box>
-                  </SwiperSlide>
-
-                ))}
-              </>
+            {/* Load More Button */}
+            {shownCount < filteredProducts.length && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                <Button
+                  variant="outlined"
+                  onClick={loadMoreProducts}
+                  sx={{ px: 4, py: 1.5 }}
+                >
+                  View More ({filteredProducts.length - shownCount} remaining)
+                </Button>
+              </Box>
             )}
-          </Swiper>
-        </Container>
-      </Box>
+          </>
+        )}
+
+        {/* Trending Keywords */}
+        <TrendingKeywordsMarquee
+          trigger={trigger}
+          trendingItems={trendingItems}
+          trendingImages={trendingImages}
+        />
+
+        {/* Wedding Occasions */}
+        <Box sx={{ py: 8, backgroundColor: '#faf5f0', mt: 8 }}>
+          <Container maxWidth="lg">
+            <WeddingOccasionSlider />
+          </Container>
+        </Box>
+
+        {/* Featured Articles */}
+        <Box sx={{ py: 8, backgroundColor: "#fff" }}>
+          <Container maxWidth="xl">
+            {banners.length > 0 && (
+              <Typography
+                variant="h4"
+                align="center"
+                sx={{ 
+                  fontWeight: 700, 
+                  mb: 6, 
+                  fontFamily: 'serif', 
+                  color: '#8B1538', 
+                  fontSize: { xs: '28px', sm: '36px', md: '48px' } 
+                }}
+              >
+                Featured Collections
+              </Typography>
+            )}
+
+            <Swiper
+              modules={[Navigation, Autoplay]}
+              spaceBetween={30}
+              slidesPerView={1}
+              breakpoints={{ 640: { slidesPerView: 2 } }}
+              autoplay={{ delay: 4000, disableOnInteraction: false }}
+              loop={true}
+            >
+              {banners.length > 0 && (
+                <>
+                  {banners.map((item) => (
+                    <SwiperSlide key={item._id}>
+                      <Box sx={{ width: "100%" }}>
+                        <img
+                          src={publicUrl(item.slider_image)}
+                          alt={item.type}
+                          style={{ width: "100%", height: "100%", maxWidth: "100%", objectFit: "contain", display: "block", cursor: "pointer", borderRadius: "12px" }}
+                          onClick={() => navigate(`/allJewellery/${(item.variety || 'all').toLowerCase()}`)}
+                        />
+                      </Box>
+                    </SwiperSlide>
+                  ))}
+                </>
+              )}
+            </Swiper>
+          </Container>
+        </Box>
+      </Container>
     </Box>
   );
 };
 
 export default WeddingPage;
-

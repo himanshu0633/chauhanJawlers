@@ -13,11 +13,11 @@ import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import SecurityIcon from '@mui/icons-material/Security';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast, ToastContainer } from 'react-toastify';
 import axiosInstance from '../commonComponents/AxiosInstance';
-import { deleteProduct, updateData, clearProducts } from '../store/Action';
+import { deleteProduct, updateData, clearProducts, addData } from '../store/Action';
 import { publicUrl } from '../commonComponents/PublicUrl';
 import Theme from '../../Theme';
 
@@ -25,55 +25,22 @@ import Theme from '../../Theme';
 const formatINR = (n) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(Number(n || 0));
 
-// ---------- Empty state ----------
-function EmptyCart({ onContinueShopping }) {
-  return (
-    <div className="empty-cart-container">
-      <div className="empty-cart-image">
-        <div className="cart-icon-circle">
-          <svg width="45" height="55" viewBox="0 0 65 75" fill="none">
-            <rect x="8" y="20" width="49" height="44" rx="5" stroke="#7d2a25" strokeWidth="2.1" fill="none" />
-            <path d="M18 20V14C18 7 47 7 47 14V20" stroke="#7d2a25" strokeWidth="2.1" fill="none" />
-            <circle cx="32.5" cy="44.5" r="2.5" fill="#7d2a25" />
-            <rect x="24" y="31" width="17" height="3" rx="1.5" fill="#7d2a25" opacity="0.5" />
-          </svg>
-        </div>
-      </div>
-
-      <div className="empty-cart-text">
-        <Typography variant="h6" className="empty-cart-title">
-          Your Cart Is Empty!
-        </Typography>
-        <Typography variant="body2" className="empty-cart-subtitle">
-          Add Chauhan Jewellers to your shopping cart
-        </Typography>
-        <Button
-          variant="contained"
-          onClick={onContinueShopping}
-          className="continue-shopping-btn"
-        >
-          Continue Shopping
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-// ---------- Item card ----------
-function CartCard({ product, onRemove, onUpdateQuantity }) {
-  const quantity = product.cartQty ?? 1;
-  const variant = product.selectedVariant ?? {};
-  const fp = Number(variant.final_price ?? variant.finalPrice ?? 0);
+// ---------- Single Product Card ----------
+function SingleProductCard({ product, units, onUpdateQuantity }) {
+  const quantity = units;
+  const variant = product?.selectedVariant ?? product?.quantity?.[0] ?? {};
+  const fp = Number(variant.final_price ?? variant.finalPrice ?? product?.unitPrice ?? product?.price ?? 0);
   const navigate = useNavigate();
   const [giftWrap, setGiftWrap] = useState(false);
-  const [isLowStock, setIsLowStock] = useState(quantity === 1);
+
+  if (!product) return null;
 
   return (
     <div className="cart-card">
       {/* Product Header */}
       <div className="cart-card-header">
         <Typography variant="h6" className="product-name">
-          {product.name}
+          {product.name || 'Product Name'}
         </Typography>
         <Typography variant="h6" className="product-price">
           {formatINR(fp)}
@@ -106,15 +73,6 @@ function CartCard({ product, onRemove, onUpdateQuantity }) {
         />
       </div>
 
-      {/* Stock Alert */}
-      {isLowStock && (
-        <div className="stock-alert">
-          <Typography variant="body2" className="stock-text">
-            ⚠️ Only 1 item left in stock
-          </Typography>
-        </div>
-      )}
-
       {/* Product Details */}
       <div className="product-details">
         {/* Product Image */}
@@ -123,8 +81,11 @@ function CartCard({ product, onRemove, onUpdateQuantity }) {
           onClick={() => navigate(`/singleProduct/${product._id}`)}
         >
           <img 
-            src={publicUrl(product?.media?.[0]?.url)} 
+            src={publicUrl(product?.media?.[0]?.url || product?.frontImage)} 
             alt={product.name} 
+            onError={(e) => {
+              e.target.src = 'https://via.placeholder.com/80x80?text=No+Image';
+            }}
           />
         </div>
 
@@ -133,7 +94,7 @@ function CartCard({ product, onRemove, onUpdateQuantity }) {
           <Typography variant="body2" className="product-name-sm">
             {product.name}
           </Typography>
-          {variant.weight && (
+          {variant?.weight && (
             <Typography variant="caption" className="product-weight">
               Weight: {variant.weight}g{variant.carat ? ` / ${variant.carat}kt` : ""}
             </Typography>
@@ -147,10 +108,7 @@ function CartCard({ product, onRemove, onUpdateQuantity }) {
             <div className="quantity-buttons">
               <IconButton
                 size="small"
-                onClick={() => {
-                  onUpdateQuantity(product._id, quantity - 1);
-                  setIsLowStock(quantity - 1 === 1);
-                }}
+                onClick={() => onUpdateQuantity(quantity - 1)}
                 disabled={quantity <= 1}
                 className="quantity-btn"
               >
@@ -161,10 +119,7 @@ function CartCard({ product, onRemove, onUpdateQuantity }) {
               </Typography>
               <IconButton
                 size="small"
-                onClick={() => {
-                  onUpdateQuantity(product._id, quantity + 1);
-                  setIsLowStock(false);
-                }}
+                onClick={() => onUpdateQuantity(quantity + 1)}
                 className="quantity-btn"
               >
                 <AddIcon />
@@ -172,14 +127,6 @@ function CartCard({ product, onRemove, onUpdateQuantity }) {
             </div>
           </div>
         </div>
-
-        {/* Remove Button */}
-        <IconButton
-          onClick={() => onRemove(product._id)}
-          className="remove-btn"
-        >
-          <DeleteOutlineIcon />
-        </IconButton>
       </div>
     </div>
   );
@@ -187,7 +134,8 @@ function CartCard({ product, onRemove, onUpdateQuantity }) {
 
 // ---------- Enhanced Order Summary with Address ----------
 function OrderSummary({ 
-  cartItems, 
+  product,
+  units, 
   subtotal, 
   total, 
   formData, 
@@ -204,7 +152,7 @@ function OrderSummary({
   const [expressDelivery, setExpressDelivery] = useState(false);
 
   const deliveryFee = expressDelivery ? 199 : 0;
-  const giftWrapFee = giftWrapAll ? cartItems.length * 80 : 0;
+  const giftWrapFee = giftWrapAll ? 80 : 0;
   const insuranceFee = insurance ? Math.round(total * 0.02) : 0;
   const finalTotal = total + deliveryFee + giftWrapFee + insuranceFee;
 
@@ -216,7 +164,7 @@ function OrderSummary({
           Order Summary
         </Typography>
         <Typography variant="body2" className="summary-subtitle">
-          {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'} in cart
+          1 item in cart
         </Typography>
       </div>
 
@@ -293,7 +241,7 @@ function OrderSummary({
       <div className="price-breakdown">
         <div className="price-row">
           <Typography variant="body2" className="price-label">
-            Subtotal
+            Subtotal ({units} {units === 1 ? 'item' : 'items'})
           </Typography>
           <Typography variant="body2" className="price-value">
             {formatINR(subtotal)}
@@ -313,10 +261,10 @@ function OrderSummary({
             label={
               <div className="service-label">
                 <Typography variant="body2" className="service-name">
-                  Gift Wrap All Items
+                  Gift Wrap
                 </Typography>
                 <Typography variant="body2" className="service-price">
-                  +{formatINR(80)} each
+                  +{formatINR(80)}
                 </Typography>
               </div>
             }
@@ -409,10 +357,10 @@ function OrderSummary({
         </Typography>
       </div>
 
-      {/* Checkout Button */}
+      {/* Checkout Button - Direct to payment */}
       <Button
         variant="contained"
-        onClick={handleCheckout}
+        onClick={() => handleCheckout(finalTotal)}
         disabled={!formData.selectedAddress}
         fullWidth
         className="checkout-btn"
@@ -451,74 +399,106 @@ function OrderSummary({
 }
 
 // ---------- main ----------
-export default function CartPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
+export default function BuyNowPage() {
   const [showModal, setShowModal] = useState(false);
   const [addresses, setAddresses] = useState([]);
   const [originalAddress, setOriginalAddress] = useState(null);
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [phoneError, setPhoneError] = useState(false);
+  const [units, setUnits] = useState(1);
   const [formData, setFormData] = useState({
     flat: '', landmark: '', state: '', city: '', country: 'India', phone: '', selectedAddress: '', pincode: ''
   });
   const [snack, setSnack] = useState({ open: false, msg: '', severity: 'success' });
 
-  const cartItems = useSelector((state) => state.app.data || []);
+  const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const userData = JSON.parse(localStorage.getItem('userData'));
 
+  // Debug navigation state
+  console.log('Location state:', location.state);
+
+  // Get product data from navigation state with better error handling
+  const { product, units: initialUnits } = location.state || {};
+  
+  // Initialize units from navigation state
   useEffect(() => {
-    const userData = localStorage.getItem('userData');
-    if (userData) {
-      setIsAuthenticated(true);
+    if (initialUnits) {
+      setUnits(initialUnits);
     }
-  }, []);
+  }, [initialUnits]);
+
+  // Fallback: If no product in state, try to get from localStorage or redirect
+  useEffect(() => {
+    if (!product) {
+      const savedProduct = localStorage.getItem('buyNowProduct');
+      if (savedProduct) {
+        // If we have saved product, use it
+        const parsedProduct = JSON.parse(savedProduct);
+        navigate('/buy-now', { 
+          state: { product: parsedProduct, units: units },
+          replace: true 
+        });
+      } else {
+        // If no product found, redirect back after a delay
+        toast.error('Product not found. Redirecting...');
+        setTimeout(() => {
+          navigate(-1);
+        }, 2000);
+      }
+    } else {
+      // Save product to localStorage as backup
+      localStorage.setItem('buyNowProduct', JSON.stringify(product));
+    }
+  }, [product, navigate, units]);
+
+  if (!product) {
+    return (
+      <div className="error-container">
+        <Typography variant="h5" className="error-text">
+          Loading product...
+        </Typography>
+        <Button 
+          variant="contained" 
+          onClick={() => navigate('/')}
+          className="back-button"
+        >
+          Go Back to Home
+        </Button>
+      </div>
+    );
+  }
 
   // ----- totals -----
-  const subtotal = useMemo(
-    () => cartItems.reduce((sum, item) => {
-      const qty = item.cartQty ?? (typeof item.quantity === 'number' ? item.quantity : 1);
-      const price = Number(
-        item.unitPrice ??
-        item.selectedVariant?.final_price ??
-        item.selectedVariant?.finalPrice ??
-        0
-      );
-      return sum + price * qty;
-    }, 0),
-    [cartItems]
+  const unitPrice = Number(
+    product.unitPrice ??
+    product.selectedVariant?.final_price ??
+    product.selectedVariant?.finalPrice ??
+    product.price ??
+    0
   );
 
+  const subtotal = unitPrice * units;
   const discountRate = 0;
   const discount = subtotal * discountRate;
   const total = subtotal - discount;
 
   // ----- qty / remove -----
-  const handleQuantityChange = (itemId, newQuantity) => {
+  const handleQuantityChange = (newQuantity) => {
     if (newQuantity < 1) return;
-    const updatedItem = cartItems.find((i) => i._id === itemId);
-    if (!updatedItem) return;
+    setUnits(newQuantity);
+  };
 
-    const updatedProduct = {
-      ...updatedItem,
-      cartQty: newQuantity,
-      ...(typeof updatedItem.quantity === 'number' ? { quantity: newQuantity } : {})
+  const handleAddToCart = () => {
+    const cartItem = {
+      ...product,
+      cartQty: units,
+      unitPrice: unitPrice,
     };
 
-    dispatch(updateData(updatedProduct));
-    toast.success('Item quantity updated!', { position: 'top-right', autoClose: 1500 });
-  };
-
-  const handleRemoveItem = (itemCompositeKey) => {
-    dispatch(deleteProduct(itemCompositeKey));
-    toast.info('Item removed from cart.', { position: 'top-right', autoClose: 1500 });
-  };
-
-  const handleClearCart = () => {
-    dispatch(clearProducts());
-    toast.info('Cart cleared.', { position: 'top-right', autoClose: 1500 });
+    dispatch(addData(cartItem));
+    toast.success('Item added to cart successfully!', { position: 'top-right', autoClose: 1500 });
   };
 
   const handleContinueShopping = () => navigate(-1);
@@ -545,30 +525,29 @@ export default function CartPage() {
       return;
     }
 
-    const userData = JSON.parse(localStorage.getItem('userData'));
-    const userId = userData?._id;
-    if (!userId) {
-      toast.error('User ID not found.');
-      return;
-    }
-
     const fullAddress = `${formData.flat}, ${formData.landmark}, ${formData.city}, ${formData.state}, ${formData.country} ,${formData.pincode}`;
 
     try {
-      const response = await axiosInstance.put(`admin/updateAdmin/${userId}`, {
-        address: [...addresses, fullAddress],
-        phone: formData.phone,
+      // Save address locally without user ID dependency
+      const newAddresses = [...addresses, fullAddress];
+      setAddresses(newAddresses);
+      
+      // Save to localStorage for persistence
+      const cartAddresses = JSON.parse(localStorage.getItem('cartAddresses') || '[]');
+      cartAddresses.push(fullAddress);
+      localStorage.setItem('cartAddresses', JSON.stringify(cartAddresses));
+      
+      toast.success('Address added successfully');
+      setFormData((p) => ({ ...p, selectedAddress: fullAddress }));
+      setShowModal(false);
+      
+      // Reset form
+      setFormData({
+        flat: '', landmark: '', state: '', city: '', country: 'India', phone: '', selectedAddress: fullAddress, pincode: ''
       });
-
-      if (response.status === 200) {
-        toast.success('Address added successfully');
-        setAddresses((prev) => [...prev, fullAddress]);
-        setFormData((p) => ({ ...p, selectedAddress: fullAddress }));
-        setShowModal(false);
-      }
     } catch (error) {
-      toast.error('Failed to update address');
-      console.error('Address update error:', error);
+      toast.error('Failed to add address');
+      console.error('Address add error:', error);
     }
   };
 
@@ -600,15 +579,34 @@ export default function CartPage() {
 
   // ----- load user addresses -----
   useEffect(() => {
+    // Load addresses from localStorage first
+    const cartAddresses = JSON.parse(localStorage.getItem('cartAddresses') || '[]');
+    if (cartAddresses.length > 0) {
+      setAddresses(cartAddresses);
+      if (!formData.selectedAddress && cartAddresses.length > 0) {
+        setFormData((p) => ({ ...p, selectedAddress: cartAddresses[0] }));
+      }
+      return;
+    }
+
+    // Fallback to API if user is authenticated
     (async () => {
       try {
         const userData = JSON.parse(localStorage.getItem('userData'));
         const userId = userData?._id;
         if (!userId) return;
+        
         const response = await axiosInstance.get(`/admin/readAdmin/${userId}`);
         const userInfo = response?.data?.data;
         setOriginalAddress(userInfo);
-        if (Array.isArray(userInfo?.address)) setAddresses(userInfo.address);
+        if (Array.isArray(userInfo?.address)) {
+          setAddresses(userInfo.address);
+          // Also save to localStorage for future use
+          localStorage.setItem('cartAddresses', JSON.stringify(userInfo.address));
+          if (!formData.selectedAddress && userInfo.address.length > 0) {
+            setFormData((p) => ({ ...p, selectedAddress: userInfo.address[0] }));
+          }
+        }
       } catch (e) {
         console.error('Error fetching address:', e);
       }
@@ -616,61 +614,46 @@ export default function CartPage() {
   }, []);
 
   // ----- razorpay -----
-  const handleCheckout = () => {
-    if (!isAuthenticated) {
-      toast.warn('Please log in to proceed with checkout.');
-      navigate('/login');
-      return;
-    }
-
+  const handleCheckout = (finalTotal) => {
+    // Direct payment flow - no login check
     if (!formData.selectedAddress) {
       toast.warn('Please select an address before checkout.');
       return;
     }
+
     const phoneNumber = formData.phone || originalAddress?.phone || "";
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
 
     const options = {
       key: 'rzp_live_RCKnQvruACO5FH',
-      amount: Math.round(total * 100),
+      amount: Math.round(finalTotal * 100),
       currency: 'INR',
       name: 'Chauhan Sons Jewellers',
       description: 'Order Payment',
       handler: async function (response) {
         try {
           toast.success('Payment successful!');
-          const userData = JSON.parse(localStorage.getItem('userData'));
-
-          if (!userData?.email) {
-            toast.error("Email not found in user data!");
-            console.error("CRITICAL: No email found, order will not send confirmation emails");
-          }
 
           const orderPayload = {
-            userId: userData?._id,
-            items: cartItems.map((item) => {
-              const qty = item.cartQty ?? (typeof item.quantity === 'number' ? item.quantity : 1);
-              const price = Number(
-                item.unitPrice ??
-                item.selectedVariant?.final_price ??
-                item.selectedVariant?.finalPrice ??
-                0
-              );
-              return {
-                productId: item._id,
-                name: item.name,
-                quantity: qty,
-                price,
-              };
-            }),
+            userId: userData?._id || 'guest', // Allow guest orders
+            items: [{
+              productId: product._id,
+              name: product.name,
+              quantity: units,
+              price: unitPrice,
+            }],
             address: formData.selectedAddress,
             phone: phoneNumber,
-            totalAmount: total,
+            totalAmount: finalTotal,
             paymentId: response.razorpay_payment_id,
             email: userData?.email,
           };
+          
           const res = await axiosInstance.post('/api/createOrder', orderPayload);
           if (res.status === 201) {
-            dispatch(clearProducts());
+            // Clear stored data after successful order
+            localStorage.removeItem('buyNowProduct');
+            localStorage.removeItem('cartAddresses');
             navigate('/successOrder');
           } else {
             toast.error('Failed to place order.');
@@ -681,13 +664,14 @@ export default function CartPage() {
         }
       },
       prefill: {
-        name: userData?.name,
-        email: userData?.email,
+        name: userData?.name || 'Customer',
+        email: userData?.email || 'customer@example.com',
         contact: phoneNumber,
       },
       notes: { address: formData.selectedAddress },
       theme: { color: Theme.palette.primary.main },
     };
+    
     const rz = new window.Razorpay(options);
     rz.open();
   };
@@ -702,8 +686,6 @@ export default function CartPage() {
     setPhoneError(formData.phone.length !== 10 || !/^[1-9][0-9]{9}$/.test(formData.phone));
   };
 
-  const isEmpty = (cartItems?.length || 0) === 0;
-
   return (
     <div className="cart-page">
       <ToastContainer position="top-right" autoClose={2000} hideProgressBar />
@@ -713,75 +695,65 @@ export default function CartPage() {
         <div className="header-left">
           <ShoppingBagIcon className="cart-icon" />
           <Typography variant="h4" className="cart-title">
-            Shopping Cart
+            Buy Now
           </Typography>
         </div>
-        {!isEmpty && (
-          <div className="header-actions">
-            <Button onClick={handleClearCart} variant="outlined" className="clear-cart-btn">
-              Clear Cart
-            </Button>
-            <Button onClick={handleContinueShopping} variant="text" className="continue-btn">
-              Continue Shopping
-            </Button>
-          </div>
-        )}
+        <div className="header-actions">
+          <Button onClick={handleAddToCart} variant="outlined" className="add-to-cart-btn">
+            Add to Cart Instead
+          </Button>
+          <Button onClick={handleContinueShopping} variant="text" className="continue-btn">
+            Continue Shopping
+          </Button>
+        </div>
       </div>
 
-      {/* Cart Items Count */}
-      {!isEmpty && (
-        <Typography variant="h6" className="cart-count">
-          {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'} in your cart
-        </Typography>
-      )}
+      {/* Item Count */}
+      <Typography variant="h6" className="cart-count">
+        1 item in your order
+      </Typography>
 
       {/* Content */}
-      {isEmpty ? (
-        <EmptyCart onContinueShopping={handleContinueShopping} />
-      ) : (
-        <div className="cart-content">
-          {/* Left Column - Products */}
-          <div className="products-column">
-            <Paper className="products-paper">
-              <Typography variant="h6" className="products-title">
-                Your Items
-              </Typography>
-              <div className="products-list">
-                {cartItems.map((item) => (
-                  <CartCard 
-                    key={item._id} 
-                    product={item}
-                    onRemove={() => handleRemoveItem(`${item._id}__${item.selectedVariant?.weight || ''}_${item.selectedVariant?.carat || ''}`)}
-                    onUpdateQuantity={handleQuantityChange} 
-                  />
-                ))}
-              </div>
-            </Paper>
-          </div>
-
-          {/* Right Column - Order Summary */}
-          <div className="summary-column">
-            <OrderSummary
-              cartItems={cartItems}
-              subtotal={subtotal}
-              total={total}
-              formData={formData}
-              handleCheckout={handleCheckout}
-              addresses={addresses}
-              setFormData={setFormData}
-              setShowModal={setShowModal}
-              phoneError={phoneError}
-              handlePhoneChange={handlePhoneChange}
-              handlePhoneBlur={handlePhoneBlur}
-            />
-          </div>
+      <div className="cart-content">
+        {/* Left Column - Product */}
+        <div className="products-column">
+          <Paper className="products-paper">
+            <Typography variant="h6" className="products-title">
+              Your Item
+            </Typography>
+            <div className="products-list">
+              <SingleProductCard 
+                product={product}
+                units={units}
+                onUpdateQuantity={handleQuantityChange}
+              />
+            </div>
+          </Paper>
         </div>
-      )}
+
+        {/* Right Column - Order Summary */}
+        <div className="summary-column">
+          <OrderSummary
+            product={product}
+            units={units}
+            subtotal={subtotal}
+            total={total}
+            formData={formData}
+            handleCheckout={handleCheckout}
+            addresses={addresses}
+            setFormData={setFormData}
+            setShowModal={setShowModal}
+            phoneError={phoneError}
+            handlePhoneChange={handlePhoneChange}
+            handlePhoneBlur={handlePhoneBlur}
+          />
+        </div>
+      </div>
 
       {/* Add address dialog */}
       <Dialog open={showModal} onClose={() => setShowModal(false)} fullWidth maxWidth="sm">
         <DialogTitle className="dialog-title">Add New Address</DialogTitle>
-        <form onSubmit={handleAddAddress}>
+        <form onSubmit={(e) => { e.preventDefault(); handleAddAddress(); }}>
           <DialogContent className="dialog-content">
             <div className="address-form-grid">
               <TextField
@@ -850,7 +822,7 @@ export default function CartPage() {
             </div>
           </DialogContent>
           <DialogActions className="dialog-actions">
-            <Button type="submit" onClick={handleAddAddress} variant="contained" className="add-address-dialog-btn">
+            <Button type="submit" variant="contained" className="add-address-dialog-btn">
               Add Address
             </Button>
             <Button onClick={() => setShowModal(false)} variant="outlined" color="secondary">
@@ -911,13 +883,13 @@ export default function CartPage() {
           gap: 1rem;
         }
 
-        .clear-cart-btn {
+        .add-to-cart-btn {
           text-transform: none;
           border-color: #7d2a25;
           color: #7d2a25;
         }
 
-        .clear-cart-btn:hover {
+        .add-to-cart-btn:hover {
           border-color: #611f18;
           background-color: rgba(125,42,37,0.04);
         }
@@ -950,76 +922,22 @@ export default function CartPage() {
           color: #333;
         }
 
-        /* Empty Cart Styles */
-        .empty-cart-container {
-          width: 100%;
-          min-height: 70vh;
+        .error-container {
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
+          min-height: 50vh;
           gap: 2rem;
-          padding-top: 1rem;
         }
 
-        .empty-cart-image {
-          min-width: 150px;
+        .error-text {
+          color: #d32f2f;
           text-align: center;
         }
 
-        .cart-icon-circle {
-          width: 100px;
-          height: 80px;
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 0 auto;
-        }
-
-        .cart-icon-circle::before {
-          content: '';
-          width: 70px;
-          height: 85px;
-          background-color: #f6f1ef;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          position: relative;
-        }
-
-        .empty-cart-text {
-          text-align: center;
-          margin-top: 1rem;
-          max-width: 400px;
-        }
-
-        .empty-cart-title {
-          color: #702626;
-          font-weight: 600;
-          margin-bottom: 0.5rem;
-          font-size: 18px;
-        }
-
-        .empty-cart-subtitle {
-          margin-bottom: 1.5rem;
-          color: #702626;
-          font-size: 14px;
-        }
-
-        .continue-shopping-btn {
+        .back-button {
           background: #7d2a25;
-          color: #fff;
-          border-radius: 4px;
-          padding: 0.5rem 1.5rem;
-          text-transform: none;
-          font-weight: 500;
-          font-size: 14px;
-        }
-
-        .continue-shopping-btn:hover {
-          background: #611f18;
         }
 
         /* Cart Card Styles */
@@ -1082,19 +1000,6 @@ export default function CartPage() {
         }
 
         .gift-wrap-text {
-          font-weight: 500;
-        }
-
-        .stock-alert {
-          background: #fff3cd;
-          border: 1px solid #ffeaa7;
-          border-radius: 4px;
-          padding: 0.75rem;
-          margin-bottom: 1rem;
-        }
-
-        .stock-text {
-          color: #856404;
           font-weight: 500;
         }
 
@@ -1523,11 +1428,6 @@ export default function CartPage() {
 
           .form-control-wide {
             grid-column: 1;
-          }
-
-          .empty-cart-container {
-            flex-direction: column;
-            text-align: center;
           }
 
           .badge-container {

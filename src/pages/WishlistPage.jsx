@@ -271,7 +271,7 @@ function WishlistCard({ product, onRemove }) {
           style={{
             width: '100%',
             height: '100%',
-            objectFit: 'contain',
+            objectFit: 'cover',
             objectPosition: 'center',
             borderBottom: '1px solid #ddd'
           }}

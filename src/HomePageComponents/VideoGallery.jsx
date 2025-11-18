@@ -166,7 +166,7 @@ export default function VideoGallery() {
                 src={publicUrl(video.url)}
                 onClick={() => handleVideoClick(video.url)}
                 sx={{
-                    height: 260, objectFit: 'cover', background: '#000', cursor: 'pointer',
+                    height: 550, objectFit: 'cover', background: '#000', cursor: 'pointer',
                     boxShadow: playingVideoId === video._id ? '0 0 15px 4px #dfbce6ff' : undefined,
                 }}
             />

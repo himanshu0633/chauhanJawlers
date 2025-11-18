@@ -89,7 +89,7 @@ const CategoryCard = styled(Card)(({ theme }) => ({
 const CategoryImg = styled(CardMedia)(({ theme }) => ({
   width: "100%",
   height: "100%",
-  objectFit: "contain",
+  objectFit: "cover",
   objectPosition: "center",
   transition: ".23s transform",
 }));

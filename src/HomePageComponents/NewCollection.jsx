@@ -562,7 +562,7 @@ const ProductImage = styled(CardMedia)({
   maxWidth: "100%",
   display: "block",
   cursor: "pointer",
-  objectFit: "contain",
+  objectFit: "cover",
 });
 
 const DiscountBadge = styled(Chip)({

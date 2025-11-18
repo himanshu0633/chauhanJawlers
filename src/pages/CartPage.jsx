@@ -106,14 +106,7 @@ function CartCard({ product, onRemove, onUpdateQuantity }) {
         />
       </div>
 
-      {/* Stock Alert */}
-      {isLowStock && (
-        <div className="stock-alert">
-          <Typography variant="body2" className="stock-text">
-            ⚠️ Only 1 item left in stock
-          </Typography>
-        </div>
-      )}
+  
 
       {/* Product Details */}
       <div className="product-details">
@@ -290,103 +283,103 @@ function OrderSummary({
       <Divider className="section-divider" />
 
       {/* Price Breakdown */}
-      <div className="price-breakdown">
-        <div className="price-row">
-          <Typography variant="body2" className="price-label">
-            Subtotal
-          </Typography>
-          <Typography variant="body2" className="price-value">
-            {formatINR(subtotal)}
-          </Typography>
-        </div>
+        <div className="price-breakdown">
+            {/* <div className="price-row">
+              <Typography variant="body2" className="price-label">
+                Subtotal
+              </Typography>
+              <Typography variant="body2" className="price-value">
+                {formatINR(subtotal)}
+              </Typography>
+            </div> */}
 
-        {/* Additional Services */}
-        <div className="service-option">
-          <FormControlLabel
-            control={
-              <Checkbox 
-                checked={giftWrapAll} 
-                onChange={(e) => setGiftWrapAll(e.target.checked)}
-                size="small"
-              />
-            }
-            label={
-              <div className="service-label">
-                <Typography variant="body2" className="service-name">
-                  Gift Wrap All Items
-                </Typography>
-                <Typography variant="body2" className="service-price">
-                  +{formatINR(80)} each
-                </Typography>
-              </div>
-            }
-          />
-        </div>
-
-        <div className="service-option">
-          <FormControlLabel
-            control={
-              <Checkbox 
-                checked={expressDelivery} 
-                onChange={(e) => setExpressDelivery(e.target.checked)}
-                size="small"
-              />
-            }
-            label={
-              <div className="service-label">
-                <div>
+          {/* Additional Services */}
+          {/* <div className="service-option">
+            <FormControlLabel
+              control={
+                <Checkbox 
+                  checked={giftWrapAll} 
+                  onChange={(e) => setGiftWrapAll(e.target.checked)}
+                  size="small"
+                />
+              }
+              label={
+                <div className="service-label">
                   <Typography variant="body2" className="service-name">
-                    Express Delivery
+                    Gift Wrap All Items
                   </Typography>
-                  <Typography variant="caption" className="service-desc">
-                    Delivery in 24 hours
+                  <Typography variant="body2" className="service-price">
+                    +{formatINR(80)} each
                   </Typography>
                 </div>
-                <Typography variant="body2" className="service-price">
-                  +{formatINR(199)}
-                </Typography>
-              </div>
-            }
-          />
-        </div>
+              }
+            />
+          </div> */}
 
-        <div className="service-option">
-          <FormControlLabel
-            control={
-              <Checkbox 
-                checked={insurance} 
-                onChange={(e) => setInsurance(e.target.checked)}
-                size="small"
-              />
-            }
-            label={
-              <div className="service-label">
-                <div>
-                  <Typography variant="body2" className="service-name">
-                    Jewelry Insurance
-                  </Typography>
-                  <Typography variant="caption" className="service-desc">
-                    Theft & Damage protection (1 year)
+          {/* <div className="service-option">
+            <FormControlLabel
+              control={
+                <Checkbox 
+                  checked={expressDelivery} 
+                  onChange={(e) => setExpressDelivery(e.target.checked)}
+                  size="small"
+                />
+              }
+              label={
+                <div className="service-label">
+                  <div>
+                    <Typography variant="body2" className="service-name">
+                      Express Delivery
+                    </Typography>
+                    <Typography variant="caption" className="service-desc">
+                      Delivery in 24 hours
+                    </Typography>
+                  </div>
+                  <Typography variant="body2" className="service-price">
+                    +{formatINR(199)}
                   </Typography>
                 </div>
-                <Typography variant="body2" className="service-price">
-                  +{formatINR(insuranceFee)}
-                </Typography>
-              </div>
-            }
-          />
-        </div>
+              }
+            />
+          </div> */}
 
-        {/* Final Total */}
-        <div className="final-total">
-          <Typography variant="h6" className="total-label">
-            Total Amount
-          </Typography>
-          <Typography variant="h5" className="total-value">
-            {formatINR(finalTotal)}
-          </Typography>
+          {/* <div className="service-option">
+            <FormControlLabel
+              control={
+                <Checkbox 
+                  checked={insurance} 
+                  onChange={(e) => setInsurance(e.target.checked)}
+                  size="small"
+                />
+              }
+              label={
+                <div className="service-label">
+                  <div>
+                    <Typography variant="body2" className="service-name">
+                      Jewelry Insurance
+                    </Typography>
+                    <Typography variant="caption" className="service-desc">
+                      Theft & Damage protection (1 year)
+                    </Typography>
+                  </div>
+                  <Typography variant="body2" className="service-price">
+                    +{formatINR(insuranceFee)}
+                  </Typography>
+                </div>
+              }
+            />
+          </div> */}
+
+          {/* Final Total */}
+          <div className="final-total">
+            <Typography variant="h6" className="total-label">
+              Total Amount
+            </Typography>
+            <Typography variant="h5" className="total-value">
+              {formatINR(finalTotal)}
+            </Typography>
+          </div>
         </div>
-      </div>
 
       {/* Progress Bar for Free Shipping */}
       <div className="shipping-progress">
@@ -409,7 +402,7 @@ function OrderSummary({
         </Typography>
       </div>
 
-      {/* Checkout Button */}
+      {/* Checkout Button - Direct to payment */}
       <Button
         variant="contained"
         onClick={handleCheckout}
@@ -452,7 +445,6 @@ function OrderSummary({
 
 // ---------- main ----------
 export default function CartPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [addresses, setAddresses] = useState([]);
   const [originalAddress, setOriginalAddress] = useState(null);
@@ -467,14 +459,6 @@ export default function CartPage() {
   const cartItems = useSelector((state) => state.app.data || []);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const userData = JSON.parse(localStorage.getItem('userData'));
-
-  useEffect(() => {
-    const userData = localStorage.getItem('userData');
-    if (userData) {
-      setIsAuthenticated(true);
-    }
-  }, []);
 
   // ----- totals -----
   const subtotal = useMemo(
@@ -545,30 +529,29 @@ export default function CartPage() {
       return;
     }
 
-    const userData = JSON.parse(localStorage.getItem('userData'));
-    const userId = userData?._id;
-    if (!userId) {
-      toast.error('User ID not found.');
-      return;
-    }
-
     const fullAddress = `${formData.flat}, ${formData.landmark}, ${formData.city}, ${formData.state}, ${formData.country} ,${formData.pincode}`;
 
     try {
-      const response = await axiosInstance.put(`admin/updateAdmin/${userId}`, {
-        address: [...addresses, fullAddress],
-        phone: formData.phone,
+      // Save address locally without user ID dependency
+      const newAddresses = [...addresses, fullAddress];
+      setAddresses(newAddresses);
+      
+      // Save to localStorage for persistence
+      const cartAddresses = JSON.parse(localStorage.getItem('cartAddresses') || '[]');
+      cartAddresses.push(fullAddress);
+      localStorage.setItem('cartAddresses', JSON.stringify(cartAddresses));
+      
+      toast.success('Address added successfully');
+      setFormData((p) => ({ ...p, selectedAddress: fullAddress }));
+      setShowModal(false);
+      
+      // Reset form
+      setFormData({
+        flat: '', landmark: '', state: '', city: '', country: 'India', phone: '', selectedAddress: fullAddress, pincode: ''
       });
-
-      if (response.status === 200) {
-        toast.success('Address added successfully');
-        setAddresses((prev) => [...prev, fullAddress]);
-        setFormData((p) => ({ ...p, selectedAddress: fullAddress }));
-        setShowModal(false);
-      }
     } catch (error) {
-      toast.error('Failed to update address');
-      console.error('Address update error:', error);
+      toast.error('Failed to add address');
+      console.error('Address add error:', error);
     }
   };
 
@@ -600,15 +583,28 @@ export default function CartPage() {
 
   // ----- load user addresses -----
   useEffect(() => {
+    // Load addresses from localStorage first
+    const cartAddresses = JSON.parse(localStorage.getItem('cartAddresses') || '[]');
+    if (cartAddresses.length > 0) {
+      setAddresses(cartAddresses);
+      return;
+    }
+
+    // Fallback to API if user is authenticated
     (async () => {
       try {
         const userData = JSON.parse(localStorage.getItem('userData'));
         const userId = userData?._id;
         if (!userId) return;
+        
         const response = await axiosInstance.get(`/admin/readAdmin/${userId}`);
         const userInfo = response?.data?.data;
         setOriginalAddress(userInfo);
-        if (Array.isArray(userInfo?.address)) setAddresses(userInfo.address);
+        if (Array.isArray(userInfo?.address)) {
+          setAddresses(userInfo.address);
+          // Also save to localStorage for future use
+          localStorage.setItem('cartAddresses', JSON.stringify(userInfo.address));
+        }
       } catch (e) {
         console.error('Error fetching address:', e);
       }
@@ -617,17 +613,14 @@ export default function CartPage() {
 
   // ----- razorpay -----
   const handleCheckout = () => {
-    if (!isAuthenticated) {
-      toast.warn('Please log in to proceed with checkout.');
-      navigate('/login');
-      return;
-    }
-
+    // Direct payment flow - no login check
     if (!formData.selectedAddress) {
       toast.warn('Please select an address before checkout.');
       return;
     }
+
     const phoneNumber = formData.phone || originalAddress?.phone || "";
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
 
     const options = {
       key: 'rzp_live_RCKnQvruACO5FH',
@@ -638,15 +631,9 @@ export default function CartPage() {
       handler: async function (response) {
         try {
           toast.success('Payment successful!');
-          const userData = JSON.parse(localStorage.getItem('userData'));
-
-          if (!userData?.email) {
-            toast.error("Email not found in user data!");
-            console.error("CRITICAL: No email found, order will not send confirmation emails");
-          }
 
           const orderPayload = {
-            userId: userData?._id,
+            userId: userData?._id || 'guest', // Allow guest orders
             items: cartItems.map((item) => {
               const qty = item.cartQty ?? (typeof item.quantity === 'number' ? item.quantity : 1);
               const price = Number(
@@ -668,9 +655,12 @@ export default function CartPage() {
             paymentId: response.razorpay_payment_id,
             email: userData?.email,
           };
+          
           const res = await axiosInstance.post('/api/createOrder', orderPayload);
           if (res.status === 201) {
             dispatch(clearProducts());
+            // Clear cart addresses after successful order
+            localStorage.removeItem('cartAddresses');
             navigate('/successOrder');
           } else {
             toast.error('Failed to place order.');
@@ -681,13 +671,14 @@ export default function CartPage() {
         }
       },
       prefill: {
-        name: userData?.name,
-        email: userData?.email,
+        name: userData?.name || 'Customer',
+        email: userData?.email || 'customer@example.com',
         contact: phoneNumber,
       },
       notes: { address: formData.selectedAddress },
       theme: { color: Theme.palette.primary.main },
     };
+    
     const rz = new window.Razorpay(options);
     rz.open();
   };
@@ -781,7 +772,7 @@ export default function CartPage() {
       {/* Add address dialog */}
       <Dialog open={showModal} onClose={() => setShowModal(false)} fullWidth maxWidth="sm">
         <DialogTitle className="dialog-title">Add New Address</DialogTitle>
-        <form onSubmit={handleAddAddress}>
+        <form onSubmit={(e) => { e.preventDefault(); handleAddAddress(); }}>
           <DialogContent className="dialog-content">
             <div className="address-form-grid">
               <TextField
@@ -850,7 +841,7 @@ export default function CartPage() {
             </div>
           </DialogContent>
           <DialogActions className="dialog-actions">
-            <Button type="submit" onClick={handleAddAddress} variant="contained" className="add-address-dialog-btn">
+            <Button type="submit" variant="contained" className="add-address-dialog-btn">
               Add Address
             </Button>
             <Button onClick={() => setShowModal(false)} variant="outlined" color="secondary">
