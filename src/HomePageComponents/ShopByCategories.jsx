@@ -173,7 +173,7 @@ const ShopByCategories = () => {
                       <Box
                         sx={{
                           width: "100%",
-                          height: 120,
+                          height: 140,
                           borderRadius: "16px",
                           overflow: "hidden",
                           backgroundColor: "#fff",
@@ -210,7 +210,7 @@ const ShopByCategories = () => {
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
                           width: "100%",
-                          minHeight: 20,
+                          minHeight: 30,
                         }}
                       >
                         {item.label}

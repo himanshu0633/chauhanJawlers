@@ -112,16 +112,17 @@ const GiftingPage = () => {
       sx={{ py: 0, bgcolor: "#f9f6f2", px: isSmallMobile ? 1 : 2 }}
     >
       {/* Hero Section with Rakhi Banner */}
-   <Box
+  <Box
   sx={{
     width: "100%",
-    px: 2,   // LEFT + RIGHT MARGIN
+    px: 1,   // smaller side padding
+    py: 2,   // smaller top/bottom padding
   }}
 >
   <Box
     sx={{
       width: "100%",
-      borderRadius: "16px",
+      borderRadius: "14px",
       overflow: "hidden",
     }}
   >
@@ -134,9 +135,13 @@ const GiftingPage = () => {
       alt="Latest festival banner"
       sx={{
         width: "100%",
-        height: { xs: "30vh", sm: "40vh", md: "60vh" },
+        height: {
+          xs: "20vh",   // smaller on mobile
+          sm: "28vh",
+          md: "40vh",   // smaller on desktop too
+        },
         objectFit: "cover",
-        borderRadius: "16px",
+        borderRadius: "14px",
         cursor: "pointer",
       }}
       onClick={() => navigate(`/allJewellery`)}
