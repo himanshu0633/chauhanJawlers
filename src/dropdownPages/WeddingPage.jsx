@@ -77,6 +77,8 @@ function WeddingProductCard({ product }) {
     navigate("/cart");
   };
 
+  const finalAmount = best?.finalPrice ? best.finalPrice : product.price ? product.price : 0;
+
   const increaseUnits = (e) => {
     e.stopPropagation();
     e.preventDefault();
@@ -90,7 +92,16 @@ function WeddingProductCard({ product }) {
   };
 
   return (
-    <Box sx={{ pb: 1, position: 'relative' }}>
+    <Box
+      sx={{
+        pb: 1,
+        position: "relative",
+        height: 360,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+      }}
+    >
       <Box sx={{
         position: 'relative',
         borderRadius: 2,
@@ -146,25 +157,36 @@ function WeddingProductCard({ product }) {
         onClick={() => navigate(`/singleProduct/${product._id}`)} 
         style={{ color: 'inherit', textDecoration: 'none', cursor: 'pointer' }}
       >
-        <Typography variant="subtitle1" sx={{
-          fontSize: 18,
-          fontWeight: 600,
-          fontFamily: 'serif',
-          color: '#222',
-          textAlign: 'left',
-          textTransform: 'capitalize',
-          mt: 1,
-          lineHeight: 1.2
-        }}>
+        <Typography
+          variant="subtitle1"
+          sx={{
+            fontSize: 16,
+            fontWeight: 600,
+            fontFamily: "serif",
+            color: "#222",
+            mt: 1,
+            lineHeight: 1.2,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            minHeight: "40px",
+          }}
+        >
           {product.name}
         </Typography>
-        <Typography variant="subtitle1" sx={{ fontWeight: 500, fontSize: 17, color: '#222', fontFamily: 'cursive' }}>
-          ₹{best.finalPrice}
+
+        <Typography
+          variant="subtitle1"
+          sx={{ fontWeight: 500, fontSize: 17, color: '#222', fontFamily: 'cursive' }}
+        >
+          ₹{finalAmount}
         </Typography>
       </Box>
 
       {/* Quantity Selector and Add to Cart Button */}
-      <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
+      <Box sx={{ mt: "auto", display: "flex", flexDirection: "column", gap: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Typography variant="body2" sx={{ fontSize: 14, fontWeight: 600, color: '#2c2c2c' }}>
             Quantity:
@@ -274,105 +296,36 @@ const WeddingPage = () => {
   };
 
   const pickBestVariation = (arr) => {
-    if (!arr.length) return null;
+    if (!arr || arr.length === 0) return {
+      finalPrice: 0,
+      gst: 0,
+      discount: 0,
+      weight: 0,
+      makingPrice: 0
+    };
     return arr.reduce((best, cur) =>
       parseFloat(cur.finalPrice || 0) < parseFloat(best.finalPrice || 0) ? cur : best, arr[0]);
   };
 
-  const preprocessProducts = (productsRaw) => productsRaw.map((p) => {
-    const quantityArr = parseQuantityArray(p.quantity?.[0]);
-    const bestVariation = pickBestVariation(quantityArr);
-    return {
-      ...p,
-      price: bestVariation ? parseFloat(bestVariation.finalPrice || 0) : 0,
-      gst: bestVariation ? parseFloat(bestVariation.gst || 0) : null,
-      discount: bestVariation ? parseFloat(bestVariation.discount || 0) : 0,
-      weight: bestVariation ? parseFloat(bestVariation.weight || 0) : null,
-      makingPrice: bestVariation ? parseFloat(bestVariation.makingPrice || 0) : null,
-      quantityVariants: quantityArr,
-      bestVariant: bestVariation,
-    };
-  });
+  // Preprocess products to calculate bestVariant and price
+  const preprocessProducts = (productsRaw) => {
+    return productsRaw.map((p) => {
+      const quantityArr = parseQuantityArray(p.quantity?.[0]);
+      const bestVariation = pickBestVariation(quantityArr);
+      return {
+        ...p,
+        price: bestVariation ? parseFloat(bestVariation.finalPrice || 0) : 0,
+        gst: bestVariation ? parseFloat(bestVariation.gst || 0) : null,
+        discount: bestVariation ? parseFloat(bestVariation.discount || 0) : 0,
+        weight: bestVariation ? parseFloat(bestVariation.weight || 0) : null,
+        makingPrice: bestVariation ? parseFloat(bestVariation.makingPrice || 0) : null,
+        quantityVariants: quantityArr,
+        bestVariant: bestVariation,
+      };
+    });
+  };
 
-  // Filter products by occasionQuery after products loaded
-  useEffect(() => {
-    if (occasionQuery && products.length > 0 && occasion.length > 0) {
-      const foundOccasion = occasion.find(
-        o => o.name.trim().toLowerCase() === occasionQuery.trim()
-      );
-      setFilteredOccasionName(foundOccasion ? foundOccasion.name : '');
-
-      let filtered = products.filter(
-        p => p.occasion && p.occasion.trim().toLowerCase() === occasionQuery.trim()
-      );
-
-      // Apply additional filters
-      if (filters.query) {
-        filtered = filtered.filter(p => 
-          p.name && p.name.toLowerCase().includes(filters.query.toLowerCase())
-        );
-      }
-
-      if (filters.priceRange !== 'all') {
-        const priceBucket = priceBuckets.find(b => b.label === filters.priceRange);
-        if (priceBucket) {
-          filtered = filtered.filter(p => 
-            p.price >= priceBucket.min && p.price <= priceBucket.max
-          );
-        }
-      }
-
-      // Apply sorting
-      filtered = filtered.sort((a, b) => {
-        switch (sortOption) {
-          case 'price-asc': return (a.price || 0) - (b.price || 0);
-          case 'price-desc': return (b.price || 0) - (a.price || 0);
-          case 'newest':
-            const dateA = new Date(a.createdAt || 0);
-            const dateB = new Date(b.createdAt || 0);
-            return dateB - dateA;
-          default: return 0;
-        }
-      });
-
-      setFilteredProducts(filtered);
-    } else {
-      let allProducts = preprocessProducts(products);
-      
-      // Apply filters to all products
-      if (filters.query) {
-        allProducts = allProducts.filter(p => 
-          p.name && p.name.toLowerCase().includes(filters.query.toLowerCase())
-        );
-      }
-
-      if (filters.priceRange !== 'all') {
-        const priceBucket = priceBuckets.find(b => b.label === filters.priceRange);
-        if (priceBucket) {
-          allProducts = allProducts.filter(p => 
-            p.price >= priceBucket.min && p.price <= priceBucket.max
-          );
-        }
-      }
-
-      // Apply sorting
-      allProducts = allProducts.sort((a, b) => {
-        switch (sortOption) {
-          case 'price-asc': return (a.price || 0) - (b.price || 0);
-          case 'price-desc': return (b.price || 0) - (a.price || 0);
-          case 'newest':
-            const dateA = new Date(a.createdAt || 0);
-            const dateB = new Date(b.createdAt || 0);
-            return dateB - dateA;
-          default: return 0;
-        }
-      });
-
-      setFilteredProducts(allProducts);
-      setFilteredOccasionName('');
-    }
-  }, [occasionQuery, products, occasion, filters, sortOption]);
-
+  // Fetch data on component mount
   const fetchOccasions = async () => {
     try {
       const response = await axiosInstance.get(`/user/allOccasions`);
@@ -386,7 +339,8 @@ const WeddingPage = () => {
     setLoading(true);
     try {
       const response = await axiosInstance.get(`/user/allproducts`);
-      setProducts(response?.data ?? []);
+      const preprocessedProducts = preprocessProducts(response?.data ?? []);
+      setProducts(preprocessedProducts);
     } catch (error) {
       setError('Could not load products. Please try again.');
       console.error("Error fetching categories:", error);
@@ -416,6 +370,59 @@ const WeddingPage = () => {
     fetchAllProducts();
     fetchBanners();
   }, []);
+
+  // Filter and sort products based on filters and occasion
+  useEffect(() => {
+    if (products.length === 0) return;
+
+    let filtered = [...products];
+    let foundOccasionName = '';
+
+    // Filter by occasion if specified
+    if (occasionQuery && occasion.length > 0) {
+      const foundOccasion = occasion.find(
+        o => o.name.trim().toLowerCase() === occasionQuery.trim()
+      );
+      foundOccasionName = foundOccasion ? foundOccasion.name : '';
+      
+      filtered = filtered.filter(
+        p => p.occasion && p.occasion.trim().toLowerCase() === occasionQuery.trim()
+      );
+    }
+
+    // Apply search filter
+    if (filters.query) {
+      filtered = filtered.filter(p => 
+        p.name && p.name.toLowerCase().includes(filters.query.toLowerCase())
+      );
+    }
+
+    // Apply price filter
+    if (filters.priceRange !== 'all') {
+      const priceBucket = priceBuckets.find(b => b.label === filters.priceRange);
+      if (priceBucket) {
+        filtered = filtered.filter(p => 
+          p.price >= priceBucket.min && p.price <= priceBucket.max
+        );
+      }
+    }
+
+    // Apply sorting
+    filtered = filtered.sort((a, b) => {
+      switch (sortOption) {
+        case 'price-asc': return (a.price || 0) - (b.price || 0);
+        case 'price-desc': return (b.price || 0) - (a.price || 0);
+        case 'newest':
+          const dateA = new Date(a.createdAt || 0);
+          const dateB = new Date(b.createdAt || 0);
+          return dateB - dateA;
+        default: return 0;
+      }
+    });
+
+    setFilteredProducts(filtered);
+    setFilteredOccasionName(foundOccasionName);
+  }, [occasionQuery, products, occasion, filters, sortOption]);
 
   // Reset shown count when filters change
   useEffect(() => {
@@ -456,10 +463,10 @@ const WeddingPage = () => {
               fontSize: { xs: '28px', sm: '36px', md: '48px' } 
             }}
           >
-             {filteredOccasionName && ` ${filteredOccasionName}`}
+            {filteredOccasionName ? filteredOccasionName : "Wedding Collection"}
           </Typography>
 
-          {/* Filters and Sort Controls - Same as JewelleryGrid */}
+          {/* Filters and Sort Controls */}
           <Box sx={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -500,55 +507,49 @@ const WeddingPage = () => {
           </Box>
         </Box>
 
-        {/* Product Grid - Same layout as JewelleryGrid */}
+        {/* Product Grid */}
         {loading ? (
-          <Typography align="center" sx={{ py: 4 }}>Loading wedding collection...</Typography>
+          <Typography align="center" sx={{ py: 4 }}>
+            Loading wedding collection...
+          </Typography>
         ) : error ? (
-          <Typography align="center" color="error" sx={{ py: 4 }}>{error}</Typography>
+          <Typography align="center" color="error" sx={{ py: 4 }}>
+            {error}
+          </Typography>
         ) : filteredProducts.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Box sx={{ textAlign: "center", py: 8 }}>
             <Typography variant="h5" color="text.secondary" gutterBottom>
               No products found
             </Typography>
             <Typography variant="body2" color="text.secondary">
               {occasionQuery
                 ? `No products available for ${filteredOccasionName} occasion. Try browsing other occasions.`
-                : "Try adjusting your filters or search terms"
-              }
+                : "Try adjusting your filters or search terms"}
             </Typography>
           </Box>
         ) : (
           <>
             <Box
               sx={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "repeat(2, 1fr)",
+                  sm: "repeat(3, 1fr)",
+                  md: "repeat(4, 1fr)",
+                  lg: "repeat(6, 1fr)",
+                },
                 gap: 2,
+                justifyContent: "center",
               }}
             >
               {productsToDisplay.map((product) => (
-                <Box
-                  key={product._id}
-                  sx={{
-                    width: {
-                      xs: '47%',
-                      sm: '30%',
-                      md: '23%',
-                      lg: '15%',
-                    },
-                    boxSizing: 'border-box',
-                    mb: 2,
-                  }}
-                >
-                  <WeddingProductCard product={product} />
-                </Box>
+                <WeddingProductCard key={product._id} product={product} />
               ))}
             </Box>
 
-            {/* Load More Button */}
+            {/* Load More */}
             {shownCount < filteredProducts.length && (
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+              <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
                 <Button
                   variant="outlined"
                   onClick={loadMoreProducts}
@@ -602,22 +603,18 @@ const WeddingPage = () => {
               autoplay={{ delay: 4000, disableOnInteraction: false }}
               loop={true}
             >
-              {banners.length > 0 && (
-                <>
-                  {banners.map((item) => (
-                    <SwiperSlide key={item._id}>
-                      <Box sx={{ width: "100%" }}>
-                        <img
-                          src={publicUrl(item.slider_image)}
-                          alt={item.type}
-                          style={{ width: "100%", height: "100%", maxWidth: "100%", objectFit: "contain", display: "block", cursor: "pointer", borderRadius: "12px" }}
-                          onClick={() => navigate(`/allJewellery/${(item.variety || 'all').toLowerCase()}`)}
-                        />
-                      </Box>
-                    </SwiperSlide>
-                  ))}
-                </>
-              )}
+              {banners.map((item) => (
+                <SwiperSlide key={item._id}>
+                  <Box sx={{ width: "100%" }}>
+                    <img
+                      src={publicUrl(item.slider_image)}
+                      alt={item.type}
+                      style={{ width: "100%", height: "100%", maxWidth: "100%", objectFit: "contain", display: "block", cursor: "pointer", borderRadius: "12px" }}
+                      onClick={() => navigate(`/allJewellery/${(item.variety || 'all').toLowerCase()}`)}
+                    />
+                  </Box>
+                </SwiperSlide>
+              ))}
             </Swiper>
           </Container>
         </Box>

@@ -10,88 +10,63 @@ import { publicUrl } from "../commonComponents/PublicUrl"
 const SliderContainer = styled(Box)({
     width: "100%",
     overflow: "hidden",
-})
+});
 
-const Slide = styled(Box)(({ theme }) => ({
+const Slide = styled(Box)({
     width: "100%",
     height: "auto",
-    padding: "0 10px",
-    [theme.breakpoints.down("sm")]: {
-        width: "100%",
-        padding: "0",
-    },
-}));
+    padding: "0",        // 🔥 Removed side gap
+    cursor: "pointer",
+});
 
 const SlideImage = styled("img")(({ theme }) => ({
-    height: "auto",
-    // height: "230px",
-    // width: "auto",
     width: "100%",
-    maxWidth: "100%",
+    height: "200px",
     display: "block",
-    margin: "0 auto",
-    borderRadius: "10px",
-    [theme.breakpoints.down("lg")]: {
-        width: "auto",
-        height: "230px",
+    objectFit: "cover",
+    borderRadius: "0px",  // 🔥 Full width edge to edge
+    margin: 0,
+
+    [theme.breakpoints.up("sm")]: {
+        height: "260px",
+    },
+    [theme.breakpoints.up("md")]: {
+        height: "330px",
+    },
+    [theme.breakpoints.up("lg")]: {
+        height: "380px",
     },
 }));
+
 const SliderWrapper = styled(Box)(({ theme }) => ({
     width: "100%",
     overflow: "hidden",
     backgroundColor: "#fff",
 
-    // scoped slick styles
     "& .slick-dots": {
-        bottom: "5px",
-        "& li": {
-            width: "10px",
-            height: "10px",
-            borderRadius: "50%",
-            // backgroundColor: "#7A7469B0",
-            transition: "all 0.3s ease",
+        bottom: "10px",
+        "& li button:before": {
+            color: "#7A7469",
+            opacity: 0.5,
         },
-        "& li.slick-active": {
-            // backgroundColor: "#fff",
+        "& li.slick-active button:before": {
+            color: "#7A7469",
+            opacity: 1,
         },
     },
+
     "& .slick-prev, & .slick-next": {
-        width: "70px",
-        height: "70px",
-        zIndex: 10,
-        top: "50% !important",
-        transform: "translateY(-50%) !important",
+        zIndex: 20,
+        width: "45px",
+        height: "45px",
+        backgroundColor: "rgba(0,0,0,0.4)",
         borderRadius: "50%",
-        // backgroundColor: "#7A7469B0",
-        // color: "#fff",
-        transition: "all 0.3s ease",
-        [theme.breakpoints.down("lg")]: {
-            width: "40px",
-            height: "40px",
-            "&::before": {
-                fontSize: "20px !important",
-                lineHeight: "40px",
-            },
-        },
-        "&::before": {
-            fontSize: "32px",
-            lineHeight: "40px",
-        },
-    },
-    "& .slick-prev": {
-        left: "20px",
-        [theme.breakpoints.down("lg")]: {
-            left: "10px",
-        },
-    },
-    "& .slick-next": {
-        right: "20px",
-        [theme.breakpoints.down("lg")]: {
-            right: "10px",
+        "&:before": { fontSize: "22px" },
+        [theme.breakpoints.down("md")]: {
+            display: "none",  // 🔥 Mobile me arrows hide
         },
     },
 }));
-
 
 function HeroSection() {
     const [banners, setBanners] = useState([]);
@@ -123,37 +98,38 @@ function HeroSection() {
     const settings = {
         dots: true,
         infinite: true,
-        speed: 500,
+        speed: 600,
         slidesToShow: 1,
         slidesToScroll: 1,
         autoplay: true,
         autoplaySpeed: 3000,
-        pauseOnHover: true,
-        centerMode: true,
-        centerPadding: "100px",
         arrows: false,
+        pauseOnHover: true,
         responsive: [
             {
-                breakpoint: 1024,
+                breakpoint: 768,
                 settings: {
-                    slidesToShow: 1,
-                    centerMode: false,      // Full-width on small screens
-                    centerPadding: "0px",   // Remove peeking effect on mobile
+                    arrows: false,  // Mobile arrows removed
+                    dots: true,
                 }
             }
         ]
     };
 
-
     return (
         <SliderContainer>
             <SliderWrapper>
-                <Slider {...settings} >
+                <Slider {...settings}>
                     {banners.map((item, index) => (
-                        <Slide key={index}
+                        <Slide 
+                            key={index}
                             onClick={() => navigate(`/collection/${(item.variety || 'all').toLowerCase()}`)}
                         >
-                            <SlideImage src={publicUrl(item.slider_image[0])} alt={`slide-${index}`} />
+                            <SlideImage 
+                                src={publicUrl(item.slider_image[0])} 
+                                alt={`slide-${index}`}
+                                loading="lazy"
+                            />
                         </Slide>
                     ))}
                 </Slider>
@@ -163,4 +139,3 @@ function HeroSection() {
 }
 
 export default HeroSection
-

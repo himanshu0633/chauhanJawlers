@@ -12,12 +12,21 @@ import ChauhanExperience from '../HomePageComponents/ChauhanExperience'
 import VideoGallery from '../HomePageComponents/VideoGallery'
 // import AnimatedSection from '../commonComponents/AnimatedSection'
 // import VideoCardSlider from '../commonComponents/VideoCardSlider'
-
+import { Box } from "@mui/material";
 const HomePage = () => {
 
     return (
         <div>
-            <HeroSection />
+          
+         <Box
+  sx={{
+    m: "10px",       // har side se 10px margin
+  }}
+>
+  <HeroSection />
+</Box>
+
+
             {/* <AnimatedSection delay={200}> */}
                 <ShopByCategories />
             {/* </AnimatedSection> */}

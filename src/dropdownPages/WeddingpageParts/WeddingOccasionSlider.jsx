@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Box, IconButton, Button } from '@mui/material';
-import { ArrowBackIos, ArrowForwardIos, ArrowForward } from '@mui/icons-material';
+import { ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
 import axiosInstance from '../../commonComponents/AxiosInstance';
 import { publicUrl } from '../../commonComponents/PublicUrl';
+import { useNavigate } from "react-router-dom";   // ✅ ADDED
 
 const WeddingOccasionSlider = () => {
   const [activeIndex, setActiveIndex] = useState(6);
   const [occasion, setOccasion] = useState([]);
+  const navigate = useNavigate();   // ✅ ADDED
 
   useEffect(() => {
     fetchOccasions();
-  }, [])
+  }, []);
+
   const fetchOccasions = async () => {
     try {
       const response = await axiosInstance.get(`/user/allOccasions`);
@@ -32,7 +35,6 @@ const WeddingOccasionSlider = () => {
     const diff = index - activeIndex;
     const totalCards = occasion.length;
 
-    // Normalize the difference to handle circular array
     let normalizedDiff = diff;
     if (Math.abs(diff) > totalCards / 2) {
       normalizedDiff = diff > 0 ? diff - totalCards : diff + totalCards;
@@ -43,32 +45,25 @@ const WeddingOccasionSlider = () => {
     let opacity = 1;
 
     if (normalizedDiff === 0) {
-      // Active card - front center
       transform = 'translate3d(0px, 0px, 0px) rotateZ(0deg) scale(1)';
       zIndex = 7;
     } else if (normalizedDiff === 1) {
-      // Next card - right side
       transform = 'translate3d(calc(19.25% - 589px), 0px, -100px) rotateZ(8deg) scale(1)';
       zIndex = 6;
     } else if (normalizedDiff === 2) {
-      // Second card - further right
       transform = 'translate3d(calc(37% - 1178px), 0px, -200px) rotateZ(16deg) scale(1)';
       zIndex = 5;
     } else if (normalizedDiff === 3) {
-      // Third card - even further right
       transform = 'translate3d(calc(53.25% - 1767px), 0px, -300px) rotateZ(24deg) scale(1)';
       zIndex = 4;
     } else if (normalizedDiff >= 4) {
-      // Cards at the back - max rotation
       transform = 'translate3d(calc(68% - 2356px), 0px, -400px) rotateZ(32deg) scale(1)';
       zIndex = Math.max(1, 4 - (normalizedDiff - 4));
     } else if (normalizedDiff === -1) {
-      // Previous card - left side (hidden behind)
       transform = 'translate3d(calc(-19.25% + 589px), 0px, -100px) rotateZ(-8deg) scale(1)';
       zIndex = 6;
       opacity = 0.7;
     } else {
-      // Other cards - hidden
       transform = 'translate3d(calc(-68% + 2356px), 0px, -400px) rotateZ(-32deg) scale(1)';
       zIndex = 1;
       opacity = 0;
@@ -83,19 +78,21 @@ const WeddingOccasionSlider = () => {
   };
 
   return (
-    <Box sx={{
-      width: '100%',
-      maxWidth: '80%',
-      mx: 'auto',
-      py: 4,
-      position: 'relative',
-      mt: { xs: 4, md: 10 },
-      height: { xs: '400px', md: '600px' },
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    }}>
-      {/* Navigation Buttons */}
+    <Box
+      sx={{
+        width: '100%',
+        maxWidth: '80%',
+        mx: 'auto',
+        py: 4,
+        position: 'relative',
+        mt: { xs: 4, md: 10 },
+        height: { xs: '400px', md: '600px' },
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
+    >
+      {/* Prev Button */}
       <IconButton
         onClick={prevSlide}
         sx={{
@@ -110,14 +107,13 @@ const WeddingOccasionSlider = () => {
           height: { xs: 30, md: 50 },
           borderRadius: '50%',
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          '&:hover': {
-            bgcolor: '#f5f5f5',
-          }
+          '&:hover': { bgcolor: '#f5f5f5' }
         }}
       >
         <ArrowBackIos sx={{ color: '#333', fontSize: { xs: '14px', md: '18px' } }} />
       </IconButton>
 
+      {/* Next Button */}
       <IconButton
         onClick={nextSlide}
         sx={{
@@ -132,22 +128,22 @@ const WeddingOccasionSlider = () => {
           height: { xs: 30, md: 50 },
           borderRadius: '50%',
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          '&:hover': {
-            bgcolor: '#f5f5f5',
-          }
+          '&:hover': { bgcolor: '#f5f5f5' }
         }}
       >
-        <ArrowForwardIos sx={{ color: '#333',  fontSize: { xs: '14px', md: '18px' } }} />
+        <ArrowForwardIos sx={{ color: '#333', fontSize: { xs: '14px', md: '18px' } }} />
       </IconButton>
 
-      {/* 3D Card Stack Container */}
-      <Box sx={{
-        position: 'relative',
-        width: { xs: '280px', md: '569px' },
-        height: { xs: '350px', md: '450px' },
-        perspective: '1000px',
-        transformStyle: 'preserve-3d'
-      }}>
+      {/* Cards */}
+      <Box
+        sx={{
+          position: 'relative',
+          width: { xs: '280px', md: '569px' },
+          height: { xs: '350px', md: '450px' },
+          perspective: '1000px',
+          transformStyle: 'preserve-3d'
+        }}
+      >
         {occasion.map((occasion, index) => {
           const cardStyle = getCardStyle(index);
           const isActive = index === activeIndex;
@@ -170,7 +166,9 @@ const WeddingOccasionSlider = () => {
                 ...cardStyle,
                 '&:hover .occasion-button': {
                   opacity: isActive ? 1 : 0,
-                  transform: isActive ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(10px)'
+                  transform: isActive
+                    ? 'translateX(-50%) translateY(0)'
+                    : 'translateX(-50%) translateY(10px)'
                 }
               }}
               onClick={() => setActiveIndex(index)}
@@ -186,42 +184,38 @@ const WeddingOccasionSlider = () => {
                 }}
               />
 
-              {/* Occasion Button - only show on active card */}
+              {/* Only active card shows button */}
               {isActive && (
-                <Box
-                  className="occasion-button"
-                  sx={{
-                    position: 'absolute',
-                    bottom: 8,
-                    left: '50%',
-                    transform: 'translateX(-50%) translateY(10px)',
-                    opacity: 0,
-                    transition: 'all 0.3s ease',
-                    zIndex: 2
-                  }}
-                >
-                  <Button
-                    sx={{
-                      background: 'linear-gradient(90.18deg, rgba(131, 39, 41, 0.741) 0.17%, rgba(99, 21, 24, 0.752) 99.86%)',
-                      color: '#fff',
-                      borderRadius: '21px',
-                      px: 3,
-                      py: 0.5,
-                      fontSize: { xs: '10px', md: '16px' },
-                      fontWeight: 'normal',
-                      textTransform: 'none',
-                      fontFamily: 'Nunito, sans-serif',
-                      boxShadow: 'rgba(0, 0, 0, 0.15) 0px 2px 8px',
-                      minWidth: 'auto',
-                      '&:hover': {
-                        background: '#832729',
-                        boxShadow: '0 4px 16px rgba(131, 39, 41, 0.3)'
-                      }
-                    }}
-                  >
-                    {occasion.name}
-                  </Button>
-                </Box>
+               <Box
+  className="occasion-button"
+  sx={{
+    position: "absolute",
+    bottom: 8,
+    left: "50%",
+    transform: "translateX(-50%) translateY(10px)",
+    opacity: 0,
+    transition: "all 0.3s ease",
+    zIndex: 9999,          // 👈 SUPER IMPORTANT
+    pointerEvents: "auto", // 👈 FIX
+  }}
+>
+  {/* <Button
+    onClick={() => navigate(`/wedding?occasion=${occasion.name.toLowerCase()}`)}
+    sx={{
+      background:
+        "linear-gradient(90deg, rgba(131,39,41,0.74), rgba(99,21,24,0.75))",
+      color: "#fff",
+      borderRadius: "21px",
+      px: 3,
+      py: 0.5,
+      fontSize: { xs: "10px", md: "16px" },
+      textTransform: "none",
+    }}
+  >
+    {occasion.name}
+  </Button> */}
+</Box>
+
               )}
             </Box>
           );

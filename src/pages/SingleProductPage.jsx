@@ -178,11 +178,19 @@ const buyNow = () => {
     const handleMouseEnter = () => setIsZoomed(true);
     const handleMouseLeave = () => setIsZoomed(false);
 
-    const variant = product?.quantity?.[selectedVariantIndex];
-    const combinedId = `${product?._id}-${variant?.weight ?? "undef"}-${
-      variant?.carat ?? "undef"
-    }`;
-    const isWishlisted = wishlist.some((item) => item._id === combinedId);
+  // Make variant safe
+const variant = product?.quantity?.[selectedVariantIndex] || {};
+
+// Generate stable variant-based ID
+const combinedId = `${product?._id}-${variant?.weight ?? "undef"}-${variant?.carat ?? "undef"}`;
+
+// Check wishlist
+const isWishlisted = wishlist.some(item => {
+  // Check if the item has the same product ID and variant details
+  return item._id === product?._id && 
+         item.selectedVariant?.weight === variant?.weight &&
+         item.selectedVariant?.carat === variant?.carat;
+});
     const canAddToCart = Boolean(product?.stock === "yes");
 
     const handleShare = () => {
@@ -202,27 +210,31 @@ const buyNow = () => {
       }
     };
 
-    const handleWishlistClick = (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-      const variant = product.quantity[selectedVariantIndex];
-      const combinedId = `${product._id}-${variant.weight ?? "undef"}-${
-        variant.carat ?? "undef"
-      }`;
-      const wishlistItem = {
-        ...product,
-        _id: combinedId,
-        selectedVariant: { ...variant },
-        price: variant.final_price ?? variant.finalPrice ?? 0,
-      };
-      if (wishlist.some((item) => item._id === combinedId)) {
-        dispatch(removeFromWishlist(combinedId));
-        toast.info("Removed from Wishlist");
-      } else {
-        dispatch(addToWishlist(wishlistItem));
-        toast.info("Added to Wishlist");
-      }
-    };
+  const handleWishlistClick = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (!product) return;
+
+  const variant = product.quantity[selectedVariantIndex];
+  if (!variant) return;
+
+  const wishlistItem = {
+    ...product,
+    selectedVariant: { ...variant },
+    price: variant.final_price ?? variant.finalPrice ?? 0,
+    // Use the same ID structure for consistency
+    _id: product._id // Keep the original ID
+  };
+
+  if (isWishlisted) {
+    dispatch(removeFromWishlist(wishlistItem));
+    toast.info("Removed from Wishlist");
+  } else {
+    dispatch(addToWishlist(wishlistItem));
+    toast.success("Added to Wishlist");
+  }
+};
 
     const fetchData = async () => {
       setLoading(true);
@@ -374,17 +386,20 @@ const buyNow = () => {
                   <h2 className="product-collection">{product.name}</h2>
                 </div>
 
-                <div className="wishlist-share">
-                  <button
-                    className={`icon-button ${isWishlisted ? "wishlisted" : ""}`}
-                    onClick={handleWishlistClick}
-                  >
-                    {isWishlisted ? "❤️" : "🤍"}
-                  </button>
-                  <button className="icon-button" onClick={handleShare}>
-                    🔗
-                  </button>
-                </div>
+              <div className="wishlist-share">
+ <button
+  className={`icon-button ${isWishlisted ? "wishlisted" : ""}`}
+  onClick={handleWishlistClick}
+>
+  {isWishlisted ? "❤️" : "🤍"}
+</button>
+
+
+  <button className="icon-button" onClick={handleShare}>
+    🔗
+  </button>
+</div>
+
               </div>
 
               {/* Variant Selector */}
@@ -777,6 +792,7 @@ const buyNow = () => {
             font-family: "Inter", sans-serif;
           }
 
+
           /* Mobile First Styles */
           .product-container {
             max-width: 1140px;
@@ -905,19 +921,37 @@ const buyNow = () => {
             flex-shrink: 0;
           }
 
-          .icon-button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            background: none;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 16px;
-          }
+      /* Heart Button Core Style */
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  font-size: 22px;
+}
+
+/* Ensure the wishlisted state is properly styled */
+.icon-button.wishlisted {
+  border-color: red !important;
+  color: red !important;
+  transform: scale(1.15);
+}
+
+/* Add hover states for better UX */
+.icon-button:hover {
+  background-color: #f5f5f5;
+  transform: scale(1.05);
+}
+
+.icon-button.wishlisted:hover {
+  background-color: #fff0f0;
+}
 
           .variant-selector {
             margin-bottom: 1rem;
