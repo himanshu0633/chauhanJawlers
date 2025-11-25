@@ -9,51 +9,74 @@ import { addData } from '../store/Action';
 import { toast, ToastContainer } from 'react-toastify';
 
 // ---- Styled Components ----
-const SectionContainer = styled(Box)({
+const SectionContainer = styled(Box)(({ theme }) => ({
   backgroundColor: "#fff",
   paddingTop: 80,
   paddingBottom: 80,
-  "@media (max-width:600px)": { paddingTop: 20, paddingBottom: 40 },
-});
+  [theme.breakpoints.down('lg')]: { 
+    paddingTop: 60, 
+    paddingBottom: 60 
+  },
+  [theme.breakpoints.down('md')]: { 
+    paddingTop: 40, 
+    paddingBottom: 40 
+  },
+  [theme.breakpoints.down('sm')]: { 
+    paddingTop: 30, 
+    paddingBottom: 30 
+  },
+}));
 
 const HeaderContainer = styled(Container)({
   textAlign: "center",
   marginBottom: 30,
 });
 
-const MainTitle = styled(Typography)({
+const MainTitle = styled(Typography)(({ theme }) => ({
   fontFamily: "serif",
   fontSize: 48,
   fontWeight: 600,
   color: Theme.palette.primary,
   marginBottom: 12,
   lineHeight: 1.2,
-  "@media (max-width:960px)": { fontSize: 40 },
-  "@media (max-width:600px)": { fontSize: 32 },
-});
+  [theme.breakpoints.down('lg')]: { fontSize: 42 },
+  [theme.breakpoints.down('md')]: { fontSize: 36 },
+  [theme.breakpoints.down('sm')]: { fontSize: 28 },
+  [theme.breakpoints.down('xs')]: { fontSize: 24 },
+}));
 
-const SubTitle = styled(Typography)({
+const SubTitle = styled(Typography)(({ theme }) => ({
   fontSize: 18,
   fontWeight: 400,
   color: "#666",
   letterSpacing: ".3px",
-  "@media (max-width:600px)": { fontSize: 16 },
-});
+  [theme.breakpoints.down('md')]: { fontSize: 17 },
+  [theme.breakpoints.down('sm')]: { fontSize: 16 },
+  [theme.breakpoints.down('xs')]: { fontSize: 14 },
+}));
 
-const FlexRow = styled(Box)({
+const FlexRow = styled(Box)(({ theme }) => ({
   display: "flex",
   gap: "32px",
   maxWidth: 1100,
   margin: "0 auto",
   alignItems: "stretch",
-  "@media (max-width:900px)": {
+  [theme.breakpoints.down('lg')]: {
+    gap: "28px",
+    maxWidth: "95%",
+  },
+  [theme.breakpoints.down('md')]: {
     flexDirection: "column",
     gap: 24,
-    maxWidth: "95vw",
+    maxWidth: "90%",
   },
-});
+  [theme.breakpoints.down('sm')]: {
+    gap: 20,
+    maxWidth: "100%",
+  },
+}));
 
-const PromoCard = styled(Card)({
+const PromoCard = styled(Card)(({ theme }) => ({
   position: "relative",
   borderRadius: 16,
   overflow: "hidden",
@@ -65,18 +88,30 @@ const PromoCard = styled(Card)({
   display: "flex",
   flexDirection: "column",
   justifyContent: "flex-end",
-  transition: "transform 0.3s",
-  "&:hover": { transform: "translateY(-5px)" },
-  "@media (max-width:900px)": {
+  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  "&:hover": { 
+    transform: "translateY(-5px)",
+    boxShadow: "0 12px 28px rgba(0,0,0,0.15)",
+  },
+  [theme.breakpoints.down('lg')]: {
+    minHeight: 450,
+    minWidth: "280px",
+  },
+  [theme.breakpoints.down('md')]: {
     minHeight: 380,
     maxWidth: "100%",
     width: "100%",
-    marginBottom: 0,
+    minWidth: "auto",
+    margin: "0 auto",
   },
-  "@media (max-width:600px)": {
-    minHeight: 260,
+  [theme.breakpoints.down('sm')]: {
+    minHeight: 300,
+    borderRadius: 12,
   },
-});
+  [theme.breakpoints.down('xs')]: {
+    minHeight: 250,
+  },
+}));
 
 const PromoImage = styled(CardMedia)({
   width: "100%",
@@ -89,7 +124,7 @@ const PromoImage = styled(CardMedia)({
   objectPosition: "center",
 });
 
-const PromoOverlay = styled(Box)({
+const PromoOverlay = styled(Box)(({ theme }) => ({
   position: "relative",
   zIndex: 2,
   padding: "48px 36px",
@@ -99,28 +134,22 @@ const PromoOverlay = styled(Box)({
   alignItems: "flex-start",
   justifyContent: "flex-end",
   height: "100%",
-  "@media (max-width:600px)": {
-    padding: "24px 16px",
+  background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)",
+  [theme.breakpoints.down('lg')]: {
+    padding: "40px 28px",
   },
-});
+  [theme.breakpoints.down('md')]: {
+    padding: "32px 24px",
+  },
+  [theme.breakpoints.down('sm')]: {
+    padding: "24px 20px",
+  },
+  [theme.breakpoints.down('xs')]: {
+    padding: "20px 16px",
+  },
+}));
 
-const PromoDiscount = styled(Typography)({
-  fontSize: 48,
-  fontWeight: "bold",
-  marginBottom: 8,
-  textShadow: "0 2px 4px rgba(0,0,0,0.3)",
-  "@media (max-width:960px)": { fontSize: 40 },
-  "@media (max-width:600px)": { fontSize: 28 },
-});
-
-const PromoDates = styled(Typography)({
-  fontSize: 14,
-  marginBottom: 16,
-  opacity: 0.9,
-  textShadow: "0 1px 2px rgba(0,0,0,0.3)",
-});
-
-const PromoButton = styled(Button)({
+const PromoButton = styled(Button)(({ theme }) => ({
   backgroundColor: "rgba(46, 37, 37, 0.46)",
   color: "#fff",
   padding: "8px 28px",
@@ -130,38 +159,49 @@ const PromoButton = styled(Button)({
   borderRadius: "6px",
   border: "1px solid rgba(255,255,255,0.33)",
   letterSpacing: ".4px",
-  "&:hover": { backgroundColor: "rgba(0,0,0,0.25)" },
-});
+  "&:hover": { 
+    backgroundColor: "rgba(0,0,0,0.25)",
+    transform: "scale(1.05)",
+  },
+  [theme.breakpoints.down('sm')]: {
+    padding: "6px 20px",
+    fontSize: 13,
+  },
+  [theme.breakpoints.down('xs')]: {
+    padding: "5px 16px",
+    fontSize: 12,
+  },
+}));
 
-const RightFlexBox = styled(Box)({
+const RightFlexBox = styled(Box)(({ theme }) => ({
   flex: "2 1 650px",
   display: "flex",
   flexWrap: "wrap",
   gap: "20px",
   minWidth: "0",
   alignContent: "flex-start",
-  "@media (max-width:1200px)": {
-    // maxWidth: 520,
+  [theme.breakpoints.down('lg')]: {
+    gap: "16px",
   },
-  "@media (max-width:900px)": {
-    // maxWidth: "100%",
+  [theme.breakpoints.down('md')]: {
     gap: "12px",
     justifyContent: "center",
     flex: "2 1 0",
   },
-  "@media (max-width:500px)": {
-    // flexDirection: "column",
-    // flexWrap: "nowrap",
-    gap: 10,
+  [theme.breakpoints.down('sm')]: {
+    gap: "10px",
   },
-});
+  [theme.breakpoints.down('xs')]: {
+    gap: "8px",
+  },
+}));
 
-const ProductCard = styled(Card)({
+const ProductCard = styled(Card)(({ theme }) => ({
   borderRadius: 12,
   overflow: "hidden",
   display: "flex",
   flexDirection: "column",
-  width: "calc(33% - 14px)",
+  width: "calc(33.333% - 14px)",
   boxSizing: "border-box",
   boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
   transition: "transform 0.26s, box-shadow 0.26s",
@@ -169,17 +209,48 @@ const ProductCard = styled(Card)({
     transform: "translateY(-2px)",
     boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
   },
-  "@media (max-width:900px)": {
-    width: "calc(50% - 8px)",
+  [theme.breakpoints.down('lg')]: {
+    width: "calc(33.333% - 11px)",
   },
-});
+  [theme.breakpoints.down('md')]: {
+    width: "calc(50% - 6px)",
+  },
+  [theme.breakpoints.down('sm')]: {
+    width: "calc(50% - 5px)",
+    borderRadius: 10,
+  },
+  [theme.breakpoints.down('xs')]: {
+    width: "calc(50% - 4px)",
+    borderRadius: 8,
+  },
+  // For very small screens, show 1 column
+  [theme.breakpoints.down(400)]: {
+    width: "100%",
+    maxWidth: "280px",
+    margin: "0 auto",
+  },
+}));
 
-const ProductImageContainer = styled(Box)({
+const ProductImageContainer = styled(Box)(({ theme }) => ({
   position: "relative",
   width: "100%",
   height: 170,
-  "@media (max-width:900px)": { height: 155 }
-});
+  [theme.breakpoints.down('lg')]: { 
+    height: 160 
+  },
+  [theme.breakpoints.down('md')]: { 
+    height: 155 
+  },
+  [theme.breakpoints.down('sm')]: { 
+    height: 140 
+  },
+  [theme.breakpoints.down('xs')]: { 
+    height: 130 
+  },
+  [theme.breakpoints.down(400)]: { 
+    height: 150 
+  },
+}));
 
 const ProductImage = styled(CardMedia)({
   height: "100%",
@@ -188,12 +259,16 @@ const ProductImage = styled(CardMedia)({
   display: "block",
   cursor: "pointer",
   objectFit: "cover",
+  transition: "transform 0.3s ease",
+  "&:hover": {
+    transform: "scale(1.05)",
+  },
 });
 
-const DiscountBadge = styled(Chip)({
+const DiscountBadge = styled(Chip)(({ theme }) => ({
   position: "absolute",
-  top: 10,
-  right: 10,
+  top: 8,
+  right: 8,
   backgroundColor: "#44170b",
   color: "#fff",
   fontSize: 12,
@@ -202,42 +277,111 @@ const DiscountBadge = styled(Chip)({
   "& .MuiChip-label": {
     padding: "0 8px",
   },
-});
+  [theme.breakpoints.down('sm')]: {
+    height: 22,
+    fontSize: 11,
+    top: 6,
+    right: 6,
+    "& .MuiChip-label": {
+      padding: "0 6px",
+    },
+  },
+  [theme.breakpoints.down('xs')]: {
+    height: 20,
+    fontSize: 10,
+  },
+}));
 
-const ProductInfo = styled(CardContent)({
+const ProductInfo = styled(CardContent)(({ theme }) => ({
   padding: "14px",
   flex: 1,
-});
+  display: "flex",
+  flexDirection: "column",
+  [theme.breakpoints.down('sm')]: {
+    padding: "12px",
+  },
+  [theme.breakpoints.down('xs')]: {
+    padding: "10px",
+  },
+}));
 
-const ProductCategory = styled(Typography)({
+const ProductCategory = styled(Typography)(({ theme }) => ({
   fontSize: 12,
   color: "#666",
   marginBottom: 2,
   textTransform: "capitalize",
-});
+  [theme.breakpoints.down('sm')]: {
+    fontSize: 11,
+  },
+  [theme.breakpoints.down('xs')]: {
+    fontSize: 10,
+  },
+}));
 
-const ProductName = styled(Typography)({
+const ProductName = styled(Typography)(({ theme }) => ({
   fontSize: 15,
   fontWeight: 500,
   color: "#2C2C2C",
   marginBottom: 4,
   lineHeight: 1.2,
   textTransform: 'capitalize',
-  "@media (max-width:600px)": { fontSize: 13 },
-});
+  minHeight: '36px',
+  display: '-webkit-box',
+  WebkitLineClamp: 2,
+  WebkitBoxOrient: 'vertical',
+  overflow: 'hidden',
+  [theme.breakpoints.down('md')]: { 
+    fontSize: 14,
+    minHeight: '34px',
+  },
+  [theme.breakpoints.down('sm')]: { 
+    fontSize: 13,
+    minHeight: '32px',
+  },
+  [theme.breakpoints.down('xs')]: { 
+    fontSize: 12,
+    minHeight: '30px',
+  },
+}));
 
 const PriceContainer = styled(Box)({
   display: "flex",
   alignItems: "center",
   gap: 8,
+  marginBottom: 8,
 });
 
-const CurrentPrice = styled(Typography)({
+const CurrentPrice = styled(Typography)(({ theme }) => ({
   fontSize: 16,
   fontWeight: 600,
   color: "#2C2C2C",
-});
+  [theme.breakpoints.down('sm')]: {
+    fontSize: 15,
+  },
+  [theme.breakpoints.down('xs')]: {
+    fontSize: 14,
+  },
+}));
 
+const AddToCartButton = styled(Button)(({ theme }) => ({
+  marginTop: 'auto',
+  fontSize: 14,
+  fontWeight: 600,
+  textTransform: 'none',
+  borderRadius: '6px',
+  padding: '6px 12px',
+  minHeight: '36px',
+  [theme.breakpoints.down('sm')]: {
+    fontSize: 13,
+    padding: '5px 10px',
+    minHeight: '34px',
+  },
+  [theme.breakpoints.down('xs')]: {
+    fontSize: 12,
+    padding: '4px 8px',
+    minHeight: '32px',
+  },
+}));
 
 // ---- Main Component ----
 export default function NewCollection() {
@@ -336,14 +480,17 @@ export default function NewCollection() {
 
       <FlexRow>
         {/* Left Promo Card */}
-        <PromoCard>
+        <PromoCard onClick={() => navigate('/allJewellery')}>
           <PromoImage
             src="/newcollectionmainimg.jpg"
             title="30% Off Sale"
             component="img"
+            onError={(e) => {
+              e.target.src = "/newCollectionLady.png";
+            }}
           />
           <PromoOverlay>
-            <PromoButton variant="outlined" onClick={() => navigate('/allJewellery')}>SHOP NOW</PromoButton>
+            <PromoButton variant="outlined">SHOP NOW</PromoButton>
           </PromoOverlay>
         </PromoCard>
 
@@ -374,17 +521,20 @@ export default function NewCollection() {
                   <ProductCategory>{product.category}</ProductCategory>
                   <ProductName>{product.name}</ProductName>
                   <PriceContainer>
-                    <CurrentPrice>₹{product.price}</CurrentPrice>
+                    <CurrentPrice>₹{product.price?.toLocaleString()}</CurrentPrice>
                   </PriceContainer>
-                  <Button
+                  <AddToCartButton
                     variant="contained"
-                    sx={{ mt: 1 }}
-                    onClick={() => handleAddToCart(product)}
+                    fullWidth
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddToCart(product);
+                    }}
                     disabled={!isInStock}
                     title={!isInStock ? 'Out of stock' : 'Add to Cart'}
                   >
                     {isInStock ? 'ADD TO CART' : 'OUT OF STOCK'}
-                  </Button>
+                  </AddToCartButton>
                 </ProductInfo>
               </ProductCard>
             );
