@@ -36,6 +36,7 @@
           : null,
         in_stock: v.in_stock ? String(v.in_stock).toLowerCase() === "yes" : false,
         weight: v.weight || "",
+        size: v.size || "",
         carat: v.carat || "",
         pricePerGram: v.pricePerGram ? Number(v.pricePerGram) : null,
         makingPrice: v.makingPrice ? Number(v.makingPrice) : null,
@@ -424,16 +425,26 @@ const isWishlisted = wishlist.some(item => {
               )}
 
               {/* Variant Details */}
-              {selectedVariant && (
-                <div className="variant-details">
-                  <div className="variant-detail-item">
-                    <span className="detail-label">Weight:</span>
-                    <span className="detail-value">
-                      {selectedVariant.weight}g
-                    </span>
-                  </div>
-                </div>
-              )}
+           {selectedVariant && (
+  <div className="variant-details">
+    <div className="variant-detail-item">
+      <span className="detail-label">Weight:</span>
+      <span className="detail-value">
+        {selectedVariant.weight}g
+      </span>
+    </div>
+
+    {selectedVariant.size > 0 && (
+      <div className="variant-detail-item">
+        <span className="detail-label">Size:</span>
+        <span className="detail-value">
+          {selectedVariant.size}
+        </span>
+      </div>
+    )}
+  </div>
+)}
+
 
               {/* Product Badge */}
               <div className="pure-silver-badge">

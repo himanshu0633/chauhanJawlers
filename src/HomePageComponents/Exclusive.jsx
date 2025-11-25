@@ -358,7 +358,7 @@ export default function Exclusive() {
                       sx={{ cursor: 'pointer', '&:hover img': { transform: 'scale(1.05)' } }}>
                       <CategoryImg
                         component="img"
-                        src={publicUrl(item.media[0].url)}
+                        src={publicUrl(item?.media?.[0]?.url)}
                         alt={item.label}
                         onError={(e) => {
                           e.target.src = "/placeholder-category.png";

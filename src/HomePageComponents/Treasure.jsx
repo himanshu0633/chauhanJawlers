@@ -112,25 +112,21 @@ const CategoryCard = styled(Box)({
 })
 
 const CategoryImage = styled("img")({
-    width: "100%",
-    height: "100%",
-    objectFit: "contain",
-    objectPosition: "center",
-})
-
-const CategoryOverlay = styled(Box)({
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    background: "linear-gradient(transparent, rgba(0,0,0,0.7))",
-    padding: "30px 8px 15px",
-    display: "flex",
-    alignItems: "flex-end",
-    "@media (max-width: 600px)": {
-        padding: "20px 2px 10px 5px",
-    },
-})
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",     // PERFECT CLEAN FIT
+  objectPosition: "center top", // top se image seedhi dikhni chahiye
+});
+const CategoryOverlay = styled("div")({
+  position: "absolute",
+  bottom: 0,
+  width: "100%",
+  padding: "20px",
+  background:
+    "linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0))",
+  display: "flex",
+  alignItems: "flex-end",
+});
 
 const CategoryName = styled(Typography)({
     fontSize: { xs: "12px", md: "18px" },
@@ -172,33 +168,36 @@ function Treasure() {
                     </TextContent>
                 </ContentOverlay>
             </SectionContainer>
+<CategorySection>
+  <Container maxWidth="xl">
+    <Box display="flex" gap={2} justifyContent="center">
+      {subcategoryName.slice(1, 4).map((item) => (
+        <Grid item xs={4} key={item._id}>
+          <CategoryCard
+            onClick={() =>
+              navigate(`/allJewellery?subcategory=${item._id}`)
+            }
+          >
+            <CategoryImage
+              src={publicUrl(item.image)}
+              alt={item.name}
+              loading="lazy"
+              onError={(e) => {
+                e.target.src =
+                  "/placeholder.svg?height=200&width=300&text=Image+Not+Found";
+              }}
+            />
+            <CategoryOverlay>
+              <CategoryName>{item.name}</CategoryName>
+            </CategoryOverlay>
+          </CategoryCard>
+        </Grid>
+      ))}
+    </Box>
+  </Container>
+</CategorySection>
 
-            <CategorySection>
-                <Container maxWidth="xl">
-                    <Box display="flex" gap={1} justifyContent={"center"}>
-                        {subcategoryName.slice(1, 4).map((item) => (
-                            <Grid xs={4} key={item._id}>
-                                <CategoryCard
-                                    // onClick={() => { navigate(`/allJewellery/${item._id}`) }}
-                                    onClick={() => { navigate(`/allJewellery?subcategory=${item._id}`) }}
-                                >
-                                    <CategoryImage
-                                        src={publicUrl(item.image)}
-                                        alt={item.name}
-                                        loading="lazy"
-                                        onError={(e) => {
-                                            e.target.src = "/placeholder.svg?height=200&width=300&text=Image+Not+Found"
-                                        }}
-                                    />
-                                    <CategoryOverlay>
-                                        <CategoryName>{item.name}</CategoryName>
-                                    </CategoryOverlay>
-                                </CategoryCard>
-                            </Grid>
-                        ))}
-                    </Box>
-                </Container>
-            </CategorySection>
+
         </Box>
     )
 }

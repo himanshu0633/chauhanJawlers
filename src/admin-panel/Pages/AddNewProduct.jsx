@@ -53,7 +53,8 @@ const AddNewProduct = () => {
         gst: '', // GST percentage
         makingPrice: '', // making price
         totalWeight: '', // total weight
-        finalPrice: '' // final price calculation
+        finalPrice: '', // final price calculation
+        size: '' ,// size of the product
       }
     ],
     category: '',
@@ -74,7 +75,8 @@ const AddNewProduct = () => {
     gst: q.gst ?? q.GST ?? '',
     makingPrice: q.makingPrice ?? q.making_price ?? '',
     totalWeight: q.totalWeight ?? q.total_weight ?? '',
-    finalPrice: q.finalPrice ?? q.final_price ?? ''
+    finalPrice: q.finalPrice ?? q.final_price ?? '',
+    size: q.size ?? q.Size ?? ''
   });
 
 
@@ -200,7 +202,9 @@ const AddNewProduct = () => {
           gst: '',
           makingPrice: '',
           totalWeight: '',
-          finalPrice: ''
+          finalPrice: '',
+          size: ''
+
         };
       }
 
@@ -213,6 +217,7 @@ const AddNewProduct = () => {
       const discount = parseFloat(qtyList[index].discount);
       const gst = parseFloat(qtyList[index].gst);
       const makingPrice = parseFloat(qtyList[index].makingPrice);
+      const size = parseFloat(qtyList[index].size);
       let totalPrice = 0;
       let totalWeight = weight;
 
@@ -382,6 +387,7 @@ const AddNewProduct = () => {
       quantity[index][name] = value;
       // ...recalculation logic here (as above)
       const weight = parseFloat(quantity[index].weight);
+      const size = parseFloat(quantity[index].size);
       const carat = parseFloat(quantity[index].carat);
       const pricePerGram = parseFloat(quantity[index].pricePerGram);
       const discount = parseFloat(quantity[index].discount);
@@ -759,6 +765,17 @@ const AddNewProduct = () => {
                   label="Weight (gm)"
                   name="weight"
                   value={qty.weight ?? ''}
+                  onChange={(e) => handleQuantityChange(e, index)}
+                  fullWidth
+                  type="number"
+                  inputProps={{  min: 0, step: "0.01" }}
+                />
+              </Grid>
+               <Grid item xs={6}>
+                <TextField
+                  label="Size"
+                  name="size"
+                  value={qty.size ?? ''}
                   onChange={(e) => handleQuantityChange(e, index)}
                   fullWidth
                   type="number"
