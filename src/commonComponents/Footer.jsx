@@ -17,6 +17,13 @@ const LogoAndDesc = styled(Box)({
     gap: 16,
     maxWidth: 280,
     marginBottom: 10,
+
+    // Logo sizing
+    img: {
+        width: 120,   // adjust as required
+        height: "auto",
+    },
+
     "@media (max-width: 900px)": {
         maxWidth: "100%",
         marginBottom: 32,

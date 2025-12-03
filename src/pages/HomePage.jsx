@@ -35,7 +35,7 @@ const HomePage = () => {
             {/* <Trending /> */}
             {/* <MasterDaimondSlider /> */}
             {/* <VideoCardSlider /> */}
-            <VideoGallery />
+            {/* <VideoGallery /> */}
             <NewCollection />
             <ChauhanWorld />
             <ExchangeOffer />
