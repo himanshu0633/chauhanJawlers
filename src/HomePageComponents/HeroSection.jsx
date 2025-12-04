@@ -16,47 +16,26 @@ const Slide = styled(Box)(({ theme }) => ({
     width: "100%",
     height: "auto",
     padding: "0 10px",
-    cursor: "pointer",
-    [theme.breakpoints.down("md")]: {
-        padding: "0 5px",
-    },
     [theme.breakpoints.down("sm")]: {
+        width: "100%",
         padding: "0",
     },
 }));
 
 const SlideImage = styled("img")(({ theme }) => ({
-    width: "100%",
     height: "auto",
+    // height: "230px",
+    // width: "auto",
+    width: "100%",
     maxWidth: "100%",
     display: "block",
     margin: "0 auto",
     borderRadius: "10px",
-    objectFit: "fill",
-    
-    // Large screens
-    [theme.breakpoints.up("xl")]: {
-        height: "500px",
-    },
-    [theme.breakpoints.between("lg", "xl")]: {
-        height: "400px",
-    },
-    [theme.breakpoints.between("md", "lg")]: {
-        height: "350px",
-    },
-    [theme.breakpoints.between("sm", "md")]: {
-        height: "300px",
-    },
-    [theme.breakpoints.down("sm")]: {
-        height: "150px",
-        borderRadius: "8px",
-    },
-    [theme.breakpoints.down("xs")]: {
-        height: "200px",
-        borderRadius: "6px",
+    [theme.breakpoints.down("lg")]: {
+        width: "auto",
+        height: "230px",
     },
 }));
-
 const SliderWrapper = styled(Box)(({ theme }) => ({
     width: "100%",
     overflow: "hidden",
@@ -64,108 +43,55 @@ const SliderWrapper = styled(Box)(({ theme }) => ({
 
     // scoped slick styles
     "& .slick-dots": {
-        bottom: "10px",
+        bottom: "5px",
         "& li": {
-            width: "12px",
-            height: "12px",
-            margin: "0 4px",
+            width: "10px",
+            height: "10px",
             borderRadius: "50%",
-            backgroundColor: "rgba(122, 116, 105, 0.7)",
+            // backgroundColor: "#7A7469B0",
             transition: "all 0.3s ease",
-            "& button": {
-                width: "12px",
-                height: "12px",
-                padding: "0",
-                "&:before": {
-                    fontSize: "8px",
-                    color: "transparent",
-                    opacity: 1,
-                    width: "12px",
-                    height: "12px",
-                    lineHeight: "12px",
-                }
-            },
-            "&.slick-active": {
-                backgroundColor: "#fff",
-                transform: "scale(1.2)",
-            },
         },
-        [theme.breakpoints.down("sm")]: {
-            bottom: "5px",
-            "& li": {
-                width: "10px",
-                height: "10px",
-                margin: "0 3px",
-                "& button": {
-                    width: "10px",
-                    height: "10px",
-                    "&:before": {
-                        fontSize: "6px",
-                        width: "10px",
-                        height: "10px",
-                        lineHeight: "10px",
-                    }
-                },
-            },
+        "& li.slick-active": {
+            // backgroundColor: "#fff",
         },
     },
-    
     "& .slick-prev, & .slick-next": {
-        width: "50px",
-        height: "50px",
+        width: "70px",
+        height: "70px",
         zIndex: 10,
         top: "50% !important",
         transform: "translateY(-50%) !important",
         borderRadius: "50%",
-        backgroundColor: "rgba(122, 116, 105, 0.7)",
-        color: "#fff",
+        // backgroundColor: "#7A7469B0",
+        // color: "#fff",
         transition: "all 0.3s ease",
-        "&:hover": {
-            backgroundColor: "rgba(122, 116, 105, 0.9)",
-        },
-        
         [theme.breakpoints.down("lg")]: {
             width: "40px",
             height: "40px",
+            "&::before": {
+                fontSize: "20px !important",
+                lineHeight: "40px",
+            },
         },
-        [theme.breakpoints.down("md")]: {
-            width: "35px",
-            height: "35px",
-        },
-        [theme.breakpoints.down("sm")]: {
-            width: "30px",
-            height: "30px",
-            display: "none !important", // Hide arrows on mobile for cleaner look
-        },
-        
         "&::before": {
-            fontSize: "20px",
-            lineHeight: "1",
-            opacity: 1,
-            color: "#fff",
+            fontSize: "32px",
+            lineHeight: "40px",
         },
     },
-    
     "& .slick-prev": {
-        left: "15px",
+        left: "20px",
         [theme.breakpoints.down("lg")]: {
             left: "10px",
         },
-        [theme.breakpoints.down("md")]: {
-            left: "5px",
-        },
     },
-    
     "& .slick-next": {
-        right: "15px",
+        right: "20px",
         [theme.breakpoints.down("lg")]: {
             right: "10px",
         },
-        [theme.breakpoints.down("md")]: {
-            right: "5px",
-        },
     },
 }));
+
 
 function HeroSection() {
     const [banners, setBanners] = useState([]);
@@ -205,60 +131,29 @@ function HeroSection() {
         pauseOnHover: true,
         centerMode: true,
         centerPadding: "100px",
-        arrows: true,
+        arrows: false,
         responsive: [
             {
-                breakpoint: 1440, // xl
+                breakpoint: 1024,
                 settings: {
-                    centerPadding: "80px",
-                }
-            },
-            {
-                breakpoint: 1200, // lg
-                settings: {
-                    centerPadding: "60px",
-                }
-            },
-            {
-                breakpoint: 900, // md
-                settings: {
-                    centerPadding: "40px",
-                }
-            },
-            {
-                breakpoint: 768, // sm
-                settings: {
-                    centerMode: false,
-                    centerPadding: "0px",
-                    arrows: false, // Hide arrows on mobile
-                }
-            },
-            {
-                breakpoint: 480, // xs
-                settings: {
-                    centerMode: false,
-                    centerPadding: "0px",
-                    arrows: false,
-                    dots: true,
+                    slidesToShow: 1,
+                    centerMode: false,      // Full-width on small screens
+                    centerPadding: "0px",   // Remove peeking effect on mobile
                 }
             }
         ]
     };
 
+
     return (
         <SliderContainer>
             <SliderWrapper>
-                <Slider {...settings}>
+                <Slider {...settings} >
                     {banners.map((item, index) => (
-                        <Slide 
-                            key={index}
+                        <Slide key={index}
                             onClick={() => navigate(`/collection/${(item.variety || 'all').toLowerCase()}`)}
                         >
-                            <SlideImage 
-                                src={publicUrl(item.slider_image[0])} 
-                                alt={`slide-${index}`}
-                                loading="lazy" // Add lazy loading for better performance
-                            />
+                            <SlideImage src={publicUrl(item.slider_image[0])} alt={`slide-${index}`} />
                         </Slide>
                     ))}
                 </Slider>
