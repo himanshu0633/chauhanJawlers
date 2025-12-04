@@ -133,6 +133,7 @@ function JewelleryCard({ product }) {
     }
     setSnackbarOpen(true);
   };
+
   const handleAddToCart = (e) => {
     e.stopPropagation();
     e.preventDefault();
@@ -147,7 +148,7 @@ function JewelleryCard({ product }) {
     };
 
     dispatch(addData(cartItem));
-    navigate("/cart"); // Navigate immediately
+    navigate("/cart");
   };
 
   const handleClosePopup = () => {
@@ -167,208 +168,257 @@ function JewelleryCard({ product }) {
   };
 
   return (
+  <Box
+  sx={{
+    pb: 1,
+    position: "relative",
+    height: 360,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+  }}
+>
+  {/* OUTSIDE RIBBON */}
+<Typography
+  sx={{
+    position: "absolute",
+    top: 12,
+    left: -3,
+    background: "#44170d",
+    color: "#fff",
+    px: 1.2,
+    py: 0.6,
+    fontSize: 9.5,
+    fontWeight: 800,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+    zIndex: 20,
+
+    // RIGHT ARROW CUT
+    clipPath: "polygon(0 0, 90% 0, 100% 50%, 90% 100%, 0 100%)",
+
+    // SMALL BOTTOM LEFT TAIL
+    "::after": {
+      content: '""',
+      position: "absolute",
+      left: 0,
+      bottom: -7,
+      width: 0,
+      height: 0,
+      borderLeft: "7px solid #2e0f09",
+      borderTop: "7px solid transparent",
+    },
+
+    boxShadow: "0 3px 6px rgba(0,0,0,0.25)",
+    borderTopRightRadius: "6px",
+    borderBottomRightRadius: "6px",
+  }}
+>
+  Making Charges Zero
+</Typography>
+
+
+  {/* IMAGE SECTION */}
+  <Box
+    sx={{
+      position: "relative",
+      borderRadius: 2,
+      overflow: "visible",      // IMPORTANT: do NOT hide overflow
+      width: "100%",
+      height: { xs: 200 },
+      mx: "auto",
+      boxShadow: "none",
+      pt: 1,
+      backgroundColor: "#fff",
+    }}
+  >
+    <Link
+      to={`/singleProduct/${product._id}`}
+      style={{ textDecoration: "none" }}
+    >
+      <img
+        src={imgUrl}
+        alt={product.name}
+        style={{
+          margin: "auto",
+          objectFit: "cover",
+          width: "100%",
+          height: "100%",
+          borderRadius: "8px",
+        }}
+      />
+    </Link>
+
+    {/* WISHLIST ICON */}
+    <IconButton
+      onClick={handleWishlistClick}
+      aria-label="add to wishlist"
+      sx={{
+        position: "absolute",
+        top: 8,
+        right: 12,
+        background: "#fff",
+        zIndex: 10,
+        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+        p: "5px",
+        color: "inherit",
+      }}
+      size="small"
+    >
+      {isWishlisted ? (
+        <FavoriteIcon sx={{ fontSize: 20, color: "red" }} />
+      ) : (
+        <FavoriteBorderIcon sx={{ fontSize: 20, color: "#bbb" }} />
+      )}
+    </IconButton>
+  </Box>
+
+  {/* PRODUCT NAME */}
+  <Link
+    to={`/singleProduct/${product._id}`}
+    style={{ color: "inherit", textDecoration: "none" }}
+  >
+    <Typography
+      variant="subtitle1"
+      sx={{
+        fontSize: 16,
+        fontWeight: 600,
+        fontFamily: "serif",
+        color: "#222",
+        textAlign: "left",
+        mt: 1,
+        lineHeight: 1.2,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        display: "-webkit-box",
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: "vertical",
+        minHeight: "40px",
+      }}
+    >
+      {product.name}
+    </Typography>
+
+    {/* PRICE */}
+    <Typography
+      variant="subtitle1"
+      sx={{
+        fontWeight: 500,
+        fontSize: 17,
+        color: "#222",
+        fontFamily: "cursive",
+      }}
+    >
+      ₹{best.finalPrice}
+    </Typography>
+  </Link>
+
+  {/* QUANTITY + CART */}
+  <Box sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 1 }}>
     <Box
       sx={{
-        pb: 1,
-        position: "relative",
-        height: 360, // 👈 FIXED HEIGHT
         display: "flex",
-        flexDirection: "column",
+        alignItems: "center",
         justifyContent: "space-between",
       }}
     >
+      <Typography
+        variant="body2"
+        sx={{ fontSize: 14, fontWeight: 600, color: "#2c2c2c" }}
+      >
+        Quantity:
+      </Typography>
+
       <Box
         sx={{
-          position: "relative",
-          borderRadius: 2,
-          overflow: "hidden",
-          width: "100%",
-          height: { xs: 200 },
-          mx: "auto",
-          bgcolor: "transparent",
-          boxShadow: "none",
-          pt: 1,
-          backgroundColor: "#fff",
+          display: "flex",
+          alignItems: "center",
+          gap: 0.5,
+          border: "1px solid #e0e0e0",
+          borderRadius: 1,
+          p: 0.5,
         }}
       >
-        <Link
-          to={`/singleProduct/${product._id}`}
-          style={{ textDecoration: "none" }}
-        >
-          <img
-            src={imgUrl}
-            alt={product.name}
-            style={{
-              margin: "auto",
-              objectFit: "cover",
-              width: "100%",
-              height: "100%",
-              borderRadius: "8px",
-            }}
-          />
-        </Link>
         <IconButton
-          onClick={handleWishlistClick}
-          aria-label="add to wishlist"
-          sx={{
-            position: "absolute",
-            top: 8,
-            right: 12,
-            background: "#fff",
-            zIndex: 2,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-            p: "5px",
-            color: "inherit",
-          }}
           size="small"
+          onClick={decreaseUnits}
+          sx={{ width: 24, height: 24, fontSize: 14 }}
         >
-          {isWishlisted ? (
-            <FavoriteIcon sx={{ fontSize: 20, color: "red" }} />
-          ) : (
-            <FavoriteBorderIcon sx={{ fontSize: 20, color: "#bbb" }} />
-          )}
+          -
         </IconButton>
-      </Box>
-
-      <Link
-        to={`/singleProduct/${product._id}`}
-        style={{ color: "inherit", textDecoration: "none" }}
-      >
-        <Typography
-          variant="subtitle1"
-          sx={{
-            fontSize: 16,
-            fontWeight: 600,
-            fontFamily: "serif",
-            color: "#222",
-            textAlign: "left",
-            mt: 1,
-            lineHeight: 1.2,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            display: "-webkit-box",
-            WebkitLineClamp: 2, // 👈 max 2 lines
-            WebkitBoxOrient: "vertical",
-            minHeight: "40px", // 👈 so height stays same
-          }}
-        >
-          {product.name}
-        </Typography>
 
         <Typography
-          variant="subtitle1"
           sx={{
-            fontWeight: 500,
-            fontSize: 17,
-            color: "#222",
-            fontFamily: "cursive",
-          }}
-        >
-          ₹{best.finalPrice}
-        </Typography>
-      </Link>
-
-      {/* Quantity Selector and Add to Cart Button */}
-      <Box sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 1 }}>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Typography
-            variant="body2"
-            sx={{ fontSize: 14, fontWeight: 600, color: "#2c2c2c" }}
-          >
-            Quantity:
-          </Typography>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 0.5,
-              border: "1px solid #e0e0e0",
-              borderRadius: 1,
-              p: 0.5,
-            }}
-          >
-            <IconButton
-              size="small"
-              onClick={decreaseUnits}
-              sx={{ width: 24, height: 24, fontSize: 14 }}
-            >
-              -
-            </IconButton>
-            <Typography
-              sx={{
-                minWidth: 30,
-                textAlign: "center",
-                fontWeight: 600,
-                fontSize: 14,
-              }}
-            >
-              {units}
-            </Typography>
-            <IconButton
-              size="small"
-              onClick={increaseUnits}
-              sx={{ width: 24, height: 24, fontSize: 14 }}
-            >
-              +
-            </IconButton>
-          </Box>
-        </Box>
-
-        <Button
-          variant="contained"
-          onClick={handleAddToCart}
-          disabled={!canAddToCart}
-          sx={{
-            backgroundColor: "#44170d",
-            color: "#fff",
+            minWidth: 30,
+            textAlign: "center",
             fontWeight: 600,
             fontSize: 14,
-            py: 0.75,
-            "&:hover": {
-              backgroundColor: "#5a1f12",
-            },
-            "&:disabled": {
-              backgroundColor: "#e0e0e0",
-              color: "#999",
-            },
           }}
         >
-          {canAddToCart ? "Add to Cart" : "Out of Stock"}
-        </Button>
-      </Box>
+          {units}
+        </Typography>
 
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={2000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <MuiAlert
-          onClose={() => setSnackbarOpen(false)}
-          severity="success"
-          sx={{ width: "100%" }}
+        <IconButton
+          size="small"
+          onClick={increaseUnits}
+          sx={{ width: 24, height: 24, fontSize: 14 }}
         >
-          {snackbarMsg}
-        </MuiAlert>
-      </Snackbar>
-
-      {showCartPopup && (
-        <CartPopup
-          product={product}
-          variant={best}
-          units={units}
-          onClose={handleClosePopup}
-        />
-      )}
+          +
+        </IconButton>
+      </Box>
     </Box>
+
+    <Button
+      variant="contained"
+      onClick={handleAddToCart}
+      disabled={!canAddToCart}
+      sx={{
+        backgroundColor: "#44170d",
+        color: "#fff",
+        fontWeight: 600,
+        fontSize: 14,
+        py: 0.75,
+        "&:hover": { backgroundColor: "#5a1f12" },
+        "&:disabled": {
+          backgroundColor: "#e0e0e0",
+          color: "#999",
+        },
+      }}
+    >
+      {canAddToCart ? "Add to Cart" : "Out of Stock"}
+    </Button>
+  </Box>
+
+  {/* SNACKBAR */}
+  <Snackbar
+    open={snackbarOpen}
+    autoHideDuration={2000}
+    onClose={() => setSnackbarOpen(false)}
+    anchorOrigin={{ vertical: "top", horizontal: "right" }}
+  >
+    <MuiAlert
+      onClose={() => setSnackbarOpen(false)}
+      severity="success"
+      sx={{ width: "100%" }}
+    >
+      {snackbarMsg}
+    </MuiAlert>
+  </Snackbar>
+
+  {/* CART POPUP */}
+  {showCartPopup && (
+    <CartPopup
+      product={product}
+      variant={best}
+      units={units}
+      onClose={handleClosePopup}
+    />
+  )}
+</Box>
+
   );
 }
+
 
 export function JewelleryGrid() {
   const [allProducts, setAllProducts] = useState([]);
