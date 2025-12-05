@@ -370,6 +370,7 @@ export default function SingleProductPage() {
                   <img
                     src={publicUrl(image?.url)}
                     alt={`Thumbnail ${index + 1}`}
+                    className="thumbnail-img"
                   />
                 </div>
               ))}
@@ -1706,6 +1707,165 @@ export default function SingleProductPage() {
           background: #f8d7da;
           color: #721c24;
         }
+
+
+          .thumbnail-container {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-start;
+    padding: 0.75rem;
+    margin-top: 1rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
+    height: 90px; /* Fixed height */
+    min-height: 90px; /* Prevent collapse on iOS */
+    align-items: center; /* Vertically center thumbnails */
+  }
+  
+  /* iOS Safari specific fixes */
+  @supports (-webkit-touch-callout: none) {
+    .thumbnail-container {
+      /* iOS Safari scroll fix */
+      padding-bottom: 20px; /* Extra space for scroll */
+      margin-bottom: -10px;
+    }
+    
+    .thumbnail {
+      -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
+    }
+    
+    .thumbnail-img {
+      -webkit-user-drag: none; /* Prevent image dragging */
+    }
+  }
+  
+  .thumbnail-container::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .thumbnail {
+    min-width: 70px;
+    width: 70px;
+    height: 70px;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid #e0e0e0;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    background-color: #fff; /* Ensure background on iOS */
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .thumbnail.active {
+    border: 2px solid #44170d;
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  
+  .thumbnail-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block; /* Remove extra space below image */
+  }
+  
+  /* For touch devices */
+  @media (hover: none) and (pointer: coarse) {
+    .thumbnail {
+      min-width: 75px; /* Larger touch target for mobile */
+      width: 75px;
+      height: 75px;
+    }
+    
+    .thumbnail:active {
+      opacity: 0.8;
+      transform: scale(0.98);
+    }
+  }
+  
+  /* Tablet and Desktop adjustments */
+  @media (min-width: 768px) {
+    .thumbnail-container {
+      justify-content: center;
+      height: 100px;
+      min-height: 100px;
+    }
+    
+    .thumbnail {
+      min-width: 80px;
+      width: 80px;
+      height: 80px;
+    }
+  }
+  
+  /* iOS device specific fixes */
+  @media only screen and (max-device-width: 812px) and (-webkit-min-device-pixel-ratio: 2) {
+    .thumbnail-container {
+      /* Force hardware acceleration for smooth scrolling */
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+    }
+    
+    .thumbnail {
+      /* Prevent thumbnail text selection on iOS */
+      -webkit-user-select: none;
+      user-select: none;
+    }
+  }
+  
+  /* Fix for very old iOS versions */
+  .thumbnail > img {
+    -webkit-touch-callout: none;
+  }
+
+  .thumbnail-container {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(70px, auto);
+  gap: 0.5rem;
+  padding: 0.75rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  height: 90px;
+}
+  .thumbnail {
+  touch-action: manipulation; /* Disable double-tap zoom */
+}
+
+/* Active state for touch devices */
+.thumbnail.active:active {
+  background-color: rgba(68, 23, 13, 0.1);
+}
+
+
+.thumbnail-container {
+  scroll-snap-type: x mandatory;
+}
+
+.thumbnail {
+  scroll-snap-align: start;
+}
+
+
+.thumbnail-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-overflow-scrolling: touch;
+}
+
+.thumbnail-img {
+  -webkit-backface-visibility: hidden; /* Prevent flickering */
+  backface-visibility: hidden;
+}
       `}</style>
     </div>
   );
