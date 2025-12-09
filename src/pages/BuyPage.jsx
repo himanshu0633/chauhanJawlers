@@ -181,22 +181,43 @@ function OrderSummary({
           <div className="address-list">
             {addresses.map((addr, idx) => (
               <div
-                key={`${addr}-${idx}`}
-                className={`address-item ${formData.selectedAddress === addr ? 'selected' : ''}`}
-                onClick={() => setFormData((p) => ({ ...p, selectedAddress: addr }))}
+                key={`${addr.address}-${idx}`}
+                className={`address-item ${formData.selectedAddress === addr.address ? 'selected' : ''}`}
+                onClick={() => {
+                  setFormData((p) => ({ 
+                    ...p, 
+                    selectedAddress: addr.address,
+                    phone: addr.phone || p.phone,
+                    email: addr.email || p.email,
+                    name: addr.name || p.name
+                  }));
+                }}
               >
                 <Typography className="address-radio">
                   <input
                     type="radio"
                     name="selectedAddress"
-                    checked={formData.selectedAddress === addr}
-                    onChange={() => setFormData((p) => ({ ...p, selectedAddress: addr }))}
+                    checked={formData.selectedAddress === addr.address}
+                    onChange={() => {
+                      setFormData((p) => ({ 
+                        ...p, 
+                        selectedAddress: addr.address,
+                        phone: addr.phone || p.phone,
+                        email: addr.email || p.email,
+                        name: addr.name || p.name
+                      }));
+                    }}
                   />
                   Address {idx + 1}
                 </Typography>
                 <Typography className="address-text">
-                  {addr}
+                  {addr.address}
                 </Typography>
+                {addr.email && (
+                  <Typography className="address-email" variant="caption">
+                    📧 {addr.email}
+                  </Typography>
+                )}
               </div>
             ))}
           </div>
@@ -361,7 +382,7 @@ function OrderSummary({
       <Button
         variant="contained"
         onClick={() => handleCheckout(finalTotal)}
-        disabled={!formData.selectedAddress}
+        disabled={!formData.selectedAddress || !formData.phone || phoneError}
         fullWidth
         className="checkout-btn"
       >
@@ -408,7 +429,8 @@ export default function BuyNowPage() {
   const [phoneError, setPhoneError] = useState(false);
   const [units, setUnits] = useState(1);
   const [formData, setFormData] = useState({
-    flat: '', landmark: '', state: '', city: '', country: 'India', phone: '', selectedAddress: '', pincode: ''
+    flat: '', landmark: '', state: '', city: '', country: 'India', 
+    phone: '', selectedAddress: '', pincode: '', email: '', name: ''
   });
   const [snack, setSnack] = useState({ open: false, msg: '', severity: 'success' });
 
@@ -452,6 +474,73 @@ export default function BuyNowPage() {
       localStorage.setItem('buyNowProduct', JSON.stringify(product));
     }
   }, [product, navigate, units]);
+
+  // Pre-fill email and name from localStorage if available
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('cartEmail');
+    const savedName = localStorage.getItem('cartName');
+    if (savedEmail || savedName) {
+      setFormData(p => ({
+        ...p,
+        email: savedEmail || p.email,
+        name: savedName || p.name
+      }));
+    }
+  }, []);
+
+  // Load addresses from localStorage or API
+  useEffect(() => {
+    // Load addresses from localStorage first
+    const cartAddresses = JSON.parse(localStorage.getItem('cartAddresses') || '[]');
+    if (cartAddresses.length > 0) {
+      setAddresses(cartAddresses);
+      if (!formData.selectedAddress && cartAddresses.length > 0) {
+        setFormData((p) => ({ 
+          ...p, 
+          selectedAddress: cartAddresses[0].address,
+          phone: cartAddresses[0].phone || p.phone,
+          email: cartAddresses[0].email || p.email,
+          name: cartAddresses[0].name || p.name
+        }));
+      }
+      return;
+    }
+
+    // Fallback to API if user is authenticated
+    (async () => {
+      try {
+        const userData = JSON.parse(localStorage.getItem('userData'));
+        const userId = userData?._id;
+        if (!userId) return;
+        
+        const response = await axiosInstance.get(`/admin/readAdmin/${userId}`);
+        const userInfo = response?.data?.data;
+        setOriginalAddress(userInfo);
+        if (Array.isArray(userInfo?.address)) {
+          const formattedAddresses = userInfo.address.map(addr => ({
+            address: addr,
+            email: userInfo.email,
+            name: userInfo.name,
+            phone: userInfo.phone
+          }));
+          setAddresses(formattedAddresses);
+          // Also save to localStorage for future use
+          localStorage.setItem('cartAddresses', JSON.stringify(formattedAddresses));
+          if (!formData.selectedAddress && formattedAddresses.length > 0) {
+            setFormData((p) => ({ 
+              ...p, 
+              selectedAddress: formattedAddresses[0].address,
+              phone: formattedAddresses[0].phone || p.phone,
+              email: formattedAddresses[0].email || p.email,
+              name: formattedAddresses[0].name || p.name
+            }));
+          }
+        }
+      } catch (e) {
+        console.error('Error fetching address:', e);
+      }
+    })();
+  }, []);
 
   if (!product) {
     return (
@@ -504,46 +593,69 @@ export default function BuyNowPage() {
   const handleContinueShopping = () => navigate(-1);
 
   const handleAddAddress = async () => {
+    // Email validation
+    if (!formData.email?.trim()) {
+      toast.error('Email is required');
+      return;
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    if (!formData.name?.trim()) {
+      toast.error('Full name is required');
+      return;
+    }
+
     if (!formData.flat?.trim()) {
       toast.error('Flat / House is required');
       return;
     }
-    if (!formData.state) {
-      toast.error('State is required');
-      return;
-    }
-    if (!formData.city) {
-      toast.error('City is required');
-      return;
-    }
+    
     if (!formData.phone || !/^\d{10}$/.test(formData.phone)) {
       toast.error('Phone number is required and must be exactly 10 digits');
       return;
     }
+
     if (!formData.pincode?.trim()) {
       toast.error('Pincode is required');
       return;
     }
 
-    const fullAddress = `${formData.flat}, ${formData.landmark}, ${formData.city}, ${formData.state}, ${formData.country} ,${formData.pincode}`;
+    const addressObj = {
+      address: `${formData.flat}, ${formData.landmark}, ${formData.city}, ${formData.state}, ${formData.country} ,${formData.pincode}`,
+      email: formData.email.trim(),
+      name: formData.name.trim(),
+      phone: formData.phone
+    };
 
     try {
-      // Save address locally without user ID dependency
-      const newAddresses = [...addresses, fullAddress];
+      // Save address locally with email
+      const newAddresses = [...addresses, addressObj];
       setAddresses(newAddresses);
       
       // Save to localStorage for persistence
       const cartAddresses = JSON.parse(localStorage.getItem('cartAddresses') || '[]');
-      cartAddresses.push(fullAddress);
+      cartAddresses.push(addressObj);
       localStorage.setItem('cartAddresses', JSON.stringify(cartAddresses));
       
+      // Save email and name separately for future use
+      localStorage.setItem('cartEmail', formData.email.trim());
+      localStorage.setItem('cartName', formData.name.trim());
+      
       toast.success('Address added successfully');
-      setFormData((p) => ({ ...p, selectedAddress: fullAddress }));
+      setFormData((p) => ({ ...p, selectedAddress: addressObj.address }));
       setShowModal(false);
       
-      // Reset form
+      // Reset form but keep email/name for next time
       setFormData({
-        flat: '', landmark: '', state: '', city: '', country: 'India', phone: '', selectedAddress: fullAddress, pincode: ''
+        flat: '', landmark: '', state: '', city: '', country: 'India', 
+        phone: '', selectedAddress: addressObj.address, pincode: '',
+        email: formData.email, // Keep email
+        name: formData.name    // Keep name
       });
     } catch (error) {
       toast.error('Failed to add address');
@@ -577,42 +689,6 @@ export default function BuyNowPage() {
     })();
   }, [formData.state]);
 
-  // ----- load user addresses -----
-  useEffect(() => {
-    // Load addresses from localStorage first
-    const cartAddresses = JSON.parse(localStorage.getItem('cartAddresses') || '[]');
-    if (cartAddresses.length > 0) {
-      setAddresses(cartAddresses);
-      if (!formData.selectedAddress && cartAddresses.length > 0) {
-        setFormData((p) => ({ ...p, selectedAddress: cartAddresses[0] }));
-      }
-      return;
-    }
-
-    // Fallback to API if user is authenticated
-    (async () => {
-      try {
-        const userData = JSON.parse(localStorage.getItem('userData'));
-        const userId = userData?._id;
-        if (!userId) return;
-        
-        const response = await axiosInstance.get(`/admin/readAdmin/${userId}`);
-        const userInfo = response?.data?.data;
-        setOriginalAddress(userInfo);
-        if (Array.isArray(userInfo?.address)) {
-          setAddresses(userInfo.address);
-          // Also save to localStorage for future use
-          localStorage.setItem('cartAddresses', JSON.stringify(userInfo.address));
-          if (!formData.selectedAddress && userInfo.address.length > 0) {
-            setFormData((p) => ({ ...p, selectedAddress: userInfo.address[0] }));
-          }
-        }
-      } catch (e) {
-        console.error('Error fetching address:', e);
-      }
-    })();
-  }, []);
-
   // ----- razorpay -----
   const handleCheckout = (finalTotal) => {
     // Direct payment flow - no login check
@@ -623,9 +699,15 @@ export default function BuyNowPage() {
 
     const phoneNumber = formData.phone || originalAddress?.phone || "";
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    
+    // Check if phone number is provided
+    if (!phoneNumber || phoneNumber.length !== 10) {
+      toast.warn('Please enter a valid 10-digit phone number before checkout.');
+      return;
+    }
 
     const options = {
-      key: 'rzp_live_RCKnQvruACO5FH',
+      key: 'rzp_test_RpQ1JwSJEy6yAw', // Replace with your Razorpay key
       amount: Math.round(finalTotal * 100),
       currency: 'INR',
       name: 'Chauhan Sons Jewellers',
@@ -634,8 +716,16 @@ export default function BuyNowPage() {
         try {
           toast.success('Payment successful!');
 
+          // Get user data from localStorage or use form data
+          const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+          const userEmail = userData?.email || formData.email || 'guest@example.com';
+          const userName = userData?.name || formData.name || 'Guest User';
+          const userId = userData?._id || 'guest';
+
           const orderPayload = {
-            userId: userData?._id || 'guest', // Allow guest orders
+            userId: userId,
+            userEmail: userEmail,
+            userName: userName,
             items: [{
               productId: product._id,
               name: product.name,
@@ -645,9 +735,10 @@ export default function BuyNowPage() {
             address: formData.selectedAddress,
             phone: phoneNumber,
             totalAmount: finalTotal,
-            paymentId: response.razorpay_payment_id,
-            email: userData?.email,
+            // paymentId: response.razorpay_payment_id,
           };
+          
+          console.log("Order payload:", orderPayload);
           
           const res = await axiosInstance.post('/api/createOrder', orderPayload);
           if (res.status === 201) {
@@ -664,8 +755,8 @@ export default function BuyNowPage() {
         }
       },
       prefill: {
-        name: userData?.name || 'Customer',
-        email: userData?.email || 'customer@example.com',
+        name: userData?.name || formData.name || 'Customer',
+        email: userData?.email || formData.email || 'customer@example.com',
         contact: phoneNumber,
       },
       notes: { address: formData.selectedAddress },
@@ -756,6 +847,29 @@ export default function BuyNowPage() {
         <form onSubmit={(e) => { e.preventDefault(); handleAddAddress(); }}>
           <DialogContent className="dialog-content">
             <div className="address-form-grid">
+              <TextField
+                label="Full Name"
+                fullWidth
+                required
+                size="small"
+                value={formData.name}
+                onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+              />
+              <TextField
+                label="Email"
+                fullWidth
+                required
+                size="small"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
+                onBlur={() => {
+                  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                  if (formData.email && !emailRegex.test(formData.email)) {
+                    toast.error('Please enter a valid email address');
+                  }
+                }}
+              />
               <TextField
                 label="Flat / House"
                 fullWidth
@@ -1164,6 +1278,13 @@ export default function BuyNowPage() {
           font-size: 13px;
           color: #666;
           line-height: 1.4;
+        }
+
+        .address-email {
+          display: block;
+          margin-top: 4px;
+          color: #666;
+          font-size: 12px;
         }
 
         .no-address {

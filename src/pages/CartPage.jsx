@@ -340,7 +340,7 @@ function OrderSummary({
       </div>
 
       {/* Checkout Button - Direct to payment */}
-// In OrderSummary component, update the checkout button
+
 <Button
   variant="contained"
   onClick={handleCheckout}
@@ -496,9 +496,7 @@ export default function CartPage() {
     cartAddresses.push(addressObj);
     localStorage.setItem('cartAddresses', JSON.stringify(cartAddresses));
     
-    // Also save email separately for quick access
-    localStorage.setItem('cartEmail', formData.email.trim());
-    localStorage.setItem('cartName', formData.name.trim());
+  
     
     toast.success('Address added successfully');
     setFormData((p) => ({ ...p, selectedAddress: addressObj.address }));
