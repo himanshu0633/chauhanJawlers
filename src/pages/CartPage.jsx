@@ -222,30 +222,51 @@ function OrderSummary({
           </Typography>
         </div>
 
-        {addresses?.length ? (
-          <div className="address-list">
-            {addresses.map((addr, idx) => (
-              <div
-                key={`${addr}-${idx}`}
-                className={`address-item ${formData.selectedAddress === addr ? 'selected' : ''}`}
-                onClick={() => setFormData((p) => ({ ...p, selectedAddress: addr }))}
-              >
-                <Typography className="address-radio">
-                  <input
-                    type="radio"
-                    name="selectedAddress"
-                    checked={formData.selectedAddress === addr}
-                    onChange={() => setFormData((p) => ({ ...p, selectedAddress: addr }))}
-                  />
-                  Address {idx + 1}
-                </Typography>
-                <Typography className="address-text">
-                  {addr}
-                </Typography>
-              </div>
-            ))}
-          </div>
-        ) : (
+      {addresses?.length ? (
+  <div className="address-list">
+    {addresses.map((addr, idx) => (
+      <div
+        key={`${addr.address}-${idx}`}
+        className={`address-item ${formData.selectedAddress === addr.address ? 'selected' : ''}`}
+        onClick={() => {
+          setFormData((p) => ({ 
+            ...p, 
+            selectedAddress: addr.address,
+            phone: addr.phone || p.phone,
+            email: addr.email || p.email,
+            name: addr.name || p.name
+          }));
+        }}
+      >
+        <Typography className="address-radio">
+          <input
+            type="radio"
+            name="selectedAddress"
+            checked={formData.selectedAddress === addr.address}
+            onChange={() => {
+              setFormData((p) => ({ 
+                ...p, 
+                selectedAddress: addr.address,
+                phone: addr.phone || p.phone,
+                email: addr.email || p.email,
+                name: addr.name || p.name
+              }));
+            }}
+          />
+          Address {idx + 1}
+        </Typography>
+        <Typography className="address-text">
+          {addr.address}
+        </Typography>
+        {addr.email && (
+          <Typography className="address-email" variant="caption">
+            📧 {addr.email}
+          </Typography>
+        )}
+      </div>
+    ))}
+  </div>
+) : (
           <div className="no-address">
             <LocationOnIcon className="no-address-icon" />
             <Typography className="no-address-text">No address saved yet</Typography>
@@ -284,91 +305,7 @@ function OrderSummary({
 
       {/* Price Breakdown */}
         <div className="price-breakdown">
-            {/* <div className="price-row">
-              <Typography variant="body2" className="price-label">
-                Subtotal
-              </Typography>
-              <Typography variant="body2" className="price-value">
-                {formatINR(subtotal)}
-              </Typography>
-            </div> */}
-
-          {/* Additional Services */}
-          {/* <div className="service-option">
-            <FormControlLabel
-              control={
-                <Checkbox 
-                  checked={giftWrapAll} 
-                  onChange={(e) => setGiftWrapAll(e.target.checked)}
-                  size="small"
-                />
-              }
-              label={
-                <div className="service-label">
-                  <Typography variant="body2" className="service-name">
-                    Gift Wrap All Items
-                  </Typography>
-                  <Typography variant="body2" className="service-price">
-                    +{formatINR(80)} each
-                  </Typography>
-                </div>
-              }
-            />
-          </div> */}
-
-          {/* <div className="service-option">
-            <FormControlLabel
-              control={
-                <Checkbox 
-                  checked={expressDelivery} 
-                  onChange={(e) => setExpressDelivery(e.target.checked)}
-                  size="small"
-                />
-              }
-              label={
-                <div className="service-label">
-                  <div>
-                    <Typography variant="body2" className="service-name">
-                      Express Delivery
-                    </Typography>
-                    <Typography variant="caption" className="service-desc">
-                      Delivery in 24 hours
-                    </Typography>
-                  </div>
-                  <Typography variant="body2" className="service-price">
-                    +{formatINR(199)}
-                  </Typography>
-                </div>
-              }
-            />
-          </div> */}
-
-          {/* <div className="service-option">
-            <FormControlLabel
-              control={
-                <Checkbox 
-                  checked={insurance} 
-                  onChange={(e) => setInsurance(e.target.checked)}
-                  size="small"
-                />
-              }
-              label={
-                <div className="service-label">
-                  <div>
-                    <Typography variant="body2" className="service-name">
-                      Jewelry Insurance
-                    </Typography>
-                    <Typography variant="caption" className="service-desc">
-                      Theft & Damage protection (1 year)
-                    </Typography>
-                  </div>
-                  <Typography variant="body2" className="service-price">
-                    +{formatINR(insuranceFee)}
-                  </Typography>
-                </div>
-              }
-            />
-          </div> */}
+            
 
           {/* Final Total */}
           <div className="final-total">
@@ -403,15 +340,16 @@ function OrderSummary({
       </div>
 
       {/* Checkout Button - Direct to payment */}
-      <Button
-        variant="contained"
-        onClick={handleCheckout}
-        disabled={!formData.selectedAddress}
-        fullWidth
-        className="checkout-btn"
-      >
-        🛒 Proceed to Secure Checkout
-      </Button>
+// In OrderSummary component, update the checkout button
+<Button
+  variant="contained"
+  onClick={handleCheckout}
+  disabled={!formData.selectedAddress || !formData.phone || phoneError}
+  fullWidth
+  className="checkout-btn"
+>
+  🛒 Proceed to Secure Checkout
+</Button>
 
       {/* Trust Badges */}
       <div className="trust-badges">
@@ -452,7 +390,8 @@ export default function CartPage() {
   const [cities, setCities] = useState([]);
   const [phoneError, setPhoneError] = useState(false);
   const [formData, setFormData] = useState({
-    flat: '', landmark: '', state: '', city: '', country: 'India', phone: '', selectedAddress: '', pincode: ''
+     flat: '', landmark: '', state: '', city: '', country: 'India', 
+  phone: '', selectedAddress: '', pincode: '', email: '', name: ''
   });
   const [snack, setSnack] = useState({ open: false, msg: '', severity: 'success' });
 
@@ -507,53 +446,76 @@ export default function CartPage() {
 
   const handleContinueShopping = () => navigate(-1);
 
-  const handleAddAddress = async () => {
-    if (!formData.flat?.trim()) {
-      toast.error('Flat / House is required');
-      return;
-    }
-    if (!formData.state) {
-      toast.error('State is required');
-      return;
-    }
-    if (!formData.city) {
-      toast.error('City is required');
-      return;
-    }
-    if (!formData.phone || !/^\d{10}$/.test(formData.phone)) {
-      toast.error('Phone number is required and must be exactly 10 digits');
-      return;
-    }
-    if (!formData.pincode?.trim()) {
-      toast.error('Pincode is required');
-      return;
-    }
+ const handleAddAddress = async () => {
+  // Email validation
+  if (!formData.email?.trim()) {
+    toast.error('Email is required');
+    return;
+  }
+  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(formData.email.trim())) {
+    toast.error('Please enter a valid email address');
+    return;
+  }
 
-    const fullAddress = `${formData.flat}, ${formData.landmark}, ${formData.city}, ${formData.state}, ${formData.country} ,${formData.pincode}`;
+  if (!formData.name?.trim()) {
+    toast.error('Full name is required');
+    return;
+  }
 
-    try {
-      // Save address locally without user ID dependency
-      const newAddresses = [...addresses, fullAddress];
-      setAddresses(newAddresses);
-      
-      // Save to localStorage for persistence
-      const cartAddresses = JSON.parse(localStorage.getItem('cartAddresses') || '[]');
-      cartAddresses.push(fullAddress);
-      localStorage.setItem('cartAddresses', JSON.stringify(cartAddresses));
-      
-      toast.success('Address added successfully');
-      setFormData((p) => ({ ...p, selectedAddress: fullAddress }));
-      setShowModal(false);
-      
-      // Reset form
-      setFormData({
-        flat: '', landmark: '', state: '', city: '', country: 'India', phone: '', selectedAddress: fullAddress, pincode: ''
-      });
-    } catch (error) {
-      toast.error('Failed to add address');
-      console.error('Address add error:', error);
-    }
+  if (!formData.flat?.trim()) {
+    toast.error('Flat / House is required');
+    return;
+  }
+  
+  if (!formData.phone || !/^\d{10}$/.test(formData.phone)) {
+    toast.error('Phone number is required and must be exactly 10 digits');
+    return;
+  }
+
+  if (!formData.pincode?.trim()) {
+    toast.error('Pincode is required');
+    return;
+  }
+
+  const addressObj = {
+    address: `${formData.flat}, ${formData.landmark}, ${formData.city}, ${formData.state}, ${formData.country} ,${formData.pincode}`,
+    email: formData.email.trim(),
+    name: formData.name.trim(),
+    phone: formData.phone
   };
+
+  try {
+    // Save address locally with email
+    const newAddresses = [...addresses, addressObj];
+    setAddresses(newAddresses);
+    
+    // Save to localStorage for persistence
+    const cartAddresses = JSON.parse(localStorage.getItem('cartAddresses') || '[]');
+    cartAddresses.push(addressObj);
+    localStorage.setItem('cartAddresses', JSON.stringify(cartAddresses));
+    
+    // Also save email separately for quick access
+    localStorage.setItem('cartEmail', formData.email.trim());
+    localStorage.setItem('cartName', formData.name.trim());
+    
+    toast.success('Address added successfully');
+    setFormData((p) => ({ ...p, selectedAddress: addressObj.address }));
+    setShowModal(false);
+    
+    // Reset form but keep email/name for next time
+    setFormData({
+      flat: '', landmark: '', state: '', city: '', country: 'India', 
+      phone: '', selectedAddress: addressObj.address, pincode: '',
+      email: formData.email, // Keep email
+      name: formData.name    // Keep name
+    });
+  } catch (error) {
+    toast.error('Failed to add address');
+    console.error('Address add error:', error);
+  }
+};
 
   // ----- states/cities -----
   useEffect(() => {
@@ -566,7 +528,45 @@ export default function CartPage() {
       }
     })();
   }, []);
+useEffect(() => {
+  // Pre-fill email and name from localStorage if available
+  const savedEmail = localStorage.getItem('cartEmail');
+  const savedName = localStorage.getItem('cartName');
+  if (savedEmail || savedName) {
+    setFormData(p => ({
+      ...p,
+      email: savedEmail || p.email,
+      name: savedName || p.name
+    }));
+  }
+  
+  // Load addresses from localStorage first
+  const cartAddresses = JSON.parse(localStorage.getItem('cartAddresses') || '[]');
+  if (cartAddresses.length > 0) {
+    setAddresses(cartAddresses);
+    return;
+  }
 
+  // Fallback to API if user is authenticated
+  (async () => {
+    try {
+      const userData = JSON.parse(localStorage.getItem('userData'));
+      const userId = userData?._id;
+      if (!userId) return;
+      
+      const response = await axiosInstance.get(`/admin/readAdmin/${userId}`);
+      const userInfo = response?.data?.data;
+      setOriginalAddress(userInfo);
+      if (Array.isArray(userInfo?.address)) {
+        setAddresses(userInfo.address);
+        // Also save to localStorage for future use
+        localStorage.setItem('cartAddresses', JSON.stringify(userInfo.address));
+      }
+    } catch (e) {
+      console.error('Error fetching address:', e);
+    }
+  })();
+}, []);
   useEffect(() => {
     if (!formData.state) return;
     (async () => {
@@ -612,76 +612,93 @@ export default function CartPage() {
   }, []);
 
   // ----- razorpay -----
-  const handleCheckout = () => {
-    // Direct payment flow - no login check
-    if (!formData.selectedAddress) {
-      toast.warn('Please select an address before checkout.');
-      return;
-    }
+  // Update your handleCheckout function in CartPage.js
 
-    const phoneNumber = formData.phone || originalAddress?.phone || "";
-    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+const handleCheckout = () => {
+  // Direct payment flow - no login check
+  if (!formData.selectedAddress) {
+    toast.warn('Please select an address before checkout.');
+    return;
+  }
 
-    const options = {
-      key: 'rzp_live_RCKnQvruACO5FH',
-      amount: Math.round(total * 100),
-      currency: 'INR',
-      name: 'Chauhan Sons Jewellers',
-      description: 'Order Payment',
-      handler: async function (response) {
-        try {
-          toast.success('Payment successful!');
+  const phoneNumber = formData.phone || originalAddress?.phone || "";
+  const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+  
+  // Check if phone number is provided
+  if (!phoneNumber || phoneNumber.length !== 10) {
+    toast.warn('Please enter a valid 10-digit phone number before checkout.');
+    return;
+  }
 
-          const orderPayload = {
-            userId: userData?._id || 'guest', // Allow guest orders
-            items: cartItems.map((item) => {
-              const qty = item.cartQty ?? (typeof item.quantity === 'number' ? item.quantity : 1);
-              const price = Number(
-                item.unitPrice ??
-                item.selectedVariant?.final_price ??
-                item.selectedVariant?.finalPrice ??
-                0
-              );
-              return {
-                productId: item._id,
-                name: item.name,
-                quantity: qty,
-                price,
-              };
-            }),
-            address: formData.selectedAddress,
-            phone: phoneNumber,
-            totalAmount: total,
-            paymentId: response.razorpay_payment_id,
-            email: userData?.email,
-          };
-          
-          const res = await axiosInstance.post('/api/createOrder', orderPayload);
-          if (res.status === 201) {
-            dispatch(clearProducts());
-            // Clear cart addresses after successful order
-            localStorage.removeItem('cartAddresses');
-            navigate('/successOrder');
-          } else {
-            toast.error('Failed to place order.');
-          }
-        } catch (err) {
-          console.error('Order creation error:', err);
-          toast.error('Something went wrong while placing the order.');
+  const options = {
+    key: 'rzp_test_RpQ1JwSJEy6yAw',
+    amount: Math.round(total * 100),
+    currency: 'INR',
+    name: 'Chauhan Sons Jewellers',
+    description: 'Order Payment',
+    handler: async function (response) {
+      try {
+        toast.success('Payment successful!');
+
+        // Get user data from localStorage or use guest info
+        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+        const userEmail = userData?.email || formData.email || 'guest@example.com';
+        const userName = userData?.name || formData.name || 'Guest User';
+        const userId = userData?._id || 'guest';
+
+        const orderPayload = {
+          userId: userId,
+          userEmail: userEmail,
+          userName: userName,
+          items: cartItems.map((item) => {
+            const qty = item.cartQty ?? (typeof item.quantity === 'number' ? item.quantity : 1);
+            const price = Number(
+              item.unitPrice ??
+              item.selectedVariant?.final_price ??
+              item.selectedVariant?.finalPrice ??
+              0
+            );
+            return {
+              productId: item._id,
+              name: item.name,
+              quantity: qty,
+              price,
+            };
+          }),
+          address: formData.selectedAddress,
+          phone: phoneNumber,
+          totalAmount: total,
+          // paymentId: response.razorpay_payment_id,
+        };
+        
+        console.log("Order payload:", orderPayload);
+        
+        const res = await axiosInstance.post('/api/createOrder', orderPayload);
+        if (res.status === 201) {
+          dispatch(clearProducts());
+          // Clear cart addresses after successful order
+          localStorage.removeItem('cartAddresses');
+          navigate('/successOrder');
+        } else {
+          toast.error('Failed to place order.');
         }
-      },
-      prefill: {
-        name: userData?.name || 'Customer',
-        email: userData?.email || 'customer@example.com',
-        contact: phoneNumber,
-      },
-      notes: { address: formData.selectedAddress },
-      theme: { color: Theme.palette.primary.main },
-    };
-    
-    const rz = new window.Razorpay(options);
-    rz.open();
+      } catch (err) {
+        console.error('Order creation error:', err);
+        toast.error('Something went wrong while placing the order.');
+      }
+    },
+    prefill: {
+      name: userData?.name || 'Customer',
+      email: userData?.email || formData.email || 'customer@example.com',
+      contact: phoneNumber,
+    },
+    notes: { address: formData.selectedAddress },
+    theme: { color: Theme.palette.primary.main },
   };
+  
+  const rz = new window.Razorpay(options);
+  rz.open();
+};
 
   const handlePhoneChange = (e) => {
     let value = e.target.value.replace(/\D/g, '');
@@ -838,6 +855,32 @@ export default function CartPage() {
                 value={formData.pincode}
                 onChange={(e) => setFormData((p) => ({ ...p, pincode: e.target.value }))}
               />
+              <TextField
+  label="Email"
+  fullWidth
+  required
+  size="small"
+  type="email"
+  value={formData.email}
+  onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
+  onBlur={() => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.email && !emailRegex.test(formData.email)) {
+      toast.error('Please enter a valid email address');
+    }
+  }}
+/>
+<TextField
+  label="Full Name"
+  fullWidth
+  required
+  size="small"
+  value={formData.name}
+  onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+/>
+
+
+
             </div>
           </DialogContent>
           <DialogActions className="dialog-actions">
@@ -1525,6 +1568,12 @@ export default function CartPage() {
             flex-direction: column;
             gap: 1rem;
           }
+            .address-email {
+  display: block;
+  margin-top: 4px;
+  color: #666;
+  font-size: 12px;
+}
         }
       `}</style>
     </div>
