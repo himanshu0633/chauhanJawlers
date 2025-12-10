@@ -223,8 +223,8 @@ const ProductCard = styled(Card)(({ theme }) => ({
     width: "calc(50% - 4px)",
     borderRadius: 8,
   },
-  // For very small screens, show 1 column
-  [theme.breakpoints.down(400)]: {
+  // 👇 yahan change kiya: 400 se 320
+  [theme.breakpoints.down(320)]: {
     width: "100%",
     maxWidth: "280px",
     margin: "0 auto",
@@ -397,7 +397,6 @@ export default function NewCollection() {
     if (typeof q === "string") {
       try { arr = JSON.parse(q); } catch { return []; }
     }
-    // Handle double-stringified arrays
     if (Array.isArray(arr) && arr.length === 1 && typeof arr[0] === 'string') {
       try { arr = JSON.parse(arr[0]); } catch { return []; }
     }
@@ -406,7 +405,6 @@ export default function NewCollection() {
 
   const pickBestVariation = (arr) => {
     if (!arr.length) return null;
-    // Return the variant with the lowest finalPrice
     return arr.reduce((best, cur) =>
       parseFloat(cur.finalPrice) < parseFloat(best.finalPrice) ? cur : best, arr[0]);
   };
@@ -435,10 +433,7 @@ export default function NewCollection() {
     try {
       const response = await axiosInstance.get('/user/allproducts');
       const processedProducts = preprocessProducts(response.data);
-
-      // Sort by createdAt descending (latest first)
       processedProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
       setAllProducts(processedProducts);
     } catch (error) {
       setError('Could not load products. Please try again.');
@@ -451,8 +446,6 @@ export default function NewCollection() {
     if (!product || !product.bestVariant) return;
 
     const variant = product.bestVariant;
-
-    // Check product-level stock status
     const isInStock = String(product.stock).toLowerCase() === 'yes';
     if (!isInStock) {
       toast.error('This product is out of stock!', { position: 'top-right', autoClose: 2000 });
@@ -497,7 +490,6 @@ export default function NewCollection() {
         {/* Right flex product cards */}
         <RightFlexBox>
           {allProducts.slice(0, 6).map((product) => {
-            // Check product-level stock status
             const isInStock = String(product.stock).toLowerCase() === 'yes';
 
             return (
