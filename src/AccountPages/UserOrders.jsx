@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-    Chip, Button, Typography, Modal, Box, CardContent, Snackbar, Alert
+    Chip, Button, Typography, Modal, Box, CardContent, Snackbar, Alert, CircularProgress
 } from '@mui/material';
 import {
     Timeline, TimelineItem, TimelineSeparator, TimelineDot, TimelineConnector, TimelineContent
@@ -9,7 +9,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../commonComponents/AxiosInstance';
 
-// --- STATUS COLOR LOGIC ---
+// ================= STATUS COLOR HELPERS =================
 const statusColor = status => {
     switch (status?.toLowerCase()) {
         case 'pending': return 'warning';
@@ -20,14 +20,18 @@ const statusColor = status => {
 };
 
 const paymentColor = status => (
-    status === 'captured' ? 'success' : status === 'failed' ? 'error' : status === 'refunded' ? 'info' : 'default'
+    status === 'captured' ? 'success' :
+    status === 'failed' ? 'error' :
+    status === 'refunded' ? 'info' : 'default'
 );
 
 const refundColor = status => (
-    status === 'processed' ? 'info' : status === 'failed' ? 'error' : status === 'pending' ? 'warning' : 'default'
+    status === 'processed' ? 'info' :
+    status === 'failed' ? 'error' :
+    status === 'pending' ? 'warning' : 'default'
 );
 
-// --- LABEL HELPERS ---
+// ================= LABEL HELPERS =================
 function paymentStatusLabel(status) {
     if (!status) return 'Unknown';
     if (status === 'captured') return 'Paid';
@@ -64,12 +68,13 @@ function formatDate(dateString) {
     });
 }
 
+// =============== ESTIMATED REFUND DAYS =================
 function getEstimatedRefundDays(refundInfo) {
     if (!refundInfo || !refundInfo.estimatedSettlement) return null;
     const now = new Date();
     const settlement = new Date(refundInfo.estimatedSettlement);
     if (isNaN(settlement.getTime())) return null;
-    
+
     const diffTime = settlement - now;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     if (diffDays <= 0) return 'Should be settled';
@@ -77,7 +82,7 @@ function getEstimatedRefundDays(refundInfo) {
     return `Expected in ${diffDays} days`;
 }
 
-// --- MAIN PAGE COMPONENT ---
+// ===================== MAIN COMPONENT =====================
 const UserOrders = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -85,17 +90,18 @@ const UserOrders = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [snackbar, setSnackbar] = useState({ 
-        open: false, 
-        message: '', 
-        severity: 'info' 
+        open: false, message: '', severity: 'info' 
     });
-    
+
+    // NEW IMAGE STATE
+    const [imageLoading, setImageLoading] = useState({});
+
     const navigate = useNavigate();
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     const userId = userData?._id;
     const userEmail = userData?.email;
 
-    // Check authentication
+    // ================= AUTH CHECK =================
     useEffect(() => {
         if (!userData._id) {
             navigate('/login');
@@ -104,7 +110,7 @@ const UserOrders = () => {
         }
     }, [navigate, userData._id]);
 
-    // Fetch live payment status
+    // ================= FETCH PAYMENT STATUS =================
     const fetchLivePaymentStatus = useCallback(async (orderId) => {
         try {
             const response = await axiosInstance.get(`/api/paymentStatus/${orderId}`);
@@ -115,7 +121,7 @@ const UserOrders = () => {
         }
     }, []);
 
-    // Fetch refund status
+    // ================= FETCH REFUND STATUS =================
     const fetchRefundStatus = useCallback(async (orderId) => {
         try {
             const response = await axiosInstance.get(`/api/orders/${orderId}/refund-status`);
@@ -126,12 +132,52 @@ const UserOrders = () => {
         }
     }, []);
 
-    // Associate guest orders with user account
+    // ================= FETCH PRODUCT IMAGES =================
+const fetchProductImages = useCallback(async (productId) => {
+    try {
+        const response = await axiosInstance.get(`/api/products/${productId}`);
+        const mediaItem = response.data.product?.media?.find(m => m.type === "image");
+        return mediaItem?.url || null;
+    } catch (error) {
+        console.error("Error fetching product image:", error);
+        return null;
+    }
+}, []);
+
+
+    // ================= UPDATED getProductImage =================
+  const getProductImage = (item) => {
+    // 1: If fetchOrders added item.image from API
+    if (item.image) return item.image;
+
+    // 2: If product has media array returned in order.items
+    if (item.media?.length > 0) {
+        const mediaItem = item.media.find(m => m.type === "image");
+        if (mediaItem?.url) return mediaItem.url;
+    }
+
+    // 3: If item.productId was populated and contains media
+    if (item.productId?.media?.length > 0) {
+        const mediaItem = item.productId.media.find(m => m.type === "image");
+        if (mediaItem?.url) return mediaItem.url;
+    }
+
+    // 4: If backend API returned product.media[][0]
+    if (item.product?.media?.length > 0) {
+        const mediaItem = item.product.media.find(m => m.type === "image");
+        if (mediaItem?.url) return mediaItem.url;
+    }
+
+    // 5: Default
+    return "https://via.placeholder.com/80x80?text=No+Image";
+};
+
+
+    // ================= ASSOCIATE GUEST ORDERS =================
     const checkAndAssociateGuestOrders = useCallback(async () => {
         if (!userEmail || !userId) return;
         
         try {
-            console.log('Checking for guest orders to associate...');
             const response = await axiosInstance.post('/api/associateGuestOrders', {
                 guestEmail: userEmail,
                 userId: userId
@@ -140,10 +186,10 @@ const UserOrders = () => {
             if (response.data.success && response.data.associatedCount > 0) {
                 setSnackbar({
                     open: true,
-                    message: `${response.data.associatedCount} previous guest order(s) have been added to your account`,
+                    message: `${response.data.associatedCount} previous guest order(s) added`,
                     severity: 'success'
                 });
-                return true; // Return true if orders were associated
+                return true;
             }
         } catch (error) {
             console.error('Error associating guest orders:', error);
@@ -151,78 +197,67 @@ const UserOrders = () => {
         return false;
     }, [userEmail, userId]);
 
-    // Main fetch orders function
+    // ================= MAIN FETCH ORDERS (UPDATED WITH IMAGES) =================
     const fetchOrders = useCallback(async () => {
         if (!userId) return;
-        
+
         setLoading(true);
         try {
-            // Try to fetch orders by userId
             let userOrders = [];
-            
+
             try {
                 const response = await axiosInstance.get(`/api/orders/${userId}`);
                 userOrders = response.data.orders || [];
-            } catch (userIdError) {
-                console.log('No orders found with userId');
-            }
-            
-            // If no orders found with userId, try fetching by email
+            } catch { /* empty */ }
+
             if (userOrders.length === 0 && userEmail) {
                 try {
-                    const emailResponse = await axiosInstance.get(
-                        `/api/orders/email/${encodeURIComponent(userEmail)}`
-                    );
-                    userOrders = emailResponse.data.orders || [];
-                } catch (emailError) {
-                    console.log('No orders found by email either');
-                }
+                    const emailResp = await axiosInstance.get(`/api/orders/email/${encodeURIComponent(userEmail)}`);
+                    userOrders = emailResp.data.orders || [];
+                } catch { /* empty */ }
             }
-            
-            // Fetch live status for all orders
-            const ordersWithLiveStatus = await Promise.all(
+
+            const ordersWithStatus = await Promise.all(
                 userOrders.map(async (order) => {
                     const paymentInfo = await fetchLivePaymentStatus(order._id);
                     const refundInfo = await fetchRefundStatus(order._id);
 
+                    // Fetch product images for each order item
+                    const itemsWithImages = await Promise.all(
+                        order.items.map(async (item) => {
+                            const image = await fetchProductImages(item.productId);
+                            return { ...item, image };
+                        })
+                    );
+
                     return {
                         ...order,
+                        items: itemsWithImages,
                         paymentInfo: paymentInfo || order.paymentInfo,
                         refundInfo: refundInfo || order.refundInfo || { status: 'none' }
                     };
                 })
             );
-            
-            // Sort orders by date (newest first)
-            const sortedOrders = ordersWithLiveStatus.sort((a, b) => {
-                const dateA = new Date(a.createdAt || 0);
-                const dateB = new Date(b.createdAt || 0);
-                return dateB - dateA;
-            });
-            
-            setOrders(sortedOrders);
+
+            const sorted = ordersWithStatus.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            setOrders(sorted);
         } catch (error) {
             console.error('Error fetching orders:', error);
         } finally {
             setLoading(false);
         }
-    }, [userId, userEmail, fetchLivePaymentStatus, fetchRefundStatus]);
-
-    // Silent fetch for periodic updates
+    }, [
+        userId, userEmail, fetchLivePaymentStatus, fetchRefundStatus, fetchProductImages
+    ]);
+    // ============ SILENT BACKGROUND ORDER UPDATES ============
     const fetchOrdersSilently = useCallback(async () => {
         if (!userId) return;
-        
+
         try {
-            let userOrders = [];
-            
-            try {
-                const response = await axiosInstance.get(`/api/orders/${userId}`);
-                userOrders = response.data.orders || [];
-            } catch (error) {
-                return;
-            }
-            
-            const ordersWithLiveStatus = await Promise.all(
+            const response = await axiosInstance.get(`/api/orders/${userId}`);
+            const userOrders = response.data.orders || [];
+
+            const ordersWithStatus = await Promise.all(
                 userOrders.map(async (order) => {
                     const paymentInfo = await fetchLivePaymentStatus(order._id);
                     const refundInfo = await fetchRefundStatus(order._id);
@@ -234,55 +269,49 @@ const UserOrders = () => {
                     };
                 })
             );
-            
-            // Update state only if orders changed
-            setOrders(prevOrders => {
-                const prevOrdersStr = JSON.stringify(prevOrders);
-                const newOrdersStr = JSON.stringify(ordersWithLiveStatus);
-                if (prevOrdersStr !== newOrdersStr) {
-                    return ordersWithLiveStatus.sort((a, b) => {
-                        const dateA = new Date(a.createdAt || 0);
-                        const dateB = new Date(b.createdAt || 0);
-                        return dateB - dateA;
-                    });
+
+            setOrders(prev => {
+                const oldStr = JSON.stringify(prev);
+                const newStr = JSON.stringify(ordersWithStatus);
+                if (oldStr !== newStr) {
+                    return ordersWithStatus.sort(
+                        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                    );
                 }
-                return prevOrders;
+                return prev;
             });
+
         } catch (error) {
             console.error('Error fetching orders silently:', error);
         }
     }, [userId, fetchLivePaymentStatus, fetchRefundStatus]);
 
-    // Initial load and guest order association
+    // ============ INITIAL PAGE LOAD ============
     useEffect(() => {
         if (!userId || !userEmail) return;
 
-        const initializePage = async () => {
-            // First associate guest orders
-            const ordersAssociated = await checkAndAssociateGuestOrders();
-            
-            // Then fetch orders
+        const load = async () => {
+            const associated = await checkAndAssociateGuestOrders();
             await fetchOrders();
-            
-            // If orders were associated, fetch again after a delay
-            if (ordersAssociated) {
-                setTimeout(() => {
-                    fetchOrders();
-                }, 1500);
+
+            if (associated) {
+                setTimeout(() => fetchOrders(), 1500);
             }
         };
 
-        initializePage();
-
-        // Set up interval for silent updates (every 30 seconds)
-        const interval = setInterval(() => {
-            fetchOrdersSilently();
-        }, 30000);
+        load();
+        const interval = setInterval(fetchOrdersSilently, 30000);
 
         return () => clearInterval(interval);
-    }, [userId, userEmail, checkAndAssociateGuestOrders, fetchOrders, fetchOrdersSilently]);
+    }, [
+        userId,
+        userEmail,
+        checkAndAssociateGuestOrders,
+        fetchOrders,
+        fetchOrdersSilently
+    ]);
 
-    // Open order details modal
+    // ============ OPEN ORDER DETAILS ============
     const openOrderDetails = useCallback(async (order) => {
         try {
             const paymentInfo = await fetchLivePaymentStatus(order._id);
@@ -293,201 +322,222 @@ const UserOrders = () => {
                 paymentInfo: paymentInfo || order.paymentInfo,
                 refundInfo: refundInfo || order.refundInfo || { status: 'none' }
             });
-        } catch (error) {
-            console.error('Error fetching latest order data:', error);
+        } catch {
             setSelectedOrder(order);
         }
         setShowModal(true);
     }, [fetchLivePaymentStatus, fetchRefundStatus]);
-    
-    // Close order details modal
-    const closeOrderDetails = useCallback(() => {
+
+    const closeOrderDetails = () => {
         setShowModal(false);
         setSelectedOrder(null);
-    }, []);
-    
-    // Handle snackbar close
-    const handleCloseSnackbar = useCallback(() => {
-        setSnackbar(prev => ({ ...prev, open: false }));
-    }, []);
+    };
 
+    const handleCloseSnackbar = () =>
+        setSnackbar(prev => ({ ...prev, open: false }));
+
+    // ====================== PAGE UI ======================
     if (isAuthenticated === null) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <Box sx={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center' }}>
                 <Typography>Loading...</Typography>
             </Box>
         );
     }
 
     return (
-        <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 1400, mx: 'auto', minHeight: '80vh' }}>
+        <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 1400, mx: 'auto' }}>
             <Typography variant="h4" fontWeight={600} mb={4} sx={{ color: 'primary.main' }}>
                 My Orders
             </Typography>
-            
-            {/* Snackbar for notifications */}
+
+            {/* SNACKBAR */}
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={6000}
                 onClose={handleCloseSnackbar}
                 anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             >
-                <Alert
-                    onClose={handleCloseSnackbar}
-                    severity={snackbar.severity}
-                    sx={{ width: '100%' }}
-                >
+                <Alert severity={snackbar.severity} onClose={handleCloseSnackbar}>
                     {snackbar.message}
                 </Alert>
             </Snackbar>
-            
-            <TableContainer 
-                component={Paper} 
-                elevation={2}
-                sx={{ 
-                    borderRadius: 2,
-                    overflow: 'hidden',
-                    mb: 4
-                }}
-            >
+
+            {/* ORDERS TABLE */}
+            <TableContainer component={Paper} elevation={2} sx={{ borderRadius: 2 }}>
                 <Table>
                     <TableHead>
                         <TableRow sx={{ backgroundColor: 'primary.light' }}>
-                            <TableCell sx={{ color: 'white', fontWeight: 600 }}>#</TableCell>
-                            <TableCell sx={{ color: 'white', fontWeight: 600 }}>Order ID</TableCell>
-                            <TableCell sx={{ color: 'white', fontWeight: 600 }}>Product(s)</TableCell>
-                            <TableCell sx={{ color: 'white', fontWeight: 600 }}>Date</TableCell>
-                            <TableCell sx={{ color: 'white', fontWeight: 600 }}>Order Status</TableCell>
-                            <TableCell sx={{ color: 'white', fontWeight: 600 }}>Payment Status</TableCell>
-                            <TableCell sx={{ color: 'white', fontWeight: 600 }}>Refund Status</TableCell>
-                            <TableCell sx={{ color: 'white', fontWeight: 600 }}>Total</TableCell>
-                            <TableCell sx={{ color: 'white', fontWeight: 600 }}>Action</TableCell>
+                            <TableCell sx={{ color: 'white' }}>#</TableCell>
+                            <TableCell sx={{ color: 'white' }}>Order ID</TableCell>
+                            <TableCell sx={{ color: 'white' }}>Products</TableCell>
+                            <TableCell sx={{ color: 'white' }}>Date</TableCell>
+                            <TableCell sx={{ color: 'white' }}>Order Status</TableCell>
+                            <TableCell sx={{ color: 'white' }}>Payment Status</TableCell>
+                            <TableCell sx={{ color: 'white' }}>Refund Status</TableCell>
+                            <TableCell sx={{ color: 'white' }}>Total</TableCell>
+                            <TableCell sx={{ color: 'white' }}>Action</TableCell>
                         </TableRow>
                     </TableHead>
+
                     <TableBody>
-                        {loading ? (
+
+                        {/* LOADING STATE */}
+                        {loading && (
                             <TableRow>
-                                <TableCell colSpan={9} align="center" sx={{ py: 8 }}>
+                                <TableCell colSpan={9} align="center" sx={{ py: 6 }}>
                                     <Typography>Loading your orders...</Typography>
                                 </TableCell>
                             </TableRow>
-                        ) : orders.length > 0 ? orders.map((order, index) => (
-                            <TableRow 
-                                key={order._id} 
-                                hover
-                                sx={{ 
-                                    '&:last-child td, &:last-child th': { border: 0 },
-                                    transition: 'background-color 0.2s'
-                                }}
-                            >
-                                <TableCell>{index + 1}</TableCell>
+                        )}
+
+                        {/* NO ORDERS */}
+                        {!loading && orders.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={9} align="center" sx={{ py: 6 }}>
+                                    <Typography>No orders found.</Typography>
+                                    <Button
+                                        variant="contained"
+                                        sx={{ mt: 2 }}
+                                        onClick={() => navigate('/shop')}
+                                    >
+                                        Start Shopping
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        )}
+
+                        {/* ORDERS LIST */}
+                        {!loading && orders.length > 0 && orders.map((order, rowIndex) => (
+                            <TableRow key={order._id} hover>
+
+                                <TableCell>{rowIndex + 1}</TableCell>
+
                                 <TableCell>
-                                    <Typography variant="body2" fontFamily="monospace" sx={{ fontSize: '0.85rem' }}>
-                                        {order._id?.slice(-8) || 'N/A'}
+                                    <Typography
+                                        fontFamily="monospace"
+                                        variant="body2"
+                                    >
+                                        {order._id?.slice(-8)}
                                     </Typography>
                                 </TableCell>
+
+                                {/* ==================== UPDATED PRODUCTS COLUMN ==================== */}
                                 <TableCell>
-                                    <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
-                                        {order.items?.slice(0, 2).map(item => item.name).join(', ') || 'No items'}
-                                        {order.items?.length > 2 && ` +${order.items.length - 2} more`}
-                                    </Typography>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                        {order.items?.slice(0, 2).map((item, index) => {
+                                            const key = `${item.productId}-${index}`;
+                                            const imgSrc = getProductImage(item);
+
+                                            return (
+                                                <Box
+                                                    key={key}
+                                                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                                                >
+                                                    {/* IMAGE or LOADER */}
+                                                    {!imageLoading[key] ? (
+                                                        <Box
+                                                            component="img"
+                                                            src={imgSrc}
+                                                            alt={item.name}
+                                                            onLoad={() =>
+                                                                setImageLoading(prev => ({ ...prev, [key]: false }))
+                                                            }
+                                                            onError={() =>
+                                                                setImageLoading(prev => ({ ...prev, [key]: false }))
+                                                            }
+                                                            sx={{
+                                                                width: 40,
+                                                                height: 40,
+                                                                borderRadius: 1,
+                                                                objectFit: 'cover',
+                                                                border: '1px solid #ddd'
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <Box
+                                                            sx={{
+                                                                width: 40,
+                                                                height: 40,
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                borderRadius: 1,
+                                                                bgcolor: 'grey.200'
+                                                            }}
+                                                        >
+                                                            <CircularProgress size={18} />
+                                                        </Box>
+                                                    )}
+
+                                                    <Typography noWrap sx={{ maxWidth: 150 }}>
+                                                        {item.name}
+                                                    </Typography>
+                                                </Box>
+                                            );
+                                        })}
+
+                                        {order.items?.length > 2 && (
+                                            <Typography variant="caption" color="text.secondary">
+                                                +{order.items.length - 2} more
+                                            </Typography>
+                                        )}
+                                    </Box>
                                 </TableCell>
+                                {/* =============================================================== */}
+
+                                <TableCell>{formatDate(order.createdAt)}</TableCell>
+
                                 <TableCell>
-                                    <Typography variant="body2">
-                                        {formatDate(order.createdAt)}
-                                    </Typography>
-                                </TableCell>
-                                <TableCell>
-                                    <Chip 
-                                        label={order.status || 'Unknown'} 
-                                        color={statusColor(order.status)} 
-                                        variant="filled" 
+                                    <Chip
+                                        label={order.status}
+                                        color={statusColor(order.status)}
                                         size="small"
-                                        sx={{ fontWeight: 500 }}
                                     />
                                 </TableCell>
+
                                 <TableCell>
-                                    <Chip 
-                                        label={paymentStatusLabel(order.paymentInfo?.status)} 
-                                        color={paymentColor(order.paymentInfo?.status)} 
-                                        variant="filled" 
+                                    <Chip
+                                        label={paymentStatusLabel(order.paymentInfo?.status)}
+                                        color={paymentColor(order.paymentInfo?.status)}
                                         size="small"
-                                        sx={{ fontWeight: 500 }}
                                     />
                                 </TableCell>
+
                                 <TableCell>
-                                    <Chip 
-                                        label={refundStatusLabel(order.refundInfo)} 
-                                        color={refundColor(order.refundInfo?.status)} 
-                                        variant="filled" 
+                                    <Chip
+                                        label={refundStatusLabel(order.refundInfo)}
+                                        color={refundColor(order.refundInfo?.status)}
                                         size="small"
-                                        sx={{ fontWeight: 500 }}
                                     />
-                                    {order.refundInfo && order.refundInfo.status === 'initiated' && (
-                                        <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'text.secondary', fontSize: '0.75rem' }}>
-                                            {getEstimatedRefundDays(order.refundInfo)}
-                                        </Typography>
-                                    )}
                                 </TableCell>
+
                                 <TableCell>
                                     <Typography fontWeight={600} sx={{ color: 'primary.main' }}>
-                                        ₹{order.totalAmount?.toLocaleString('en-IN') || '0'}
+                                        ₹{order.totalAmount?.toLocaleString('en-IN')}
                                     </Typography>
                                 </TableCell>
+
                                 <TableCell>
-                                    <Button 
-                                        variant="outlined" 
-                                        size="small" 
+                                    <Button
+                                        variant="outlined"
                                         onClick={() => openOrderDetails(order)}
-                                        sx={{ 
-                                            textTransform: 'none',
-                                            borderColor: 'primary.main',
-                                            color: 'primary.main',
-                                            '&:hover': {
-                                                backgroundColor: 'primary.light',
-                                                borderColor: 'primary.dark'
-                                            }
-                                        }}
+                                        size="small"
                                     >
                                         View Details
                                     </Button>
                                 </TableCell>
+
                             </TableRow>
-                        )) : (
-                            <TableRow>
-                                <TableCell colSpan={9} align="center" sx={{ py: 8 }}>
-                                    <Box sx={{ textAlign: 'center' }}>
-                                        <Typography variant="h6" color="text.secondary" mb={2}>
-                                            No orders found
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary" mb={3}>
-                                            You haven't placed any orders yet.
-                                        </Typography>
-                                        <Button 
-                                            variant="contained" 
-                                            onClick={() => navigate('/shop')}
-                                            sx={{
-                                                backgroundColor: 'primary.main',
-                                                '&:hover': {
-                                                    backgroundColor: 'primary.dark'
-                                                }
-                                            }}
-                                        >
-                                            Start Shopping
-                                        </Button>
-                                    </Box>
-                                </TableCell>
-                            </TableRow>
-                        )}
+                        ))}
                     </TableBody>
                 </Table>
             </TableContainer>
-
-            {/* MODAL FOR ORDER DETAILS */}
-            <Modal 
-                open={showModal} 
+            {/* ===================== ORDER DETAILS MODAL ===================== */}
+            <Modal
+                open={showModal}
                 onClose={closeOrderDetails}
-                sx={{ 
+                sx={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -495,140 +545,163 @@ const UserOrders = () => {
                 }}
             >
                 <Box sx={{
-                    maxWidth: 900, 
-                    width: '100%', 
-                    bgcolor: 'background.paper', 
-                    borderRadius: 3, 
-                    maxHeight: '90vh',
-                    boxShadow: 24, 
+                    maxWidth: 900,
+                    width: '100%',
+                    bgcolor: 'background.paper',
+                    borderRadius: 3,
                     overflow: 'hidden',
+                    maxHeight: '90vh',
                     display: 'flex',
-                    flexDirection: 'column'
+                    flexDirection: 'column',
+                    boxShadow: 24
                 }}>
+
+                    {/* MODAL HEADER */}
                     {selectedOrder && (
-                        <>
-                            {/* Modal Header */}
-                            <Box sx={{
-                                bgcolor: 'primary.main', 
-                                color: 'common.white', 
-                                p: 3, 
-                                display: 'flex', 
-                                justifyContent: 'space-between', 
-                                alignItems: 'center'
-                            }}>
-                                <Box>
-                                    <Typography variant="h5" fontWeight={600}>
-                                        Order Details
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
-                                        #{selectedOrder._id?.slice(-8) || 'N/A'} • {formatDate(selectedOrder.createdAt)}
-                                    </Typography>
-                                </Box>
-                                <Button 
-                                    variant="text" 
-                                    color="inherit" 
-                                    onClick={closeOrderDetails} 
-                                    sx={{ 
-                                        minWidth: 'auto',
-                                        p: 1,
-                                        borderRadius: '50%',
-                                        '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' }
-                                    }}
-                                >
-                                    <Typography sx={{ fontSize: 28, lineHeight: 1 }}>×</Typography>
-                                </Button>
+                        <Box
+                            sx={{
+                                bgcolor: 'primary.main',
+                                color: 'white',
+                                p: 3,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between'
+                            }}
+                        >
+                            <Box>
+                                <Typography variant="h5" fontWeight={600}>
+                                    Order Details
+                                </Typography>
+
+                                <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                                    #{selectedOrder._id?.slice(-8)} • {formatDate(selectedOrder.createdAt)}
+                                </Typography>
                             </Box>
-                            
-                            {/* Modal Content */}
-                            <Box sx={{ 
-                                overflowY: 'auto',
-                                flex: 1,
-                                p: { xs: 2, md: 3 }
-                            }}>
-                                {/* Order Info Section */}
+
+                            <Button
+                                variant="text"
+                                color="inherit"
+                                onClick={closeOrderDetails}
+                                sx={{
+                                    minWidth: 'auto',
+                                    p: 1.2,
+                                    borderRadius: '50%',
+                                    '&:hover': { backgroundColor: 'rgba(255,255,255,0.15)' }
+                                }}
+                            >
+                                <Typography sx={{ fontSize: 28 }}>×</Typography>
+                            </Button>
+                        </Box>
+                    )}
+
+                    {/* MODAL CONTENT */}
+                    <Box sx={{ overflowY: 'auto', flex: 1, p: { xs: 2, md: 3 } }}>
+                        {selectedOrder && (
+                            <>
+
+                                {/* ===================== ORDER INFORMATION ===================== */}
                                 <CardContent sx={{ p: 0, mb: 4 }}>
                                     <Typography variant="h6" fontWeight={600} mb={3} sx={{ color: 'primary.main' }}>
                                         Order Information
                                     </Typography>
-                                    <Box sx={{ 
-                                        display: 'grid', 
-                                        gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(3, 1fr)' }, 
-                                        gap: 3 
-                                    }}>
+
+                                    <Box
+                                        sx={{
+                                            display: 'grid',
+                                            gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(3, 1fr)' },
+                                            gap: 3
+                                        }}
+                                    >
                                         <Box>
-                                            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                                            <Typography variant="body2" color="text.secondary">
                                                 Status
                                             </Typography>
-                                            <Typography variant="body1" fontWeight={500}>
+                                            <Typography fontWeight={500}>
                                                 {selectedOrder.status}
                                             </Typography>
                                         </Box>
+
                                         <Box>
-                                            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                                            <Typography variant="body2" color="text.secondary">
                                                 Order Date
                                             </Typography>
-                                            <Typography variant="body1" fontWeight={500}>
+                                            <Typography fontWeight={500}>
                                                 {formatDate(selectedOrder.createdAt)}
                                             </Typography>
                                         </Box>
+
                                         <Box>
-                                            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                                            <Typography variant="body2" color="text.secondary">
                                                 Total Amount
                                             </Typography>
-                                            <Typography variant="body1" fontWeight={600} sx={{ color: 'primary.main' }}>
-                                                ₹{selectedOrder.totalAmount?.toLocaleString('en-IN') || '0'}
+                                            <Typography fontWeight={700} sx={{ color: 'primary.main' }}>
+                                                ₹{selectedOrder.totalAmount?.toLocaleString('en-IN')}
                                             </Typography>
                                         </Box>
+
                                         <Box>
-                                            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                                            <Typography variant="body2" color="text.secondary">
                                                 Phone
                                             </Typography>
-                                            <Typography variant="body1" fontWeight={500}>
+                                            <Typography fontWeight={500}>
                                                 {selectedOrder.phone || 'N/A'}
                                             </Typography>
                                         </Box>
-                                        <Box sx={{ gridColumn: { xs: '1 / -1', sm: '1 / -1', md: 'span 2' } }}>
-                                            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+
+                                        <Box sx={{ gridColumn: { md: 'span 2' } }}>
+                                            <Typography variant="body2" color="text.secondary">
                                                 Delivery Address
                                             </Typography>
-                                            <Typography variant="body1" fontWeight={500}>
+                                            <Typography fontWeight={500}>
                                                 {selectedOrder.address || 'N/A'}
                                             </Typography>
                                         </Box>
                                     </Box>
-                                    
-                                    {/* Cancellation Info */}
+
+                                    {/* CANCELLATION DETAILS */}
                                     {selectedOrder.cancelReason && (
-                                        <Box mt={3} p={2.5} bgcolor="#fff3cd" borderRadius={2} borderLeft="4px solid #ffc107">
-                                            <Typography variant="subtitle1" color="warning.dark" fontWeight={600} mb={1}>
+                                        <Box
+                                            mt={3}
+                                            p={2.5}
+                                            bgcolor="#fff3cd"
+                                            borderRadius={2}
+                                            borderLeft="4px solid #ffc107"
+                                        >
+                                            <Typography variant="subtitle1" fontWeight={600} color="warning.dark">
                                                 Cancellation Details
                                             </Typography>
-                                            <Typography variant="body2" mb={1}>
+
+                                            <Typography variant="body2" mt={1}>
                                                 <strong>Reason:</strong> {selectedOrder.cancelReason}
                                             </Typography>
+
                                             {selectedOrder.cancelledAt && (
                                                 <Typography variant="body2">
-                                                    <strong>Cancelled on:</strong> {formatDate(selectedOrder.cancelledAt)}
+                                                    <strong>Cancelled On:</strong> {formatDate(selectedOrder.cancelledAt)}
                                                 </Typography>
                                             )}
                                         </Box>
                                     )}
                                 </CardContent>
-                                
-                                {/* Payment Info */}
+
+                                {/* ===================== PAYMENT INFORMATION ===================== */}
                                 <CardContent sx={{ p: 0, mb: 4 }}>
                                     <Typography variant="h6" fontWeight={600} mb={3} sx={{ color: 'primary.main' }}>
                                         Payment Information
                                     </Typography>
-                                    <Box sx={{ 
-                                        display: 'grid', 
-                                        gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(3, 1fr)' }, 
-                                        gap: 3 
-                                    }}>
+
+                                    <Box
+                                        sx={{
+                                            display: 'grid',
+                                            gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(3, 1fr)' },
+                                            gap: 3
+                                        }}
+                                    >
                                         <Box>
                                             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                                                 Payment Status
                                             </Typography>
+
                                             <Chip
                                                 label={paymentStatusLabel(selectedOrder.paymentInfo?.status)}
                                                 color={paymentColor(selectedOrder.paymentInfo?.status)}
@@ -636,262 +709,374 @@ const UserOrders = () => {
                                                 sx={{ fontWeight: 600 }}
                                             />
                                         </Box>
+
                                         {selectedOrder.paymentInfo?.paymentId && (
                                             <Box>
-                                                <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                                                <Typography variant="body2" color="text.secondary">
                                                     Payment ID
                                                 </Typography>
-                                                <Typography variant="body2" fontFamily="monospace" sx={{ 
-                                                    backgroundColor: 'grey.100', 
-                                                    p: 1, 
-                                                    borderRadius: 1,
-                                                    wordBreak: 'break-all'
-                                                }}>
+
+                                                <Typography
+                                                    variant="body2"
+                                                    sx={{
+                                                        backgroundColor: 'grey.100',
+                                                        p: 1,
+                                                        mt: 0.5,
+                                                        borderRadius: 1,
+                                                        fontFamily: 'monospace'
+                                                    }}
+                                                >
                                                     {selectedOrder.paymentInfo.paymentId}
                                                 </Typography>
                                             </Box>
                                         )}
+
                                         {selectedOrder.paymentInfo?.updatedAt && (
                                             <Box>
-                                                <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                                                <Typography variant="body2" color="text.secondary">
                                                     Last Updated
                                                 </Typography>
-                                                <Typography variant="body2" fontWeight={500}>
+                                                <Typography fontWeight={500}>
                                                     {formatDate(selectedOrder.paymentInfo.updatedAt)}
                                                 </Typography>
                                             </Box>
                                         )}
+
                                         {selectedOrder.paymentInfo?.method && (
                                             <Box>
-                                                <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                                                <Typography variant="body2" color="text.secondary">
                                                     Payment Method
                                                 </Typography>
-                                                <Typography variant="body2" fontWeight={500} sx={{ textTransform: 'capitalize' }}>
+                                                <Typography
+                                                    fontWeight={500}
+                                                    sx={{ textTransform: 'capitalize' }}
+                                                >
                                                     {selectedOrder.paymentInfo.method}
                                                 </Typography>
                                             </Box>
                                         )}
                                     </Box>
                                 </CardContent>
-                                
-                                {/* Refund Info Section */}
-                                {selectedOrder.refundInfo && selectedOrder.refundInfo.status !== 'none' && (
-                                    <CardContent sx={{ p: 0, mb: 4 }}>
-                                        <Box bgcolor="#e8f4fd" borderRadius={3} p={3} border="1px solid #74b9ff">
-                                            <Typography variant="h6" fontWeight={600} mb={2} sx={{ color: 'primary.main' }}>
-                                                Refund Information
-                                            </Typography>
-                                            <Typography variant="body2" mb={3} color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                                                Refund takes up to 5-7 working days after the refund has processed
-                                            </Typography>
-                                            
-                                            <Box display="flex" alignItems="center" mb={3}>
-                                                <Chip
-                                                    label={refundStatusLabel(selectedOrder.refundInfo)}
-                                                    color={refundColor(selectedOrder.refundInfo?.status)}
-                                                    sx={{ mr: 2, fontWeight: 600 }}
-                                                />
-                                                <Typography variant="h4" color="primary.main" fontWeight={700}>
-                                                    ₹{selectedOrder.refundInfo.amount?.toLocaleString('en-IN') || '0'}
-                                                </Typography>
-                                            </Box>
 
-                                            <Box sx={{ 
-                                                display: 'grid', 
-                                                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, 
-                                                gap: 2,
-                                                mb: 3
-                                            }}>
-                                                {selectedOrder.refundInfo.refundId && (
-                                                    <Box>
-                                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                                                            Refund ID
-                                                        </Typography>
-                                                        <Typography variant="body2" fontWeight={500} fontFamily="monospace">
-                                                            {selectedOrder.refundInfo.refundId}
-                                                        </Typography>
-                                                    </Box>
-                                                )}
-                                                {selectedOrder.refundInfo.reason && (
-                                                    <Box>
-                                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                                                            Refund Reason
-                                                        </Typography>
-                                                        <Typography variant="body2" fontWeight={500}>
-                                                            {selectedOrder.refundInfo.reason}
-                                                        </Typography>
-                                                    </Box>
-                                                )}
-                                                {selectedOrder.refundInfo.speed && (
-                                                    <Box>
-                                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                                                            Processing Speed
-                                                        </Typography>
-                                                        <Typography variant="body2" fontWeight={500} sx={{ textTransform: 'capitalize' }}>
-                                                            {selectedOrder.refundInfo.speed}
-                                                        </Typography>
-                                                    </Box>
-                                                )}
-                                                {selectedOrder.refundInfo.createdAt && (
-                                                    <Box>
-                                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                                                            Initiated
-                                                        </Typography>
-                                                        <Typography variant="body2" fontWeight={500}>
-                                                            {formatDate(selectedOrder.refundInfo.createdAt)}
-                                                        </Typography>
-                                                    </Box>
-                                                )}
-                                                {selectedOrder.refundInfo.processedAt && (
-                                                    <Box>
-                                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                                                            Processed
-                                                        </Typography>
-                                                        <Typography variant="body2" fontWeight={500}>
-                                                            {formatDate(selectedOrder.refundInfo.processedAt)}
-                                                        </Typography>
-                                                    </Box>
-                                                )}
-                                                {selectedOrder.refundInfo.estimatedSettlement && (
-                                                    <Box>
-                                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                                                            Expected Settlement
-                                                        </Typography>
-                                                        <Typography variant="body2" fontWeight={500}>
-                                                            {formatDate(selectedOrder.refundInfo.estimatedSettlement)}
-                                                            <Typography component="span" sx={{ 
-                                                                color: '#28a745', 
-                                                                fontWeight: 600, 
-                                                                fontSize: '0.75rem', 
-                                                                ml: 1 
-                                                            }}>
-                                                                ({getEstimatedRefundDays(selectedOrder.refundInfo)})
-                                                            </Typography>
-                                                        </Typography>
-                                                    </Box>
-                                                )}
-                                            </Box>
-                                            
-                                            {selectedOrder.refundInfo.notes && (
-                                                <Box mb={3}>
-                                                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                                                        Note
-                                                    </Typography>
-                                                    <Typography variant="body2" sx={{ 
-                                                        backgroundColor: 'white', 
-                                                        p: 2, 
-                                                        borderRadius: 1,
-                                                        borderLeft: '3px solid #74b9ff'
-                                                    }}>
-                                                        {selectedOrder.refundInfo.notes}
+                                {/* ===================== REFUND INFORMATION ===================== */}
+                                {selectedOrder.refundInfo &&
+                                    selectedOrder.refundInfo.status !== 'none' && (
+                                        <CardContent sx={{ p: 0, mb: 4 }}>
+                                            <Box
+                                                bgcolor="#e8f4fd"
+                                                borderRadius={3}
+                                                p={3}
+                                                border="1px solid #74b9ff"
+                                            >
+                                                <Typography
+                                                    variant="h6"
+                                                    fontWeight={600}
+                                                    mb={1}
+                                                    sx={{ color: 'primary.main' }}
+                                                >
+                                                    Refund Information
+                                                </Typography>
+
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                    sx={{ fontStyle: 'italic', mb: 2 }}
+                                                >
+                                                    Refund takes 5–7 working days after processing.
+                                                </Typography>
+
+                                                {/* Refund Amount + Status */}
+                                                <Box display="flex" alignItems="center" mb={3}>
+                                                    <Chip
+                                                        label={refundStatusLabel(selectedOrder.refundInfo)}
+                                                        color={refundColor(selectedOrder.refundInfo.status)}
+                                                        sx={{ mr: 2, fontWeight: 600 }}
+                                                    />
+
+                                                    <Typography
+                                                        variant="h4"
+                                                        fontWeight={700}
+                                                        sx={{ color: 'primary.main' }}
+                                                    >
+                                                        ₹{selectedOrder.refundInfo.amount?.toLocaleString('en-IN')}
                                                     </Typography>
                                                 </Box>
-                                            )}
-                                            
-                                            {/* Refund Timeline */}
-                                            {(selectedOrder.refundInfo.status === 'initiated' || selectedOrder.refundInfo.status === 'processed') && (
-                                                <Box mt={4}>
-                                                    <Typography variant="subtitle1" fontWeight={600} mb={2}>
-                                                        Refund Timeline
-                                                    </Typography>
-                                                    <Timeline position="alternate">
-                                                        <TimelineItem>
-                                                            <TimelineSeparator>
-                                                                <TimelineDot color="primary" />
-                                                                <TimelineConnector />
-                                                            </TimelineSeparator>
-                                                            <TimelineContent>
-                                                                <Typography variant="body2" fontWeight={600}>
-                                                                    Refund Initiated
+
+                                                {/* Refund Meta Information */}
+                                                <Box
+                                                    sx={{
+                                                        display: 'grid',
+                                                        gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                                                        gap: 2,
+                                                        mb: 3
+                                                    }}
+                                                >
+                                                    {selectedOrder.refundInfo.refundId && (
+                                                        <Box>
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                Refund ID
+                                                            </Typography>
+                                                            <Typography
+                                                                variant="body2"
+                                                                fontFamily="monospace"
+                                                                fontWeight={500}
+                                                            >
+                                                                {selectedOrder.refundInfo.refundId}
+                                                            </Typography>
+                                                        </Box>
+                                                    )}
+
+                                                    {selectedOrder.refundInfo.reason && (
+                                                        <Box>
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                Refund Reason
+                                                            </Typography>
+                                                            <Typography fontWeight={500}>
+                                                                {selectedOrder.refundInfo.reason}
+                                                            </Typography>
+                                                        </Box>
+                                                    )}
+
+                                                    {selectedOrder.refundInfo.speed && (
+                                                        <Box>
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                Processing Speed
+                                                            </Typography>
+                                                            <Typography fontWeight={500}>
+                                                                {selectedOrder.refundInfo.speed}
+                                                            </Typography>
+                                                        </Box>
+                                                    )}
+
+                                                    {selectedOrder.refundInfo.createdAt && (
+                                                        <Box>
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                Initiated
+                                                            </Typography>
+                                                            <Typography fontWeight={500}>
+                                                                {formatDate(selectedOrder.refundInfo.createdAt)}
+                                                            </Typography>
+                                                        </Box>
+                                                    )}
+
+                                                    {selectedOrder.refundInfo.processedAt && (
+                                                        <Box>
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                Processed
+                                                            </Typography>
+                                                            <Typography fontWeight={500}>
+                                                                {formatDate(selectedOrder.refundInfo.processedAt)}
+                                                            </Typography>
+                                                        </Box>
+                                                    )}
+
+                                                    {selectedOrder.refundInfo.estimatedSettlement && (
+                                                        <Box>
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                Expected Settlement
+                                                            </Typography>
+                                                            <Typography fontWeight={500}>
+                                                                {formatDate(selectedOrder.refundInfo.estimatedSettlement)}
+                                                                <Typography component="span" sx={{ ml: 1, color: 'green', fontWeight: 600 }}>
+                                                                    ({getEstimatedRefundDays(selectedOrder.refundInfo)})
                                                                 </Typography>
-                                                                <Typography variant="caption" color="text.secondary">
-                                                                    {formatDate(selectedOrder.refundInfo.createdAt)}
-                                                                </Typography>
-                                                            </TimelineContent>
-                                                        </TimelineItem>
-                                                        {selectedOrder.refundInfo.processedAt && (
+                                                            </Typography>
+                                                        </Box>
+                                                    )}
+                                                </Box>
+
+                                                {/* Refund Notes */}
+                                                {selectedOrder.refundInfo.notes && (
+                                                    <Box mb={2}>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Note
+                                                        </Typography>
+                                                        <Typography
+                                                            sx={{
+                                                                background: 'white',
+                                                                p: 2,
+                                                                borderRadius: 1,
+                                                                borderLeft: '3px solid #74b9ff'
+                                                            }}
+                                                        >
+                                                            {selectedOrder.refundInfo.notes}
+                                                        </Typography>
+                                                    </Box>
+                                                )}
+
+                                                {/* Refund Timeline */}
+                                                {(selectedOrder.refundInfo.status === 'initiated' ||
+                                                    selectedOrder.refundInfo.status === 'processed') && (
+                                                    <Box mt={3}>
+                                                        <Typography variant="subtitle1" fontWeight={600} mb={2}>
+                                                            Refund Timeline
+                                                        </Typography>
+
+                                                        <Timeline position="alternate">
                                                             <TimelineItem>
                                                                 <TimelineSeparator>
-                                                                    <TimelineDot color="success" />
+                                                                    <TimelineDot color="primary" />
                                                                     <TimelineConnector />
                                                                 </TimelineSeparator>
                                                                 <TimelineContent>
-                                                                    <Typography variant="body2" fontWeight={600}>
-                                                                        Refund Processed
-                                                                    </Typography>
+                                                                    <Typography fontWeight={600}>Refund Initiated</Typography>
                                                                     <Typography variant="caption" color="text.secondary">
-                                                                        {formatDate(selectedOrder.refundInfo.processedAt)}
+                                                                        {formatDate(selectedOrder.refundInfo.createdAt)}
                                                                     </Typography>
                                                                 </TimelineContent>
                                                             </TimelineItem>
-                                                        )}
-                                                        <TimelineItem>
-                                                            <TimelineSeparator>
-                                                                <TimelineDot 
-                                                                    color={selectedOrder.refundInfo.status === 'processed' ? 'info' : 'grey'} 
-                                                                />
-                                                            </TimelineSeparator>
-                                                            <TimelineContent>
-                                                                <Typography variant="body2" fontWeight={600}>
-                                                                    Amount Credited to Account
-                                                                </Typography>
-                                                                <Typography variant="caption" color="text.secondary">
-                                                                    {selectedOrder.refundInfo.estimatedSettlement
-                                                                        ? formatDate(selectedOrder.refundInfo.estimatedSettlement)
-                                                                        : 'Pending'}
-                                                                </Typography>
-                                                            </TimelineContent>
-                                                        </TimelineItem>
-                                                    </Timeline>
-                                                </Box>
-                                            )}
-                                        </Box>
-                                    </CardContent>
-                                )}
-                                
-                                {/* Items Info Section */}
-                                <CardContent sx={{ p: 0 }}>
-                                    <Typography variant="h6" fontWeight={600} mb={3} sx={{ color: 'primary.main' }}>
+
+                                                            {selectedOrder.refundInfo.processedAt && (
+                                                                <TimelineItem>
+                                                                    <TimelineSeparator>
+                                                                        <TimelineDot color="success" />
+                                                                        <TimelineConnector />
+                                                                    </TimelineSeparator>
+                                                                    <TimelineContent>
+                                                                        <Typography fontWeight={600}>Refund Processed</Typography>
+                                                                        <Typography variant="caption" color="text.secondary">
+                                                                            {formatDate(selectedOrder.refundInfo.processedAt)}
+                                                                        </Typography>
+                                                                    </TimelineContent>
+                                                                </TimelineItem>
+                                                            )}
+
+                                                            <TimelineItem>
+                                                                <TimelineSeparator>
+                                                                    <TimelineDot color="info" />
+                                                                </TimelineSeparator>
+                                                                <TimelineContent>
+                                                                    <Typography fontWeight={600}>
+                                                                        Amount Credited to Account
+                                                                    </Typography>
+                                                                    <Typography variant="caption">
+                                                                        {selectedOrder.refundInfo.estimatedSettlement
+                                                                            ? formatDate(selectedOrder.refundInfo.estimatedSettlement)
+                                                                            : 'Pending'}
+                                                                    </Typography>
+                                                                </TimelineContent>
+                                                            </TimelineItem>
+                                                        </Timeline>
+                                                    </Box>
+                                                )}
+                                            </Box>
+                                        </CardContent>
+                                    )}
+                                {/* ===================== ITEMS ORDERED ===================== */}
+                                <CardContent sx={{ p: 0, mb: 2 }}>
+                                    <Typography
+                                        variant="h6"
+                                        fontWeight={600}
+                                        mb={3}
+                                        sx={{ color: 'primary.main' }}
+                                    >
                                         Items Ordered ({selectedOrder.items?.length || 0})
                                     </Typography>
+
                                     <Box display="grid" gap={2}>
-                                        {selectedOrder.items?.map((item, index) => (
-                                            <Box 
-                                                key={index} 
-                                                p={2.5} 
-                                                bgcolor="background.default" 
-                                                border={1} 
-                                                borderColor="divider" 
-                                                borderRadius={2}
-                                                sx={{
-                                                    transition: 'all 0.2s',
-                                                    '&:hover': {
-                                                        borderColor: 'primary.main',
-                                                        boxShadow: 1
-                                                    }
-                                                }}
-                                            >
-                                                <Typography variant="subtitle1" fontWeight={600} mb={1}>
-                                                    {item.name}
-                                                </Typography>
-                                                <Typography fontSize={13} color="text.secondary" mb={2}>
-                                                    Product ID: {item.productId}
-                                                </Typography>
-                                                <Box display="flex" justifyContent="space-between" alignItems="center">
-                                                    <Typography variant="body2" color="text.secondary">
-                                                        ₹{item.price?.toLocaleString('en-IN')} × {item.quantity}
-                                                    </Typography>
-                                                    <Typography variant="h6" color="primary.main" fontWeight={700}>
-                                                        ₹{(item.price * item.quantity)?.toLocaleString('en-IN')}
-                                                    </Typography>
+                                        {selectedOrder.items?.map((item, index) => {
+                                            const key = `${item.productId}-${index}`;
+                                            const imgSrc = getProductImage(item);
+
+                                            return (
+                                                <Box
+                                                    key={key}
+                                                    sx={{
+                                                        display: 'flex',
+                                                        gap: 2,
+                                                        p: 2.5,
+                                                        bgcolor: 'background.default',
+                                                        border: 1,
+                                                        borderColor: 'divider',
+                                                        borderRadius: 2,
+                                                        transition: '0.2s',
+                                                        '&:hover': {
+                                                            borderColor: 'primary.main',
+                                                            boxShadow: 1
+                                                        }
+                                                    }}
+                                                >
+                                                    {/* IMAGE + LOADER */}
+                                                    {!imageLoading[key] ? (
+                                                        <Box
+                                                            component="img"
+                                                            src={imgSrc}
+                                                            alt={item.name}
+                                                            onLoad={() =>
+                                                                setImageLoading(prev => ({ ...prev, [key]: false }))
+                                                            }
+                                                            onError={() =>
+                                                                setImageLoading(prev => ({ ...prev, [key]: false }))
+                                                            }
+                                                            sx={{
+                                                                width: 80,
+                                                                height: 80,
+                                                                borderRadius: 1.5,
+                                                                objectFit: 'cover',
+                                                                border: '1px solid #ddd',
+                                                                flexShrink: 0
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <Box
+                                                            sx={{
+                                                                width: 80,
+                                                                height: 80,
+                                                                borderRadius: 1.5,
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                bgcolor: 'grey.200',
+                                                                flexShrink: 0
+                                                            }}
+                                                        >
+                                                            <CircularProgress size={24} />
+                                                        </Box>
+                                                    )}
+
+                                                    {/* PRODUCT DETAILS */}
+                                                    <Box sx={{ flex: 1 }}>
+                                                        <Typography variant="subtitle1" fontWeight={600} mb={0.5}>
+                                                            {item.name}
+                                                        </Typography>
+
+                                                        <Typography
+                                                            fontSize={13}
+                                                            color="text.secondary"
+                                                            mb={1.5}
+                                                        >
+                                                            Product ID: {item.productId}
+                                                        </Typography>
+
+                                                        <Box
+                                                            display="flex"
+                                                            justifyContent="space-between"
+                                                            alignItems="flex-end"
+                                                        >
+                                                            <Typography
+                                                                variant="body2"
+                                                                color="text.secondary"
+                                                            >
+                                                                ₹{item.price?.toLocaleString('en-IN')} × {item.quantity}
+                                                            </Typography>
+
+                                                            <Typography
+                                                                variant="h6"
+                                                                fontWeight={700}
+                                                                sx={{ color: 'primary.main' }}
+                                                            >
+                                                                ₹{(item.price * item.quantity)?.toLocaleString('en-IN')}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Box>
                                                 </Box>
-                                            </Box>
-                                        ))}
+                                            );
+                                        })}
                                     </Box>
                                 </CardContent>
-                            </Box>
-                        </>
-                    )}
+                            </>
+                        )}
+                    </Box>
                 </Box>
             </Modal>
         </Box>

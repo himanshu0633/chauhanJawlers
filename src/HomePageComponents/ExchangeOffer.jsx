@@ -223,16 +223,12 @@ export default function ExchangeOffer() {
                         Your browser does not support the video tag.
                     </VideoElement>
 
-<<<<<<< HEAD
-            
-=======
                     {/* <BrandLogo>
                         <LogoContainer className="videoLogoSize">
                             <img src="/logo.svg" alt="img" />
                         </LogoContainer>
                     </BrandLogo> */}
 
->>>>>>> 167973247850cc348fdbef8b37ea93ebbed7203d
                     <VideoOverlay isPlaying={isPlaying}>
                         <PlayButton >
                             <PlayArrow sx={{ fontSize: "32px", color: "#2C2C2C", marginLeft: "4px" }} />
