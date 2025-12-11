@@ -223,7 +223,16 @@ export default function ExchangeOffer() {
                         Your browser does not support the video tag.
                     </VideoElement>
 
+<<<<<<< HEAD
             
+=======
+                    {/* <BrandLogo>
+                        <LogoContainer className="videoLogoSize">
+                            <img src="/logo.svg" alt="img" />
+                        </LogoContainer>
+                    </BrandLogo> */}
+
+>>>>>>> 167973247850cc348fdbef8b37ea93ebbed7203d
                     <VideoOverlay isPlaying={isPlaying}>
                         <PlayButton >
                             <PlayArrow sx={{ fontSize: "32px", color: "#2C2C2C", marginLeft: "4px" }} />
@@ -232,13 +241,7 @@ export default function ExchangeOffer() {
                 </VideoContainer>
 
                 <BottomSection>
-                    {/* <ExploreButton
-                        variant="contained"
-                        endIcon={<ArrowForward sx={{ fontSize: "18px" }} />}
-                        onClick={() => console.log("Explore Now clicked")}
-                    >
-                        Explore Now
-                    </ExploreButton> */}
+                  
 
                     <DescriptionText>
                         Join us in celebrating your treasured moments with jewellery designed to last a lifetime.

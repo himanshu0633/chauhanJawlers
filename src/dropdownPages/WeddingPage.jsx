@@ -102,34 +102,50 @@ function WeddingProductCard({ product }) {
         justifyContent: "space-between",
       }}
     >
-      <Box sx={{
-        position: 'relative',
-        borderRadius: 2,
-        overflow: 'hidden',
-        width: "100%",
-        height: { xs: 200 },
-        mx: 'auto',
-        bgcolor: 'transparent',
-        boxShadow: 'none',
-        pt: 1,
-        backgroundColor: '#fff'
-      }}>
-        <Box 
-          onClick={() => navigate(`/singleProduct/${product._id}`)} 
-          style={{ textDecoration: 'none', cursor: 'pointer' }}
+      {/* IMAGE BOX – updated to center image & avoid crop */}
+      <Box
+        sx={{
+          position: 'relative',
+          borderRadius: 2,
+          overflow: 'hidden',
+          width: "100%",
+          height: { xs: 200 },
+          mx: 'auto',
+          bgcolor: 'transparent',
+          boxShadow: 'none',
+          pt: 1,
+          backgroundColor: '#fff',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Box
+          onClick={() => navigate(`/singleProduct/${product._id}`)}
+          style={{
+            textDecoration: 'none',
+            cursor: 'pointer',
+            width: "100%",
+            height: "100%",
+          }}
         >
           <img
             src={imgUrl}
             alt={product.name}
             style={{
-              margin: 'auto',
-              objectFit: 'cover',
-              width: '100%',
-              height: "100%",  
-              borderRadius: '8px'
+              display: "block",
+              margin: '0 auto',
+              maxWidth: "100%",
+              maxHeight: "100%",
+              width: "100%",
+              height: "100%",
+              objectFit: 'cover',      // 🔥 no cropping, full product visible
+              objectPosition: "center",
+              borderRadius: '8px',
             }}
           />
         </Box>
+
         <IconButton
           onClick={handleWishlistClick}
           aria-label="add to wishlist"
@@ -609,8 +625,18 @@ const WeddingPage = () => {
                     <img
                       src={publicUrl(item.slider_image)}
                       alt={item.type}
-                      style={{ width: "100%", height: "100%", maxWidth: "100%", objectFit: "contain", display: "block", cursor: "pointer", borderRadius: "12px" }}
-                      onClick={() => navigate(`/allJewellery/${(item.variety || 'all').toLowerCase()}`)}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        maxWidth: "100%",
+                        objectFit: "contain",
+                        display: "block",
+                        cursor: "pointer",
+                        borderRadius: "12px",
+                      }}
+                      onClick={() =>
+                        navigate(`/allJewellery/${(item.variety || 'all').toLowerCase()}`)
+                      }
                     />
                   </Box>
                 </SwiperSlide>
