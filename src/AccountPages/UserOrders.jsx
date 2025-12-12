@@ -84,24 +84,51 @@ function getEstimatedRefundDays(refundInfo) {
 }
 
 // ================= IMAGE HELPER =================
+// ================= IMAGE HELPER =================
 const getProductImage = (item) => {
+    const BASE_URL = 'https://backend.chauhansonsjewellers.com';
+    
+    // Helper function to prepend base URL if needed
+    const getFullImageUrl = (url) => {
+        if (!url) return null;
+        
+        // If URL already has http/https, return as is
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+            return url;
+        }
+        
+        // If URL starts with /, prepend base URL
+        if (url.startsWith('/')) {
+            return `${BASE_URL}${url}`;
+        }
+        
+        // If it's just a filename, prepend base URL with uploads path
+        // Adjust this based on your actual uploads directory structure
+        return `${BASE_URL}/uploads/${url}`;
+    };
+
     // 1. Check if product has media array
     if (item.product?.media?.length > 0) {
         const imageMedia = item.product.media.find(m => m.type === "image");
-        if (imageMedia?.url) return imageMedia.url;
+        const url = getFullImageUrl(imageMedia?.url);
+        if (url) return url;
     }
     
     // 2. Check if productId has media (populated)
     if (item.productId?.media?.length > 0) {
         const imageMedia = item.productId.media.find(m => m.type === "image");
-        if (imageMedia?.url) return imageMedia.url;
+        const url = getFullImageUrl(imageMedia?.url);
+        if (url) return url;
     }
     
-    // 3. Check if we have image from API
-    if (item.image) return item.image;
+    // 3. Check if we have image from API (could be filename or path)
+    if (item.image) {
+        const url = getFullImageUrl(item.image);
+        if (url) return url;
+    }
     
-    // 4. Default placeholder
-    // return "https://via.placeholder.com/80x80?text=No+Image";
+    // 4. Default placeholder - you can use a local placeholder or keep the external one
+    return "https://via.placeholder.com/80x80?text=No+Image";
 };
 
 // ===================== MAIN COMPONENT =====================
@@ -412,7 +439,7 @@ const UserOrders = () => {
                                                         }}
                                                     />
                                                     <Typography noWrap sx={{ maxWidth: 150 }}>
-                                                        {item.name} (x{item.quantity})
+                                                        {item.name} {item.quantity}
                                                     </Typography>
                                                 </Box>
                                             );
