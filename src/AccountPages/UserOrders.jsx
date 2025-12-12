@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-    Chip, Button, Typography, Modal, Box, CardContent, Snackbar, Alert, CircularProgress
+    Chip, Button, Typography, Modal, Box, CardContent, Snackbar, Alert, CircularProgress,Divider ,
+    Link, IconButton, Tooltip
 } from '@mui/material';
 import {
     Timeline, TimelineItem, TimelineSeparator, TimelineDot, TimelineConnector, TimelineContent
 } from '@mui/lab';
 import { useNavigate } from 'react-router-dom';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import axiosInstance from '../commonComponents/AxiosInstance';
 
 // ================= STATUS COLOR HELPERS =================
@@ -16,6 +19,8 @@ const statusColor = status => {
         case 'cancelled': return 'error';
         case 'delivered': return 'success';
         case 'refunded': return 'info';
+        case 'processing': return 'info';
+        case 'shipped': return 'secondary';
         default: return 'default';
     }
 };
@@ -38,7 +43,7 @@ function paymentStatusLabel(status) {
     if (status === 'captured') return 'Paid';
     if (status === 'failed') return 'Failed';
     if (status === 'authorized') return 'Authorized';
-    if (status === 'created') return 'Created';
+    if (status === 'created') return 'Payment Initiated';
     if (status === 'refunded') return 'Refunded';
     return status.charAt(0).toUpperCase() + status.slice(1);
 }
@@ -84,7 +89,6 @@ function getEstimatedRefundDays(refundInfo) {
 }
 
 // ================= IMAGE HELPER =================
-// ================= IMAGE HELPER =================
 const getProductImage = (item) => {
     const BASE_URL = 'https://backend.chauhansonsjewellers.com';
     
@@ -103,20 +107,19 @@ const getProductImage = (item) => {
         }
         
         // If it's just a filename, prepend base URL with uploads path
-        // Adjust this based on your actual uploads directory structure
         return `${BASE_URL}/uploads/${url}`;
     };
 
-    // 1. Check if product has media array
-    if (item.product?.media?.length > 0) {
-        const imageMedia = item.product.media.find(m => m.type === "image");
+    // 1. Check if product has media array (populated product)
+    if (item.productId?.media?.length > 0) {
+        const imageMedia = item.productId.media.find(m => m.type === "image");
         const url = getFullImageUrl(imageMedia?.url);
         if (url) return url;
     }
     
-    // 2. Check if productId has media (populated)
-    if (item.productId?.media?.length > 0) {
-        const imageMedia = item.productId.media.find(m => m.type === "image");
+    // 2. Check if product has media array
+    if (item.product?.media?.length > 0) {
+        const imageMedia = item.product.media.find(m => m.type === "image");
         const url = getFullImageUrl(imageMedia?.url);
         if (url) return url;
     }
@@ -127,8 +130,34 @@ const getProductImage = (item) => {
         if (url) return url;
     }
     
-    // 4. Default placeholder - you can use a local placeholder or keep the external one
+    // 4. Default placeholder
     return "https://via.placeholder.com/80x80?text=No+Image";
+};
+
+// ================= GET PRODUCT ID =================
+const getProductId = (item) => {
+    // Try to get product ID from different possible locations
+    return item.productId?._id || 
+           item.product?._id || 
+           item.productId || 
+           null;
+};
+
+// ================= GET PRODUCT NAME =================
+const getProductName = (item) => {
+    return item.productId?.name || 
+           item.product?.name || 
+           item.name || 
+           'Unknown Product';
+};
+
+// ================= GET PRODUCT PRICE =================
+const getProductPrice = (item) => {
+    // Try to get price from different possible locations
+    return item.price || 
+           item.productId?.consumer_price || 
+           item.product?.consumer_price || 
+           0;
 };
 
 // ===================== MAIN COMPONENT =====================
@@ -141,7 +170,6 @@ const UserOrders = () => {
     const [snackbar, setSnackbar] = useState({ 
         open: false, message: '', severity: 'info' 
     });
-    const [imageLoading, setImageLoading] = useState({});
 
     const navigate = useNavigate();
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
@@ -330,6 +358,16 @@ const UserOrders = () => {
     const handleCloseSnackbar = () =>
         setSnackbar(prev => ({ ...prev, open: false }));
 
+    // ================= NAVIGATE TO PRODUCT =================
+    const navigateToProduct = (productId) => {
+        if (productId) {
+            navigate(`/singleProduct/${productId}`);
+            if (showModal) {
+                closeOrderDetails();
+            }
+        }
+    };
+
     // ====================== PAGE UI ======================
     if (isAuthenticated === null) {
         return (
@@ -341,7 +379,8 @@ const UserOrders = () => {
 
     return (
         <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 1400, mx: 'auto' }}>
-            <Typography variant="h4" fontWeight={600} mb={4} sx={{ color: 'primary.main' }}>
+            <Typography variant="h4" fontWeight={600} mb={4} sx={{ color: 'primary.main', display: 'flex', alignItems: 'center', gap: 2 }}>
+                <ShoppingBagIcon fontSize="large" />
                 My Orders
             </Typography>
 
@@ -416,20 +455,31 @@ const UserOrders = () => {
                                 <TableCell>
                                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                                         {order.items?.slice(0, 2).map((item, index) => {
-                                            const key = `${item.productId || item._id}-${index}`;
+                                            const productId = getProductId(item);
+                                            const productName = getProductName(item);
                                             const imgSrc = getProductImage(item);
+                                            const key = `${productId || item._id}-${index}`;
 
                                             return (
-                                                <Box key={key} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                <Box 
+                                                    key={key} 
+                                                    sx={{ 
+                                                        display: 'flex', 
+                                                        alignItems: 'center', 
+                                                        gap: 1,
+                                                        cursor: productId ? 'pointer' : 'default',
+                                                        '&:hover': productId ? { 
+                                                            backgroundColor: 'action.hover',
+                                                            borderRadius: 1,
+                                                            p: 0.5 
+                                                        } : {}
+                                                    }}
+                                                    onClick={() => productId && navigateToProduct(productId)}
+                                                >
                                                     <Box
                                                         component="img"
                                                         src={imgSrc}
-                                                        alt={item.name}
-                                                        onLoad={() => setImageLoading(prev => ({ ...prev, [key]: false }))}
-                                                        onError={(e) => {
-                                                            e.target.src = "";
-                                                            setImageLoading(prev => ({ ...prev, [key]: false }));
-                                                        }}
+                                                        alt={productName}
                                                         sx={{
                                                             width: 40,
                                                             height: 40,
@@ -438,9 +488,34 @@ const UserOrders = () => {
                                                             border: '1px solid #ddd'
                                                         }}
                                                     />
-                                                    <Typography noWrap sx={{ maxWidth: 150 }}>
-                                                        {item.name} {item.quantity}
-                                                    </Typography>
+                                                    <Box>
+                                                        <Typography 
+                                                            noWrap 
+                                                            sx={{ 
+                                                                maxWidth: 150,
+                                                                color: productId ? 'primary.main' : 'text.primary',
+                                                                fontWeight: productId ? 500 : 400,
+                                                                textDecoration: productId ? 'underline' : 'none'
+                                                            }}
+                                                        >
+                                                            {productName} 
+                                                        </Typography>
+                                                        <Typography variant="caption" color="text.secondary">
+                                                            Qty: {item.quantity}
+                                                        </Typography>
+                                                    </Box>
+                                                    {productId && (
+                                                        <Tooltip title="View Product">
+                                                            <VisibilityIcon 
+                                                                fontSize="small" 
+                                                                sx={{ 
+                                                                    ml: 1, 
+                                                                    color: 'primary.main',
+                                                                    opacity: 0.7 
+                                                                }} 
+                                                            />
+                                                        </Tooltip>
+                                                    )}
                                                 </Box>
                                             );
                                         })}
@@ -490,8 +565,9 @@ const UserOrders = () => {
                                         variant="outlined"
                                         onClick={() => openOrderDetails(order)}
                                         size="small"
+                                        startIcon={<VisibilityIcon />}
                                     >
-                                        View Details
+                                        View
                                     </Button>
                                 </TableCell>
                             </TableRow>
@@ -574,9 +650,12 @@ const UserOrders = () => {
                                             <Typography variant="body2" color="text.secondary">
                                                 Status
                                             </Typography>
-                                            <Typography fontWeight={500}>
-                                                {selectedOrder.status}
-                                            </Typography>
+                                            <Chip
+                                                label={selectedOrder.status}
+                                                color={statusColor(selectedOrder.status)}
+                                                size="small"
+                                                sx={{ mt: 0.5 }}
+                                            />
                                         </Box>
 
                                         <Box>
@@ -599,6 +678,15 @@ const UserOrders = () => {
 
                                         <Box>
                                             <Typography variant="body2" color="text.secondary">
+                                                Customer Name
+                                            </Typography>
+                                            <Typography fontWeight={500}>
+                                                {selectedOrder.userName || 'N/A'}
+                                            </Typography>
+                                        </Box>
+
+                                        <Box>
+                                            <Typography variant="body2" color="text.secondary">
                                                 Phone
                                             </Typography>
                                             <Typography fontWeight={500}>
@@ -606,7 +694,16 @@ const UserOrders = () => {
                                             </Typography>
                                         </Box>
 
-                                        <Box sx={{ gridColumn: { md: 'span 2' } }}>
+                                        <Box>
+                                            <Typography variant="body2" color="text.secondary">
+                                                Email
+                                            </Typography>
+                                            <Typography fontWeight={500}>
+                                                {selectedOrder.userEmail || 'N/A'}
+                                            </Typography>
+                                        </Box>
+
+                                        <Box sx={{ gridColumn: { xs: 'span 1', md: 'span 3' } }}>
                                             <Typography variant="body2" color="text.secondary">
                                                 Delivery Address
                                             </Typography>
@@ -685,6 +782,28 @@ const UserOrders = () => {
                                                 </Typography>
                                             </Box>
                                         )}
+
+                                        {selectedOrder.paymentInfo?.amount && (
+                                            <Box>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Amount
+                                                </Typography>
+                                                <Typography fontWeight={700} sx={{ color: 'primary.main' }}>
+                                                    ₹{selectedOrder.paymentInfo.amount?.toLocaleString('en-IN')}
+                                                </Typography>
+                                            </Box>
+                                        )}
+
+                                        {selectedOrder.razorpayOrderId && (
+                                            <Box>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Razorpay Order ID
+                                                </Typography>
+                                                <Typography variant="body2" sx={{ backgroundColor: 'grey.100', p: 1, mt: 0.5, borderRadius: 1, fontFamily: 'monospace' }}>
+                                                    {selectedOrder.razorpayOrderId}
+                                                </Typography>
+                                            </Box>
+                                        )}
                                     </Box>
                                 </CardContent>
 
@@ -707,9 +826,11 @@ const UserOrders = () => {
                                                     color={refundColor(selectedOrder.refundInfo.status)}
                                                     sx={{ mr: 2, fontWeight: 600 }}
                                                 />
-                                                <Typography variant="h4" fontWeight={700} sx={{ color: 'primary.main' }}>
-                                                    ₹{selectedOrder.refundInfo.amount?.toLocaleString('en-IN')}
-                                                </Typography>
+                                                {selectedOrder.refundInfo.amount > 0 && (
+                                                    <Typography variant="h4" fontWeight={700} sx={{ color: 'primary.main' }}>
+                                                        ₹{selectedOrder.refundInfo.amount?.toLocaleString('en-IN')}
+                                                    </Typography>
+                                                )}
                                             </Box>
 
                                             {/* Refund Meta Information */}
@@ -782,6 +903,17 @@ const UserOrders = () => {
                                                         </Typography>
                                                     </Box>
                                                 )}
+
+                                                {selectedOrder.estimatedSettlementDisplay && (
+                                                    <Box>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Settlement Display
+                                                        </Typography>
+                                                        <Typography fontWeight={500}>
+                                                            {selectedOrder.estimatedSettlementDisplay}
+                                                        </Typography>
+                                                    </Box>
+                                                )}
                                             </Box>
 
                                             {/* Refund Notes */}
@@ -807,8 +939,11 @@ const UserOrders = () => {
 
                                     <Box display="grid" gap={2}>
                                         {selectedOrder.items?.map((item, index) => {
-                                            const key = `${item.productId || item._id}-${index}`;
+                                            const productId = getProductId(item);
+                                            const productName = getProductName(item);
+                                            const productPrice = getProductPrice(item);
                                             const imgSrc = getProductImage(item);
+                                            const key = `${productId || item._id}-${index}`;
 
                                             return (
                                                 <Box
@@ -822,13 +957,18 @@ const UserOrders = () => {
                                                         borderColor: 'divider',
                                                         borderRadius: 2,
                                                         transition: '0.2s',
-                                                        '&:hover': { borderColor: 'primary.main', boxShadow: 1 }
+                                                        '&:hover': { 
+                                                            borderColor: productId ? 'primary.main' : 'divider', 
+                                                            boxShadow: productId ? 1 : 0,
+                                                            cursor: productId ? 'pointer' : 'default'
+                                                        }
                                                     }}
+                                                    onClick={() => productId && navigateToProduct(productId)}
                                                 >
                                                     <Box
                                                         component="img"
                                                         src={imgSrc}
-                                                        alt={item.name}
+                                                        alt={productName}
                                                         onError={(e) => {
                                                             e.target.src = "https://via.placeholder.com/80x80?text=No+Image";
                                                         }}
@@ -843,27 +983,89 @@ const UserOrders = () => {
                                                     />
 
                                                     <Box sx={{ flex: 1 }}>
-                                                        <Typography variant="subtitle1" fontWeight={600} mb={0.5}>
-                                                            {item.name}
-                                                        </Typography>
+                                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                         <Box>
+    <Typography 
+        variant="subtitle1" 
+        fontWeight={600} 
+        mb={0.5}
+        sx={{
+            color: productId ? 'primary.main' : 'text.primary',
+            textDecoration: productId ? 'underline' : 'none'
+        }}
+    >
+        {productName}
+        {productId && (
+            <VisibilityIcon 
+                fontSize="small" 
+                sx={{ 
+                    ml: 1, 
+                    color: 'primary.main',
+                    verticalAlign: 'middle' 
+                }} 
+            />
+        )}
+    </Typography>
 
-                                                        <Typography fontSize={13} color="text.secondary" mb={1.5}>
-                                                            Quantity: {item.quantity}
-                                                        </Typography>
+    <Typography fontSize={13} color="text.secondary">
+        Quantity: {item.quantity}
+    </Typography>
+</Box>
 
-                                                        <Box display="flex" justifyContent="space-between" alignItems="flex-end">
+                                                            
+                                                            {productId && (
+                                                                <Button
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        navigateToProduct(productId);
+                                                                    }}
+                                                                >
+                                                                    View Product
+                                                                </Button>
+                                                            )}
+                                                        </Box>
+
+                                                        <Box display="flex" justifyContent="space-between" alignItems="flex-end" mt={2}>
                                                             <Typography variant="body2" color="text.secondary">
-                                                                ₹{item.price?.toLocaleString('en-IN')} × {item.quantity}
+                                                                Unit Price: {productPrice ? `₹${productPrice.toLocaleString('en-IN')}` : 'Price not available'}
                                                             </Typography>
 
                                                             <Typography variant="h6" fontWeight={700} sx={{ color: 'primary.main' }}>
-                                                                ₹{(item.price * item.quantity)?.toLocaleString('en-IN')}
+                                                                Total: {productPrice ? `₹${(productPrice * item.quantity).toLocaleString('en-IN')}` : 'N/A'}
                                                             </Typography>
                                                         </Box>
                                                     </Box>
                                                 </Box>
                                             );
                                         })}
+                                    </Box>
+
+                                    {/* ORDER TOTAL SUMMARY */}
+                                    <Box sx={{ mt: 4, p: 3, bgcolor: 'grey.50', borderRadius: 2, border: '1px solid #e0e0e0' }}>
+                                        <Typography variant="h6" fontWeight={600} mb={2} sx={{ color: 'primary.main' }}>
+                                            Order Summary
+                                        </Typography>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                            <Typography>Items Total</Typography>
+                                            <Typography>₹{selectedOrder.totalAmount?.toLocaleString('en-IN')}</Typography>
+                                        </Box>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                            <Typography>Shipping</Typography>
+                                            <Typography>Free</Typography>
+                                        </Box>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                            <Typography>Tax</Typography>
+                                            <Typography>Included</Typography>
+                                        </Box>
+                                        <Divider sx={{ my: 2 }} />
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                            <Typography variant="h6" fontWeight={700}>Total Amount</Typography>
+                                            <Typography variant="h6" fontWeight={700} sx={{ color: 'primary.main' }}>
+                                                ₹{selectedOrder.totalAmount?.toLocaleString('en-IN')}
+                                            </Typography>
+                                        </Box>
                                     </Box>
                                 </CardContent>
                             </>
