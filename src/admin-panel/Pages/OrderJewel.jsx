@@ -74,7 +74,7 @@ const OrderJewel = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [refreshing, setRefreshing] = useState(false);
-  const [processingCapture, setProcessingCapture] = useState(null);
+  
 
   useEffect(() => {
     fetchData();

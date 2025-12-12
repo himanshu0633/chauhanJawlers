@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import {
   Container,
@@ -26,7 +27,7 @@ const GiftingPage = () => {
   }, []);
   const fetchOccasions = async () => {
     try {
-      const response = await axiosInstance.get(`/user/allOccasions`);
+      const response = await axiosInstance.get("/user/allOccasions");
       const latestOccasions = response?.data ?? [];
 
       // Sort by createdAt descending (recent first)
@@ -144,7 +145,7 @@ const GiftingPage = () => {
         borderRadius: "14px",
         cursor: "pointer",
       }}
-      onClick={() => navigate(`/allJewellery`)}
+      onClick={() => navigate("/allJewellery")}
     />
   </Box>
 </Box>
@@ -153,7 +154,7 @@ const GiftingPage = () => {
 
 
       {/* Gift By Range Section */}
-      {/* <Box sx={{ mb: 6, textAlign: 'center' }}>
+      { <Box sx={{ mb: 6, textAlign: 'center' }}>
                 <Typography sx={{ ...responsiveTitle, mb: 1 }}>
                     Gift By Range
                 </Typography>
@@ -185,7 +186,7 @@ const GiftingPage = () => {
                         </Box>
                     ))}
                 </Box>
-            </Box> */}
+            </Box> }
 
       {/* Shop by Occasion Section */}
       <Box sx={{ mb: 6 }}>
@@ -223,7 +224,7 @@ const GiftingPage = () => {
                   onClick={() => {
                     navigate(`/allJewellery?occasion=${occasionItem._id}`);
                   }}
-                  // onClick={() => { navigate(`/gifting/allJewellery?occasion=${item._id}`) }}
+              
                 />
                 <Typography
                   sx={{
@@ -243,84 +244,7 @@ const GiftingPage = () => {
       </Box>
 
       {/* Late in Planning Gift Cards and Gold Coins */}
-      <Box sx={{ mb: 6 }}>
-        <Box
-          sx={{
-            display: "flex",
-            // flexDirection: { xs: 'column', md: 'row' },
-            gap: { xs: 1, sm: 3 },
-            mb: 4,
-            alignItems: "center",
-          }}
-        >
-          <Box
-            sx={{
-              width: { xs: "100%", md: "50%" },
-              borderRadius: 2,
-              overflow: "hidden",
-            }}
-          >
-            <CardMedia
-              component="img"
-              image="/collection1.png"
-              alt="Gift Card Banner"
-              sx={{ width: "100%", height: 300, objectFit: "cover" }}
-            />
-          </Box>
-          <Box
-            sx={{
-              width: { xs: "100%", md: "50%" },
-              textAlign: { xs: "center", md: "left" },
-            }}
-          >
-            <Typography sx={{ ...responsiveTitle, mb: 2 }}>
-              Late in planning?
-            </Typography>
-            <Typography sx={{ mb: 1 }}>
-              Explore Gift Cards for your last minute gifting needs
-            </Typography>
-          
-          </Box>
-        </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            // flexDirection: { xs: 'column-reverse', md: 'row' },
-            gap: { xs: 1, sm: 3 },
-            alignItems: "center",
-          }}
-        >
-          <Box
-            sx={{
-              width: { xs: "100%", md: "50%" },
-              textAlign: { xs: "center", md: "left" },
-            }}
-          >
-            <Typography sx={{ ...responsiveTitle, mb: 1 }}>
-              Or gold coins
-            </Typography>
-            <Typography sx={{ mb: 3 }}>
-              Explore Gift Coins for your last minute gifting needs
-            </Typography>
-         
-          </Box>
-          <Box
-            sx={{
-              width: { xs: "100%", md: "50%" },
-              borderRadius: 2,
-              overflow: "hidden",
-            }}
-          >
-            <CardMedia
-              component="img"
-              image="https://staticimg.tanishq.co.in/microsite/gifting/assets/images/crossSection/goldcoins.jpg"
-              alt="Gold Coins Banner"
-              sx={{ width: "100%", height: 300, objectFit: "cover" }}
-            />
-          </Box>
-        </Box>
-      </Box>
+     
     </Container>
   );
 };
