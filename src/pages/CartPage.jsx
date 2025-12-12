@@ -3,7 +3,7 @@ import {
   Box, Typography, Button, Grid, IconButton, Snackbar, Alert, Divider,
   Dialog, DialogTitle, DialogContent, DialogActions, TextField, InputAdornment,
   MenuItem, Select, FormControl, InputLabel, Container, Paper, Card,
-  Checkbox, FormControlLabel
+  Checkbox, FormControlLabel, Backdrop, CircularProgress
 } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddIcon from '@mui/icons-material/Add';
@@ -105,8 +105,6 @@ function CartCard({ product, onRemove, onUpdateQuantity }) {
           }
         />
       </div>
-
-  
 
       {/* Product Details */}
       <div className="product-details">
@@ -222,51 +220,51 @@ function OrderSummary({
           </Typography>
         </div>
 
-      {addresses?.length ? (
-  <div className="address-list">
-    {addresses.map((addr, idx) => (
-      <div
-        key={`${addr.address}-${idx}`}
-        className={`address-item ${formData.selectedAddress === addr.address ? 'selected' : ''}`}
-        onClick={() => {
-          setFormData((p) => ({ 
-            ...p, 
-            selectedAddress: addr.address,
-            phone: addr.phone || p.phone,
-            email: addr.email || p.email,
-            name: addr.name || p.name
-          }));
-        }}
-      >
-        <Typography className="address-radio">
-          <input
-            type="radio"
-            name="selectedAddress"
-            checked={formData.selectedAddress === addr.address}
-            onChange={() => {
-              setFormData((p) => ({ 
-                ...p, 
-                selectedAddress: addr.address,
-                phone: addr.phone || p.phone,
-                email: addr.email || p.email,
-                name: addr.name || p.name
-              }));
-            }}
-          />
-          Address {idx + 1}
-        </Typography>
-        <Typography className="address-text">
-          {addr.address}
-        </Typography>
-        {addr.email && (
-          <Typography className="address-email" variant="caption">
-            📧 {addr.email}
-          </Typography>
-        )}
-      </div>
-    ))}
-  </div>
-) : (
+        {addresses?.length ? (
+          <div className="address-list">
+            {addresses.map((addr, idx) => (
+              <div
+                key={`${addr.address}-${idx}`}
+                className={`address-item ${formData.selectedAddress === addr.address ? 'selected' : ''}`}
+                onClick={() => {
+                  setFormData((p) => ({ 
+                    ...p, 
+                    selectedAddress: addr.address,
+                    phone: addr.phone || p.phone,
+                    email: addr.email || p.email,
+                    name: addr.name || p.name
+                  }));
+                }}
+              >
+                <Typography className="address-radio">
+                  <input
+                    type="radio"
+                    name="selectedAddress"
+                    checked={formData.selectedAddress === addr.address}
+                    onChange={() => {
+                      setFormData((p) => ({ 
+                        ...p, 
+                        selectedAddress: addr.address,
+                        phone: addr.phone || p.phone,
+                        email: addr.email || p.email,
+                        name: addr.name || p.name
+                      }));
+                    }}
+                  />
+                  Address {idx + 1}
+                </Typography>
+                <Typography className="address-text">
+                  {addr.address}
+                </Typography>
+                {addr.email && (
+                  <Typography className="address-email" variant="caption">
+                    📧 {addr.email}
+                  </Typography>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
           <div className="no-address">
             <LocationOnIcon className="no-address-icon" />
             <Typography className="no-address-text">No address saved yet</Typography>
@@ -304,19 +302,17 @@ function OrderSummary({
       <Divider className="section-divider" />
 
       {/* Price Breakdown */}
-        <div className="price-breakdown">
-            
-
-          {/* Final Total */}
-          <div className="final-total">
-            <Typography variant="h6" className="total-label">
-              Total Amount
-            </Typography>
-            <Typography variant="h5" className="total-value">
-              {formatINR(finalTotal)}
-            </Typography>
-          </div>
+      <div className="price-breakdown">
+        {/* Final Total */}
+        <div className="final-total">
+          <Typography variant="h6" className="total-label">
+            Total Amount
+          </Typography>
+          <Typography variant="h5" className="total-value">
+            {formatINR(finalTotal)}
+          </Typography>
         </div>
+      </div>
 
       {/* Progress Bar for Free Shipping */}
       <div className="shipping-progress">
@@ -340,16 +336,15 @@ function OrderSummary({
       </div>
 
       {/* Checkout Button - Direct to payment */}
-
-<Button
-  variant="contained"
-  onClick={handleCheckout}
-  disabled={!formData.selectedAddress || !formData.phone || phoneError}
-  fullWidth
-  className="checkout-btn"
->
-  🛒 Proceed to Secure Checkout
-</Button>
+      <Button
+        variant="contained"
+        onClick={handleCheckout}
+        disabled={!formData.selectedAddress || !formData.phone || phoneError}
+        fullWidth
+        className="checkout-btn"
+      >
+        🛒 Proceed to Secure Checkout
+      </Button>
 
       {/* Trust Badges */}
       <div className="trust-badges">
@@ -389,9 +384,10 @@ export default function CartPage() {
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [phoneError, setPhoneError] = useState(false);
+  const [isProcessingOrder, setIsProcessingOrder] = useState(false);
   const [formData, setFormData] = useState({
-     flat: '', landmark: '', state: '', city: '', country: 'India', 
-  phone: '', selectedAddress: '', pincode: '', email: '', name: ''
+    flat: '', landmark: '', state: '', city: '', country: 'India', 
+    phone: '', selectedAddress: '', pincode: '', email: '', name: ''
   });
   const [snack, setSnack] = useState({ open: false, msg: '', severity: 'success' });
 
@@ -446,74 +442,72 @@ export default function CartPage() {
 
   const handleContinueShopping = () => navigate(-1);
 
- const handleAddAddress = async () => {
-  // Email validation
-  if (!formData.email?.trim()) {
-    toast.error('Email is required');
-    return;
-  }
-  
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(formData.email.trim())) {
-    toast.error('Please enter a valid email address');
-    return;
-  }
+  const handleAddAddress = async () => {
+    // Email validation
+    if (!formData.email?.trim()) {
+      toast.error('Email is required');
+      return;
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
 
-  if (!formData.name?.trim()) {
-    toast.error('Full name is required');
-    return;
-  }
+    if (!formData.name?.trim()) {
+      toast.error('Full name is required');
+      return;
+    }
 
-  if (!formData.flat?.trim()) {
-    toast.error('Flat / House is required');
-    return;
-  }
-  
-  if (!formData.phone || !/^\d{10}$/.test(formData.phone)) {
-    toast.error('Phone number is required and must be exactly 10 digits');
-    return;
-  }
+    if (!formData.flat?.trim()) {
+      toast.error('Flat / House is required');
+      return;
+    }
+    
+    if (!formData.phone || !/^\d{10}$/.test(formData.phone)) {
+      toast.error('Phone number is required and must be exactly 10 digits');
+      return;
+    }
 
-  if (!formData.pincode?.trim()) {
-    toast.error('Pincode is required');
-    return;
-  }
+    if (!formData.pincode?.trim()) {
+      toast.error('Pincode is required');
+      return;
+    }
 
-  const addressObj = {
-    address: `${formData.flat}, ${formData.landmark}, ${formData.city}, ${formData.state}, ${formData.country} ,${formData.pincode}`,
-    email: formData.email.trim(),
-    name: formData.name.trim(),
-    phone: formData.phone
+    const addressObj = {
+      address: `${formData.flat}, ${formData.landmark}, ${formData.city}, ${formData.state}, ${formData.country} ,${formData.pincode}`,
+      email: formData.email.trim(),
+      name: formData.name.trim(),
+      phone: formData.phone
+    };
+
+    try {
+      // Save address locally with email
+      const newAddresses = [...addresses, addressObj];
+      setAddresses(newAddresses);
+      
+      // Save to localStorage for persistence
+      const cartAddresses = JSON.parse(localStorage.getItem('cartAddresses') || '[]');
+      cartAddresses.push(addressObj);
+      localStorage.setItem('cartAddresses', JSON.stringify(cartAddresses));
+      
+      toast.success('Address added successfully');
+      setFormData((p) => ({ ...p, selectedAddress: addressObj.address }));
+      setShowModal(false);
+      
+      // Reset form but keep email/name for next time
+      setFormData({
+        flat: '', landmark: '', state: '', city: '', country: 'India', 
+        phone: '', selectedAddress: addressObj.address, pincode: '',
+        email: formData.email, // Keep email
+        name: formData.name    // Keep name
+      });
+    } catch (error) {
+      toast.error('Failed to add address');
+      console.error('Address add error:', error);
+    }
   };
-
-  try {
-    // Save address locally with email
-    const newAddresses = [...addresses, addressObj];
-    setAddresses(newAddresses);
-    
-    // Save to localStorage for persistence
-    const cartAddresses = JSON.parse(localStorage.getItem('cartAddresses') || '[]');
-    cartAddresses.push(addressObj);
-    localStorage.setItem('cartAddresses', JSON.stringify(cartAddresses));
-    
-  
-    
-    toast.success('Address added successfully');
-    setFormData((p) => ({ ...p, selectedAddress: addressObj.address }));
-    setShowModal(false);
-    
-    // Reset form but keep email/name for next time
-    setFormData({
-      flat: '', landmark: '', state: '', city: '', country: 'India', 
-      phone: '', selectedAddress: addressObj.address, pincode: '',
-      email: formData.email, // Keep email
-      name: formData.name    // Keep name
-    });
-  } catch (error) {
-    toast.error('Failed to add address');
-    console.error('Address add error:', error);
-  }
-};
 
   // ----- states/cities -----
   useEffect(() => {
@@ -526,45 +520,7 @@ export default function CartPage() {
       }
     })();
   }, []);
-useEffect(() => {
-  // Pre-fill email and name from localStorage if available
-  const savedEmail = localStorage.getItem('cartEmail');
-  const savedName = localStorage.getItem('cartName');
-  if (savedEmail || savedName) {
-    setFormData(p => ({
-      ...p,
-      email: savedEmail || p.email,
-      name: savedName || p.name
-    }));
-  }
-  
-  // Load addresses from localStorage first
-  const cartAddresses = JSON.parse(localStorage.getItem('cartAddresses') || '[]');
-  if (cartAddresses.length > 0) {
-    setAddresses(cartAddresses);
-    return;
-  }
 
-  // Fallback to API if user is authenticated
-  (async () => {
-    try {
-      const userData = JSON.parse(localStorage.getItem('userData'));
-      const userId = userData?._id;
-      if (!userId) return;
-      
-      const response = await axiosInstance.get(`/admin/readAdmin/${userId}`);
-      const userInfo = response?.data?.data;
-      setOriginalAddress(userInfo);
-      if (Array.isArray(userInfo?.address)) {
-        setAddresses(userInfo.address);
-        // Also save to localStorage for future use
-        localStorage.setItem('cartAddresses', JSON.stringify(userInfo.address));
-      }
-    } catch (e) {
-      console.error('Error fetching address:', e);
-    }
-  })();
-}, []);
   useEffect(() => {
     if (!formData.state) return;
     (async () => {
@@ -581,6 +537,17 @@ useEffect(() => {
 
   // ----- load user addresses -----
   useEffect(() => {
+    // Pre-fill email and name from localStorage if available
+    const savedEmail = localStorage.getItem('cartEmail');
+    const savedName = localStorage.getItem('cartName');
+    if (savedEmail || savedName) {
+      setFormData(p => ({
+        ...p,
+        email: savedEmail || p.email,
+        name: savedName || p.name
+      }));
+    }
+    
     // Load addresses from localStorage first
     const cartAddresses = JSON.parse(localStorage.getItem('cartAddresses') || '[]');
     if (cartAddresses.length > 0) {
@@ -610,93 +577,110 @@ useEffect(() => {
   }, []);
 
   // ----- razorpay -----
-  // Update your handleCheckout function in CartPage.js
+  const handleCheckout = () => {
+    // Direct payment flow - no login check
+    if (!formData.selectedAddress) {
+      toast.warn('Please select an address before checkout.');
+      return;
+    }
 
-const handleCheckout = () => {
-  // Direct payment flow - no login check
-  if (!formData.selectedAddress) {
-    toast.warn('Please select an address before checkout.');
-    return;
-  }
+    const phoneNumber = formData.phone || originalAddress?.phone || "";
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    
+    // Check if phone number is provided
+    if (!phoneNumber || phoneNumber.length !== 10) {
+      toast.warn('Please enter a valid 10-digit phone number before checkout.');
+      return;
+    }
 
-  const phoneNumber = formData.phone || originalAddress?.phone || "";
-  const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-  
-  // Check if phone number is provided
-  if (!phoneNumber || phoneNumber.length !== 10) {
-    toast.warn('Please enter a valid 10-digit phone number before checkout.');
-    return;
-  }
+    const options = {
+      key: 'rzp_test_RpQ1JwSJEy6yAw',
+      amount: Math.round(total * 100),
+      currency: 'INR',
+      name: 'Chauhan Sons Jewellers',
+      description: 'Order Payment',
+      handler: async function (response) {
+        try {
+          // Show processing loader
+          setIsProcessingOrder(true);
+          
+          // Show payment success toast
+          toast.success('Payment successful! Processing your order...');
 
-  const options = {
-    key: 'rzp_test_RpQ1JwSJEy6yAw',
-    amount: Math.round(total * 100),
-    currency: 'INR',
-    name: 'Chauhan Sons Jewellers',
-    description: 'Order Payment',
-    handler: async function (response) {
-      try {
-        toast.success('Payment successful!');
+          // Get user data from localStorage or use guest info
+          const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+          const userEmail = userData?.email || formData.email || 'guest@example.com';
+          const userName = userData?.name || formData.name || 'Guest User';
+          const userId = userData?._id || 'guest';
 
-        // Get user data from localStorage or use guest info
-        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-        const userEmail = userData?.email || formData.email || 'guest@example.com';
-        const userName = userData?.name || formData.name || 'Guest User';
-        const userId = userData?._id || 'guest';
-
-        const orderPayload = {
-          userId: userId,
-          userEmail: userEmail,
-          userName: userName,
-          items: cartItems.map((item) => {
-            const qty = item.cartQty ?? (typeof item.quantity === 'number' ? item.quantity : 1);
-            const price = Number(
-              item.unitPrice ??
-              item.selectedVariant?.final_price ??
-              item.selectedVariant?.finalPrice ??
-              0
-            );
-            return {
-              productId: item._id,
-              name: item.name,
-              quantity: qty,
-              price,
-            };
-          }),
-          address: formData.selectedAddress,
-          phone: phoneNumber,
-          totalAmount: total,
-          // paymentId: response.razorpay_payment_id,
-        };
-        
-        console.log("Order payload:", orderPayload);
-        
-        const res = await axiosInstance.post('/api/createOrder', orderPayload);
-        if (res.status === 201) {
-          dispatch(clearProducts());
-          // Clear cart addresses after successful order
-          localStorage.removeItem('cartAddresses');
-          navigate('/successOrder');
-        } else {
-          toast.error('Failed to place order.');
+          const orderPayload = {
+            userId: userId,
+            userEmail: userEmail,
+            userName: userName,
+            items: cartItems.map((item) => {
+              const qty = item.cartQty ?? (typeof item.quantity === 'number' ? item.quantity : 1);
+              const price = Number(
+                item.unitPrice ??
+                item.selectedVariant?.final_price ??
+                item.selectedVariant?.finalPrice ??
+                0
+              );
+              return {
+                productId: item._id,
+                name: item.name,
+                quantity: qty,
+                price,
+              };
+            }),
+            address: formData.selectedAddress,
+            phone: phoneNumber,
+            totalAmount: total,
+            paymentId: response.razorpay_payment_id,
+          };
+          
+          console.log("Order payload:", orderPayload);
+          
+          // Simulate processing delay for better UX
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          
+          const res = await axiosInstance.post('/api/createOrder', orderPayload);
+          if (res.status === 201) {
+            // Show success message
+            toast.success('Order confirmed! Redirecting...');
+            
+            // Clear cart
+            dispatch(clearProducts());
+            
+            // Clear cart addresses after successful order
+            localStorage.removeItem('cartAddresses');
+            
+            // Add small delay for user to see success message
+            setTimeout(() => {
+              setIsProcessingOrder(false);
+              navigate('/successOrder');
+            }, 1500);
+          } else {
+            setIsProcessingOrder(false);
+            toast.error('Failed to place order.');
+          }
+        } catch (err) {
+          setIsProcessingOrder(false);
+          console.error('Order creation error:', err);
+          toast.error('Something went wrong while placing the order.');
         }
-      } catch (err) {
-        console.error('Order creation error:', err);
-        toast.error('Something went wrong while placing the order.');
-      }
-    },
-    prefill: {
-      name: userData?.name || 'Customer',
-      email: userData?.email || formData.email || 'customer@example.com',
-      contact: phoneNumber,
-    },
-    notes: { address: formData.selectedAddress },
-    theme: { color: Theme.palette.primary.main },
+      },
+      prefill: {
+        name: userData?.name || 'Customer',
+        email: userData?.email || formData.email || 'customer@example.com',
+        contact: phoneNumber,
+      },
+      notes: { address: formData.selectedAddress },
+      theme: { color: Theme.palette.primary.main },
+    };
+    
+    const rz = new window.Razorpay(options);
+    rz.open();
   };
-  
-  const rz = new window.Razorpay(options);
-  rz.open();
-};
 
   const handlePhoneChange = (e) => {
     let value = e.target.value.replace(/\D/g, '');
@@ -714,6 +698,42 @@ const handleCheckout = () => {
     <div className="cart-page">
       <ToastContainer position="top-right" autoClose={2000} hideProgressBar />
       
+      {/* Processing Order Loader */}
+      <Backdrop
+        sx={{ 
+          color: '#fff', 
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          backdropFilter: 'blur(4px)'
+        }}
+        open={isProcessingOrder}
+      >
+        <div className="order-processing-loader">
+          <CircularProgress color="inherit" size={60} />
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              mt: 3, 
+              color: '#fff',
+              fontWeight: 600,
+              textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+            }}
+          >
+            Processing Your Order...
+          </Typography>
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              mt: 1, 
+              color: 'rgba(255,255,255,0.8)',
+              maxWidth: '300px',
+              textAlign: 'center'
+            }}
+          >
+            Please wait while we confirm your payment and create your order.
+          </Typography>
+        </div>
+      </Backdrop>
+
       {/* Header */}
       <div className="cart-header">
         <div className="header-left">
@@ -854,31 +874,28 @@ const handleCheckout = () => {
                 onChange={(e) => setFormData((p) => ({ ...p, pincode: e.target.value }))}
               />
               <TextField
-  label="Email"
-  fullWidth
-  required
-  size="small"
-  type="email"
-  value={formData.email}
-  onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
-  onBlur={() => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (formData.email && !emailRegex.test(formData.email)) {
-      toast.error('Please enter a valid email address');
-    }
-  }}
-/>
-<TextField
-  label="Full Name"
-  fullWidth
-  required
-  size="small"
-  value={formData.name}
-  onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
-/>
-
-
-
+                label="Email"
+                fullWidth
+                required
+                size="small"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
+                onBlur={() => {
+                  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                  if (formData.email && !emailRegex.test(formData.email)) {
+                    toast.error('Please enter a valid email address');
+                  }
+                }}
+              />
+              <TextField
+                label="Full Name"
+                fullWidth
+                required
+                size="small"
+                value={formData.name}
+                onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+              />
             </div>
           </DialogContent>
           <DialogActions className="dialog-actions">
@@ -980,6 +997,20 @@ const handleCheckout = () => {
           font-weight: 600;
           margin-bottom: 1.5rem;
           color: #333;
+        }
+
+        /* Order Processing Loader */
+        .order-processing-loader {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+          background: rgba(125, 42, 37, 0.9);
+          border-radius: 16px;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+          min-width: 350px;
+          min-height: 250px;
         }
 
         /* Empty Cart Styles */
@@ -1528,6 +1559,13 @@ const handleCheckout = () => {
           background: #7d2a25;
         }
 
+        .address-email {
+          display: block;
+          margin-top: 4px;
+          color: #666;
+          font-size: 12px;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
           .cart-page {
@@ -1566,12 +1604,11 @@ const handleCheckout = () => {
             flex-direction: column;
             gap: 1rem;
           }
-            .address-email {
-  display: block;
-  margin-top: 4px;
-  color: #666;
-  font-size: 12px;
-}
+
+          .order-processing-loader {
+            min-width: 280px;
+            padding: 1.5rem;
+          }
         }
       `}</style>
     </div>

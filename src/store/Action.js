@@ -2,6 +2,7 @@
 import { toast } from "react-toastify";
 
 // ---------------- CART ACTIONS ---------------------
+
 export const addData = (data) => ({
   type: "ADD_DATA",
   payload: data,
@@ -26,19 +27,47 @@ export const updateData = (updatedProduct) => ({
   payload: updatedProduct,
 });
 
-export const addToCart = (product) => ({
-  type: "ADD_TO_CART",
-  payload: product,
-});
+
+// 🔥 UPDATED ADD TO CART — WITH TOAST + VARIANT CHECK + QTY INCREMENT
+export const addToCart = (product) => (dispatch, getState) => {
+
+  const cart = getState().app.data || [];
+
+  // unique key check for variant
+  const incomingKey = `${product._id}__${product.selectedVariant?.weight || ''}_${product.selectedVariant?.carat || ''}`;
+
+  const exists = cart.some((item) => {
+    const itemKey = `${item._id}__${item.selectedVariant?.weight || ''}_${item.selectedVariant?.carat || ''}`;
+    return itemKey === incomingKey;
+  });
+
+  if (exists) {
+    toast.info("Quantity increased!", {
+      position: "top-right",
+      autoClose: 1500,
+    });
+  } else {
+    toast.success("Added to cart!", {
+      position: "top-right",
+      autoClose: 1500,
+    });
+  }
+
+  dispatch({
+    type: "ADD_TO_CART",
+    payload: product,
+  });
+};
+
+
 
 
 // ------------------ WISHLIST ACTIONS ---------------------
 
-// 🔥 ADD TO WISHLIST WITH DUPLICATE CHECK (IMPORTANT)
+// 🔥 ADD TO WISHLIST WITH DUPLICATE CHECK
 export const addToWishlist = (product) => (dispatch, getState) => {
   const wishlist = getState().app.wishlist || [];
 
-  // Check if already exists
   const alreadyExists = wishlist.some(
     (item) => item._id === product._id
   );
