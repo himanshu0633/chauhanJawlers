@@ -35,7 +35,7 @@ export default function ProfileEdit() {
         const userDataStr = localStorage.getItem("userData");
         if (userDataStr) {
             const userData = JSON.parse(userDataStr);
-            if (!userData._id) {
+            if (!userData.id) {
                 // if id missing, force login or fetch full user data
                 navigate("/login");
                 return;

@@ -140,30 +140,40 @@ function JewelleryCard({ product }) {
     setSnackbarOpen(true);
   };
 
-  const handleAddToCart = (e) => {
-    e.stopPropagation();
-    e.preventDefault();
+  // const handleAddToCart = (e) => {
+  //   e.stopPropagation();
+  //   e.preventDefault();
 
-    if (!product) return;
+  //   if (!product) return;
 
-    const cartItem = {
-      ...product,
-      selectedVariant: best,
-      cartQty: units,
-      unitPrice: Number(best.finalPrice || 0),
-    };
+  //   const cartItem = {
+  //     ...product,
+  //     selectedVariant: best,
+  //     cartQty: units,
+  //     unitPrice: Number(best.finalPrice || 0),
+  //   };
 
-    dispatch(addData(cartItem));
+  //   dispatch(addData(cartItem));
 
-    // -----------------------------
-    //  FIXED: Popup open hoga
-    // -----------------------------
-    setShowCartPopup(true);
+  //   // -----------------------------
+  //   //  FIXED: Popup open hoga
+  //   // -----------------------------
+  //   setShowCartPopup(true);
 
-    // Snackbar message
-    setSnackbarMsg("Added to Cart");
-    setSnackbarOpen(true);
-  };
+  //   // Snackbar message
+  //   setSnackbarMsg("Added to Cart");
+  //   setSnackbarOpen(true);
+  // };
+
+  const handleShopNow = (e) => {
+  e.stopPropagation();
+  e.preventDefault();
+
+  if (!product) return;
+
+  // Navigate to the product details page
+  navigate(`/singleProduct/${product._id}`);
+};
 
   const handleClosePopup = () => {
     setShowCartPopup(false);
@@ -376,7 +386,7 @@ function JewelleryCard({ product }) {
           </Box>
         </Box>
 
-        <Button
+        {/* <Button
           variant="contained"
           onClick={handleAddToCart}
           disabled={!canAddToCart}
@@ -394,7 +404,23 @@ function JewelleryCard({ product }) {
           }}
         >
           {canAddToCart ? "Add to Cart" : "Out of Stock"}
-        </Button>
+        </Button> */}
+
+        <Button
+  variant="contained"
+  onClick={handleShopNow}
+  sx={{
+    backgroundColor: "#44170d",
+    color: "#fff",
+    fontWeight: 600,
+    fontSize: 14,
+    py: 0.75,
+    "&:hover": { backgroundColor: "#5a1f12" },
+  }}
+>
+  Shop Now
+</Button>
+
       </Box>
 
       {/* SNACKBAR */}

@@ -66,7 +66,13 @@ function CartCard({ product, onRemove, onUpdateQuantity }) {
   const fp = Number(variant.final_price ?? variant.finalPrice ?? 0);
   const navigate = useNavigate();
   const [giftWrap, setGiftWrap] = useState(false);
-  const [isLowStock, setIsLowStock] = useState(quantity === 1);
+
+  // Create unique identifier for this item
+  const getItemIdentifier = () => {
+    const variantIdentifier = variant.weight ? `_${variant.weight}` : '';
+    const caratIdentifier = variant.carat ? `_${variant.carat}` : '';
+    return `${product._id}${variantIdentifier}${caratIdentifier}`;
+  };
 
   return (
     <div className="cart-card">
@@ -139,8 +145,7 @@ function CartCard({ product, onRemove, onUpdateQuantity }) {
               <IconButton
                 size="small"
                 onClick={() => {
-                  onUpdateQuantity(product._id, quantity - 1);
-                  setIsLowStock(quantity - 1 === 1);
+                  onUpdateQuantity(getItemIdentifier(), quantity - 1);
                 }}
                 disabled={quantity <= 1}
                 className="quantity-btn"
@@ -153,8 +158,7 @@ function CartCard({ product, onRemove, onUpdateQuantity }) {
               <IconButton
                 size="small"
                 onClick={() => {
-                  onUpdateQuantity(product._id, quantity + 1);
-                  setIsLowStock(false);
+                  onUpdateQuantity(getItemIdentifier(), quantity + 1);
                 }}
                 className="quantity-btn"
               >
@@ -166,7 +170,7 @@ function CartCard({ product, onRemove, onUpdateQuantity }) {
 
         {/* Remove Button */}
         <IconButton
-          onClick={() => onRemove(product._id)}
+          onClick={() => onRemove(getItemIdentifier())}
           className="remove-btn"
         >
           <DeleteOutlineIcon />
@@ -414,36 +418,171 @@ export default function CartPage() {
   const discount = subtotal * discountRate;
   const total = subtotal - discount;
 
-  // ----- qty / remove -----
-  const handleQuantityChange = (itemId, newQuantity) => {
-    if (newQuantity < 1) return;
-    const updatedItem = cartItems.find((i) => i._id === itemId);
-    if (!updatedItem) return;
+  // ----- Address functions -----
+  const saveAddressesToLocalStorage = (addressList) => {
+    try {
+      localStorage.setItem('cartAddresses', JSON.stringify(addressList));
+      localStorage.setItem('cartEmail', formData.email);
+      localStorage.setItem('cartName', formData.name);
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+    }
+  };
 
-    const updatedProduct = {
-      ...updatedItem,
+  const loadAddressesFromLocalStorage = () => {
+    try {
+      const savedAddresses = localStorage.getItem('cartAddresses');
+      if (savedAddresses) {
+        const parsedAddresses = JSON.parse(savedAddresses);
+        setAddresses(parsedAddresses);
+        
+        const savedEmail = localStorage.getItem('cartEmail');
+        const savedName = localStorage.getItem('cartName');
+        if (savedEmail || savedName) {
+          setFormData(p => ({
+            ...p,
+            email: savedEmail || p.email,
+            name: savedName || p.name
+          }));
+        }
+        
+        if (parsedAddresses.length > 0 && !formData.selectedAddress) {
+          const firstAddress = parsedAddresses[0];
+          setFormData(p => ({ 
+            ...p, 
+            selectedAddress: firstAddress.address,
+            phone: firstAddress.phone || p.phone,
+            email: firstAddress.email || p.email,
+            name: firstAddress.name || p.name
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Error loading from localStorage:', error);
+    }
+  };
+
+  // ----- Helper function to check if same product exists -----
+  const findExistingItem = (newItem) => {
+    const newVariant = newItem.selectedVariant || {};
+    const newVariantId = newVariant.weight ? `_${newVariant.weight}` : '';
+    const newCaratId = newVariant.carat ? `_${newVariant.carat}` : '';
+    const newItemIdentifier = `${newItem._id}${newVariantId}${newCaratId}`;
+    
+    return cartItems.find(item => {
+      const variant = item.selectedVariant || {};
+      const variantId = variant.weight ? `_${variant.weight}` : '';
+      const caratId = variant.carat ? `_${variant.carat}` : '';
+      const itemIdentifier = `${item._id}${variantId}${caratId}`;
+      return itemIdentifier === newItemIdentifier;
+    });
+  };
+
+  // ----- qty / remove functions -----
+  const handleQuantityChange = (itemIdentifier, newQuantity) => {
+    if (newQuantity < 1) return;
+    
+    // Find the item to update
+    const itemToUpdate = cartItems.find(item => {
+      const variant = item.selectedVariant || {};
+      const variantIdentifier = variant.weight ? `_${variant.weight}` : '';
+      const caratIdentifier = variant.carat ? `_${variant.carat}` : '';
+      const currentIdentifier = `${item._id}${variantIdentifier}${caratIdentifier}`;
+      return currentIdentifier === itemIdentifier;
+    });
+    
+    if (!itemToUpdate) return;
+
+    // Create updated item
+    const updatedItem = {
+      ...itemToUpdate,
       cartQty: newQuantity,
-      ...(typeof updatedItem.quantity === 'number' ? { quantity: newQuantity } : {})
+      quantity: newQuantity
     };
 
-    dispatch(updateData(updatedProduct));
+    // Use existing updateData action
+    dispatch(updateData(updatedItem));
+    
     toast.success('Item quantity updated!', { position: 'top-right', autoClose: 1500 });
   };
 
-  const handleRemoveItem = (itemCompositeKey) => {
-    dispatch(deleteProduct(itemCompositeKey));
-    toast.info('Item removed from cart.', { position: 'top-right', autoClose: 1500 });
-  };
+const handleRemoveItem = (itemIdentifier) => {
+  if (window.confirm('Are you sure you want to remove this item from cart?')) {
+    // Find the item to remove
+    const itemToRemove = cartItems.find(item => {
+      const variant = item.selectedVariant || {};
+      const variantIdentifier = variant.weight ? `_${variant.weight}` : '';
+      const caratIdentifier = variant.carat ? `_${variant.carat}` : '';
+      const currentIdentifier = `${item._id}${variantIdentifier}${caratIdentifier}`;
+      return currentIdentifier === itemIdentifier;
+    });
+
+    if (itemToRemove) {
+      // Create composite key for deleteProduct
+      const compositeKey = `${itemToRemove._id}__${itemToRemove.selectedVariant?.weight || ''}_${itemToRemove.selectedVariant?.carat || ''}`;
+      
+      // Dispatch the delete action with compositeKey
+      dispatch(deleteProduct(compositeKey));
+      
+      // Show toast notification after removal
+      toast.info('Item removed from cart.', { position: 'top-right', autoClose: 1500 });
+    }
+  }
+};
+
+
+  // ----- IMPORTANT: Update Redux actions to handle duplicate products -----
+  useEffect(() => {
+    // This will log cart items whenever they change
+    console.log('Cart Items:', cartItems);
+    
+    // Check for duplicates and merge them
+    const checkAndMergeDuplicates = () => {
+      const uniqueItems = [];
+      const itemMap = new Map();
+      
+      cartItems.forEach(item => {
+        const variant = item.selectedVariant || {};
+        const variantIdentifier = variant.weight ? `_${variant.weight}` : '';
+        const caratIdentifier = variant.carat ? `_${variant.carat}` : '';
+        const itemKey = `${item._id}${variantIdentifier}${caratIdentifier}`;
+        
+        if (itemMap.has(itemKey)) {
+          // Duplicate found, merge quantities
+          const existingItem = itemMap.get(itemKey);
+          existingItem.cartQty = (existingItem.cartQty || 1) + (item.cartQty || 1);
+          existingItem.quantity = existingItem.cartQty;
+        } else {
+          // New item
+          itemMap.set(itemKey, { ...item });
+          uniqueItems.push(item);
+        }
+      });
+      
+      // If duplicates were found and merged, update the cart
+      if (itemMap.size < cartItems.length) {
+        const mergedItems = Array.from(itemMap.values());
+        dispatch({ 
+          type: 'UPDATE_CART', 
+          payload: mergedItems 
+        });
+        toast.info('Similar items merged in cart', { position: 'top-right', autoClose: 2000 });
+      }
+    };
+    
+    checkAndMergeDuplicates();
+  }, [cartItems, dispatch]);
 
   const handleClearCart = () => {
-    dispatch(clearProducts());
-    toast.info('Cart cleared.', { position: 'top-right', autoClose: 1500 });
+    if (window.confirm('Are you sure you want to clear your cart?')) {
+      dispatch(clearProducts());
+      toast.info('Cart cleared.', { position: 'top-right', autoClose: 1500 });
+    }
   };
 
   const handleContinueShopping = () => navigate(-1);
 
   const handleAddAddress = async () => {
-    // Email validation
     if (!formData.email?.trim()) {
       toast.error('Email is required');
       return;
@@ -476,36 +615,45 @@ export default function CartPage() {
     }
 
     const addressObj = {
-      address: `${formData.flat}, ${formData.landmark}, ${formData.city}, ${formData.state}, ${formData.country} ,${formData.pincode}`,
+      id: Date.now().toString(),
+      address: `${formData.flat}, ${formData.landmark}, ${formData.city}, ${formData.state}, ${formData.country} - ${formData.pincode}`,
       email: formData.email.trim(),
       name: formData.name.trim(),
-      phone: formData.phone
+      phone: formData.phone,
+      flat: formData.flat.trim(),
+      landmark: formData.landmark.trim(),
+      city: formData.city.trim(),
+      state: formData.state.trim(),
+      country: formData.country.trim(),
+      pincode: formData.pincode.trim(),
+      timestamp: new Date().toISOString()
     };
 
     try {
-      // Save address locally with email
       const newAddresses = [...addresses, addressObj];
       setAddresses(newAddresses);
+      saveAddressesToLocalStorage(newAddresses);
       
-      // Save to localStorage for persistence
-      const cartAddresses = JSON.parse(localStorage.getItem('cartAddresses') || '[]');
-      cartAddresses.push(addressObj);
-      localStorage.setItem('cartAddresses', JSON.stringify(cartAddresses));
+      setFormData((p) => ({ 
+        ...p, 
+        selectedAddress: addressObj.address,
+        phone: addressObj.phone,
+        email: addressObj.email,
+        name: addressObj.name
+      }));
       
-      toast.success('Address added successfully');
-      setFormData((p) => ({ ...p, selectedAddress: addressObj.address }));
+      toast.success('Address saved successfully!');
       setShowModal(false);
       
-      // Reset form but keep email/name for next time
       setFormData({
         flat: '', landmark: '', state: '', city: '', country: 'India', 
         phone: '', selectedAddress: addressObj.address, pincode: '',
-        email: formData.email, // Keep email
-        name: formData.name    // Keep name
+        email: addressObj.email,
+        name: addressObj.name
       });
     } catch (error) {
-      toast.error('Failed to add address');
-      console.error('Address add error:', error);
+      toast.error('Failed to save address');
+      console.error('Address save error:', error);
     }
   };
 
@@ -535,50 +683,13 @@ export default function CartPage() {
     })();
   }, [formData.state]);
 
-  // ----- load user addresses -----
+  // ----- load addresses from localStorage -----
   useEffect(() => {
-    // Pre-fill email and name from localStorage if available
-    const savedEmail = localStorage.getItem('cartEmail');
-    const savedName = localStorage.getItem('cartName');
-    if (savedEmail || savedName) {
-      setFormData(p => ({
-        ...p,
-        email: savedEmail || p.email,
-        name: savedName || p.name
-      }));
-    }
-    
-    // Load addresses from localStorage first
-    const cartAddresses = JSON.parse(localStorage.getItem('cartAddresses') || '[]');
-    if (cartAddresses.length > 0) {
-      setAddresses(cartAddresses);
-      return;
-    }
-
-    // Fallback to API if user is authenticated
-    (async () => {
-      try {
-        const userData = JSON.parse(localStorage.getItem('userData'));
-        const userId = userData?._id;
-        if (!userId) return;
-        
-        const response = await axiosInstance.get(`/admin/readAdmin/${userId}`);
-        const userInfo = response?.data?.data;
-        setOriginalAddress(userInfo);
-        if (Array.isArray(userInfo?.address)) {
-          setAddresses(userInfo.address);
-          // Also save to localStorage for future use
-          localStorage.setItem('cartAddresses', JSON.stringify(userInfo.address));
-        }
-      } catch (e) {
-        console.error('Error fetching address:', e);
-      }
-    })();
+    loadAddressesFromLocalStorage();
   }, []);
 
   // ----- razorpay -----
   const handleCheckout = () => {
-    // Direct payment flow - no login check
     if (!formData.selectedAddress) {
       toast.warn('Please select an address before checkout.');
       return;
@@ -587,7 +698,6 @@ export default function CartPage() {
     const phoneNumber = formData.phone || originalAddress?.phone || "";
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     
-    // Check if phone number is provided
     if (!phoneNumber || phoneNumber.length !== 10) {
       toast.warn('Please enter a valid 10-digit phone number before checkout.');
       return;
@@ -601,13 +711,9 @@ export default function CartPage() {
       description: 'Order Payment',
       handler: async function (response) {
         try {
-          // Show processing loader
           setIsProcessingOrder(true);
-          
-          // Show payment success toast
           toast.success('Payment successful! Processing your order...');
 
-          // Get user data from localStorage or use guest info
           const userData = JSON.parse(localStorage.getItem('userData') || '{}');
           const userEmail = userData?.email || formData.email || 'guest@example.com';
           const userName = userData?.name || formData.name || 'Guest User';
@@ -638,23 +744,14 @@ export default function CartPage() {
             paymentId: response.razorpay_payment_id,
           };
           
-          console.log("Order payload:", orderPayload);
-          
-          // Simulate processing delay for better UX
           await new Promise(resolve => setTimeout(resolve, 1500));
           
           const res = await axiosInstance.post('/api/createOrder', orderPayload);
           if (res.status === 201) {
-            // Show success message
             toast.success('Order confirmed! Redirecting...');
-            
-            // Clear cart
             dispatch(clearProducts());
+            setFormData(p => ({ ...p, selectedAddress: '' }));
             
-            // Clear cart addresses after successful order
-            localStorage.removeItem('cartAddresses');
-            
-            // Add small delay for user to see success message
             setTimeout(() => {
               setIsProcessingOrder(false);
               navigate('/successOrder');
@@ -670,7 +767,7 @@ export default function CartPage() {
         }
       },
       prefill: {
-        name: userData?.name || 'Customer',
+        name: userData?.name || formData.name || 'Customer',
         email: userData?.email || formData.email || 'customer@example.com',
         contact: phoneNumber,
       },
@@ -757,7 +854,7 @@ export default function CartPage() {
       {/* Cart Items Count */}
       {!isEmpty && (
         <Typography variant="h6" className="cart-count">
-          {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'} in your cart
+          {cartItems.length} unique {cartItems.length === 1 ? 'item' : 'items'} in your cart
         </Typography>
       )}
 
@@ -773,14 +870,21 @@ export default function CartPage() {
                 Your Items
               </Typography>
               <div className="products-list">
-                {cartItems.map((item) => (
-                  <CartCard 
-                    key={item._id} 
-                    product={item}
-                    onRemove={() => handleRemoveItem(`${item._id}__${item.selectedVariant?.weight || ''}_${item.selectedVariant?.carat || ''}`)}
-                    onUpdateQuantity={handleQuantityChange} 
-                  />
-                ))}
+                {cartItems.map((item) => {
+                  const variant = item.selectedVariant || {};
+                  const variantIdentifier = variant.weight ? `_${variant.weight}` : '';
+                  const caratIdentifier = variant.carat ? `_${variant.carat}` : '';
+                  const itemKey = `${item._id}${variantIdentifier}${caratIdentifier}`;
+                  
+                  return (
+                    <CartCard 
+                      key={itemKey}
+                      product={item}
+                      onRemove={handleRemoveItem}
+                      onUpdateQuantity={handleQuantityChange} 
+                    />
+                  );
+                })}
               </div>
             </Paper>
           </div>
@@ -809,9 +913,41 @@ export default function CartPage() {
         <DialogTitle className="dialog-title">Add New Address</DialogTitle>
         <form onSubmit={(e) => { e.preventDefault(); handleAddAddress(); }}>
           <DialogContent className="dialog-content">
+            <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+              Address will be saved for future use
+            </Typography>
             <div className="address-form-grid">
               <TextField
-                label="Flat / House"
+                label="Full Name"
+                fullWidth
+                required
+                size="small"
+                value={formData.name}
+                onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+              />
+              <TextField
+                label="Email"
+                fullWidth
+                required
+                size="small"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
+              />
+              <TextField
+                label="Phone Number"
+                fullWidth
+                required
+                size="small"
+                value={formData.phone}
+                onChange={handlePhoneChange}
+                onBlur={handlePhoneBlur}
+                error={phoneError}
+                helperText={phoneError ? "Phone number must be exactly 10 digits" : ""}
+                InputProps={{ startAdornment: <InputAdornment position="start">+91</InputAdornment> }}
+              />
+              <TextField
+                label="Flat / House No."
                 fullWidth
                 required
                 size="small"
@@ -824,6 +960,14 @@ export default function CartPage() {
                 size="small"
                 value={formData.landmark}
                 onChange={(e) => setFormData((p) => ({ ...p, landmark: e.target.value }))}
+              />
+              <TextField
+                label="Pincode"
+                fullWidth
+                required
+                size="small"
+                value={formData.pincode}
+                onChange={(e) => setFormData((p) => ({ ...p, pincode: e.target.value }))}
               />
               <FormControl size="small" fullWidth className="form-control-wide">
                 <InputLabel id="state-label">State</InputLabel>
@@ -852,55 +996,20 @@ export default function CartPage() {
                   {cities.map((c) => <MenuItem key={c} value={c}>{c}</MenuItem>)}
                 </Select>
               </FormControl>
-              <TextField label="Country" fullWidth required size="small" value="India" disabled />
-              <TextField
-                label="Phone Number"
-                fullWidth
-                required
-                size="small"
-                value={formData.phone}
-                onChange={handlePhoneChange}
-                onBlur={handlePhoneBlur}
-                error={phoneError}
-                helperText={phoneError ? "Phone number must be exactly 10 digits" : ""}
-                InputProps={{ startAdornment: <InputAdornment position="start">+91</InputAdornment> }}
-              />
-              <TextField
-                label="Pincode"
-                fullWidth
-                required
-                size="small"
-                value={formData.pincode}
-                onChange={(e) => setFormData((p) => ({ ...p, pincode: e.target.value }))}
-              />
-              <TextField
-                label="Email"
-                fullWidth
-                required
-                size="small"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
-                onBlur={() => {
-                  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                  if (formData.email && !emailRegex.test(formData.email)) {
-                    toast.error('Please enter a valid email address');
-                  }
-                }}
-              />
-              <TextField
-                label="Full Name"
-                fullWidth
-                required
-                size="small"
-                value={formData.name}
-                onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+              <TextField 
+                label="Country" 
+                fullWidth 
+                required 
+                size="small" 
+                value="India" 
+                disabled 
+                className="form-control-wide"
               />
             </div>
           </DialogContent>
           <DialogActions className="dialog-actions">
             <Button type="submit" variant="contained" className="add-address-dialog-btn">
-              Add Address
+              Save Address
             </Button>
             <Button onClick={() => setShowModal(false)} variant="outlined" color="secondary">
               Cancel
@@ -1148,19 +1257,6 @@ export default function CartPage() {
           font-weight: 500;
         }
 
-        .stock-alert {
-          background: #fff3cd;
-          border: 1px solid #ffeaa7;
-          border-radius: 4px;
-          padding: 0.75rem;
-          margin-bottom: 1rem;
-        }
-
-        .stock-text {
-          color: #856404;
-          font-weight: 500;
-        }
-
         .product-details {
           display: flex;
           gap: 1rem;
@@ -1291,6 +1387,8 @@ export default function CartPage() {
           flex-direction: column;
           gap: 0.5rem;
           margin-bottom: 1rem;
+          max-height: 200px;
+          overflow-y: auto;
         }
 
         .address-item {
@@ -1385,28 +1483,6 @@ export default function CartPage() {
         .price-value {
           font-weight: 600;
           color: #2c3e50;
-        }
-
-        .service-option {
-          margin-bottom: 1rem;
-        }
-
-        .service-label {
-          display: flex;
-          justify-content: space-between;
-          width: 100%;
-        }
-
-        .service-name {
-          font-weight: 500;
-        }
-
-        .service-desc {
-          color: #7f8c8d;
-        }
-
-        .service-price {
-          color: #7f8c8d;
         }
 
         .final-total {

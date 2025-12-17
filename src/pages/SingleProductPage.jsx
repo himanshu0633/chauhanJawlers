@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { addData, addToWishlist, removeFromWishlist } from "../store/Action";
+import { addData, addToWishlist, removeFromWishlist ,  updateCartItem} from "../store/Action";
 import { toast, ToastContainer } from "react-toastify";
 import { createSelector } from "@reduxjs/toolkit";
 import ProductReviewsSection from "../Reviews/ProductReviewsSection";
@@ -148,6 +148,7 @@ export default function SingleProductPage() {
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
   const [wishlistUpdate, setWishlistUpdate] = useState(0);
+  const cartItems = useSelector((state) => state.app.data);
 
   // Debug log to see wishlist state
   useEffect(() => {
@@ -287,10 +288,33 @@ export default function SingleProductPage() {
     fetchData();
   }, [id]);
 
-  const handleAddToCart = () => {
-    if (!product) return;
-    const variant = product.quantity[selectedVariantIndex];
-    if (!variant) return;
+
+
+const handleAddToCart = () => {
+  if (!product) return;
+
+  const variant = product.quantity[selectedVariantIndex]; // Get the selected variant
+
+  // Check if the product already exists in the cart
+  const existingCartItem = cartItems.find(
+    (item) =>
+      item._id === product._id && item.selectedVariant._key === variant._key
+  );
+
+  if (existingCartItem) {
+    // If the product already exists in the cart, increase its quantity
+    existingCartItem.cartQty += units; // Increase the quantity by the selected units
+
+    // Dispatch action to update the cart with the new quantity
+    dispatch(updateCartItem(existingCartItem));
+
+    // Display toast that quantity was increased
+    toast.info(`Quantity increased by ${units}!`, {
+      position: "top-right",
+      autoClose: 1500,
+    });
+  } else {
+    // If the product is not in the cart, add it to the cart
     const cartItem = {
       ...product,
       selectedVariant: variant,
@@ -298,9 +322,16 @@ export default function SingleProductPage() {
       unitPrice: Number(variant.final_price ?? variant.finalPrice ?? 0),
     };
 
-    dispatch(addData(cartItem));
-    toast.success("Item added to cart successfully!");
-  };
+    dispatch(addData(cartItem)); // Dispatch action to add the product to cart
+    toast.success("Item added to cart successfully!", {
+      position: "top-right",
+      autoClose: 1500,
+    });
+  }
+};
+
+
+  
 
   const increaseUnits = () => setUnits((prev) => prev + 1);
   const decreaseUnits = () => setUnits((prev) => (prev > 1 ? prev - 1 : 1));

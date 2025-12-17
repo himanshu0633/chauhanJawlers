@@ -2,10 +2,14 @@
 import { toast } from "react-toastify";
 
 // ---------------- CART ACTIONS ---------------------
-
 export const addData = (data) => ({
   type: "ADD_DATA",
   payload: data,
+});
+
+export const updateCartItem = (updatedProduct) => ({
+  type: "UPDATE_CART_ITEM",
+  payload: updatedProduct,
 });
 
 export const deleteProduct = (productId) => ({
@@ -27,44 +31,53 @@ export const updateData = (updatedProduct) => ({
   payload: updatedProduct,
 });
 
-
+// 🔥 UPDATED ADD TO CART — WITH TOAST + VARIANT CHECK + QTY INCREMENT
 // 🔥 UPDATED ADD TO CART — WITH TOAST + VARIANT CHECK + QTY INCREMENT
 export const addToCart = (product) => (dispatch, getState) => {
+  const cart = getState().app.data || []; // Get the current cart items
 
-  const cart = getState().app.data || [];
-
-  // unique key check for variant
+  // Create unique key based on the product id and variant (if any)
   const incomingKey = `${product._id}__${product.selectedVariant?.weight || ''}_${product.selectedVariant?.carat || ''}`;
 
-  const exists = cart.some((item) => {
+  // Check if the product with the same variant is already in the cart
+  const existingCartItem = cart.find((item) => {
     const itemKey = `${item._id}__${item.selectedVariant?.weight || ''}_${item.selectedVariant?.carat || ''}`;
     return itemKey === incomingKey;
   });
 
-  if (exists) {
+  if (existingCartItem) {
+    // If the product already exists in the cart, increase its quantity
+    const updatedProduct = {
+      ...existingCartItem,
+      cartQty: existingCartItem.cartQty + (product.cartQty || 1), // Increase quantity
+    };
+
+    // 🔴 CHANGE: Dispatch ADD_TO_CART instead of UPDATE_DATA
+    dispatch({
+      type: "ADD_TO_CART", // Use ADD_TO_CART to trigger toast
+      payload: updatedProduct,
+    });
+
+    // 🔴 CHANGE: Show toast after dispatch
     toast.info("Quantity increased!", {
       position: "top-right",
       autoClose: 1500,
     });
   } else {
+    // If the product is not in the cart, add it
+    dispatch({
+      type: "ADD_TO_CART",
+      payload: { ...product, cartQty: product.cartQty || 1 },
+    });
+
     toast.success("Added to cart!", {
       position: "top-right",
       autoClose: 1500,
     });
   }
-
-  dispatch({
-    type: "ADD_TO_CART",
-    payload: product,
-  });
 };
 
-
-
-
 // ------------------ WISHLIST ACTIONS ---------------------
-
-// 🔥 ADD TO WISHLIST WITH DUPLICATE CHECK
 export const addToWishlist = (product) => (dispatch, getState) => {
   const wishlist = getState().app.wishlist || [];
 
@@ -90,7 +103,6 @@ export const addToWishlist = (product) => (dispatch, getState) => {
     autoClose: 1500,
   });
 };
-
 
 // REMOVE FROM WISHLIST
 export const removeFromWishlist = (productId) => ({

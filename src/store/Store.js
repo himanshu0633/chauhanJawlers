@@ -135,99 +135,120 @@ const saveState = (data) => {
     localStorage.setItem("reduxState", JSON.stringify(data.data));
 };
 
+
 const rootReducer = (state = initialState, action) => {
-    switch (action.type) {
-        case "ADD_DATA":
-            const newState = {
-                ...state,
-                data: [...state.data, action.payload],
-            };
-            saveState(newState);
-            return newState;
-        // case "DELETE_PRODUCT":
-        //     const newState1 = {
-        //         ...state,
-        //         data: state.data.filter((product) => product._id !== action.payload),
-        //     };
-        //     saveState(newState1);
-        //     return newState1;
-        case "DELETE_PRODUCT":
-            return {
-                ...state,
-                data: state.data.filter((product) => {
-                    const productKey = `${product._id}__${product.selectedVariant?.weight || ''}_${product.selectedVariant?.carat || ''}`;
-                    return productKey !== action.payload;
-                }),
-            };
-        case "CLEAR_PRODUCT":
-            const newState2 = {
-                ...state,
-                data: action.payload,
-            };
-            saveState(newState2);
-            return newState2;
-        case "CLEAR_ALLPRODUCT":
-            const updatedState = {
-                ...state,
-                data: [],
-            };
-            saveState(updatedState);
-            return updatedState;
-        case "UPDATE_DATA":
-            const updatedData = state.data.map(item => {
-                const itemKey = `${item._id}__${item.selectedVariant?.weight || ''}_${item.selectedVariant?.carat || ''}`;
-                const payloadKey = `${action.payload._id}__${action.payload.selectedVariant?.weight || ''}_${action.payload.selectedVariant?.carat || ''}`;
-                return itemKey === payloadKey ? action.payload : item;
-            });
-            const newState3 = {
-                ...state,
-                data: updatedData,
-            };
-            saveState(newState3);
-            return newState3;
+  switch (action.type) {
 
-        case "ADD_TO_WISHLIST":
-            const currentWishlist = Array.isArray(state.wishlist) ? state.wishlist : [];
-            if (currentWishlist.some(item => item._id === action.payload._id)) {
-                return state;
-            }
-            return { ...state, wishlist: [...currentWishlist, action.payload] };
+     case "UPDATE_CART_ITEM":
+     const updatedCart = state.data.map((item) => {
+        if (item._id === action.payload._id && item.selectedVariant._key === action.payload.selectedVariant._key) {
+          return { ...item, cartQty: action.payload.cartQty }; // Update the quantity
+        }
+        return item;
+      });
+      
+    case "ADD_DATA":
+      const newState = {
+        ...state,
+        data: [...state.data, action.payload],
+      };
+      saveState(newState);
+      return newState;
 
-        case "REMOVE_FROM_WISHLIST":
-            return { ...state, wishlist: state.wishlist.filter(item => item._id !== action.payload) };
-        case "CLEAR_WISHLIST":
-            return { ...state, wishlist: [] };
+    case "DELETE_PRODUCT":
+      return {
+        ...state,
+        data: state.data.filter((product) => {
+          const productKey = `${product._id}__${product.selectedVariant?.weight || ''}_${product.selectedVariant?.carat || ''}`;
+          return productKey !== action.payload;
+        }),
+      };
 
-        case "ADD_TO_CART":
-            const cart = Array.isArray(state.data) ? state.data : [];
+    case "CLEAR_PRODUCT":
+      const newState2 = {
+        ...state,
+        data: action.payload,
+      };
+      saveState(newState2);
+      return newState2;
 
-            // Create unique key for variants, e.g. product._id + variant weight + carat
-            const incomingKey = `${action.payload._id}__${action.payload.selectedVariant?.weight || ''}_${action.payload.selectedVariant?.carat || ''}`;
+    case "CLEAR_ALLPRODUCT":
+      const updatedState = {
+        ...state,
+        data: [],
+      };
+      saveState(updatedState);
+      return updatedState;
 
-            // Find index by composite key
-            const itemIndex = cart.findIndex(item => {
-                const itemKey = `${item._id}__${item.selectedVariant?.weight || ''}_${item.selectedVariant?.carat || ''}`;
-                return itemKey === incomingKey;
-            });
+    case "UPDATE_DATA":
+      const updatedData = state.data.map(item => {
+        const itemKey = `${item._id}__${item.selectedVariant?.weight || ''}_${item.selectedVariant?.carat || ''}`;
+        const payloadKey = `${action.payload._id}__${action.payload.selectedVariant?.weight || ''}_${action.payload.selectedVariant?.carat || ''}`;
+        return itemKey === payloadKey ? action.payload : item;
+      });
+      const newState3 = {
+        ...state,
+        data: updatedData,
+      };
+      saveState(newState3);
+      return newState3;
 
-            if (itemIndex !== -1) {
-                const updatedCart = [...cart];
-                const existingItem = updatedCart[itemIndex];
-                updatedCart[itemIndex] = {
-                    ...existingItem,
-                    cartQty: (existingItem.cartQty || 1) + 1,  // increment quantity
-                };
-                return { ...state, data: updatedCart };
-            }
+    case "ADD_TO_WISHLIST":
+      const currentWishlist = Array.isArray(state.wishlist) ? state.wishlist : [];
+      if (currentWishlist.some(item => item._id === action.payload._id)) {
+        return state;
+      }
+      return { ...state, wishlist: [...currentWishlist, action.payload] };
 
-            // If not found, add new item with initial quantity
-            return { ...state, data: [...cart, { ...action.payload, cartQty: 1 }] };
+    case "REMOVE_FROM_WISHLIST":
+      return { ...state, wishlist: state.wishlist.filter(item => item._id !== action.payload) };
 
+    case "CLEAR_WISHLIST":
+      return { ...state, wishlist: [] };
 
+   case "ADD_TO_CART":
+  const cart = Array.isArray(state.data) ? state.data : [];
 
-        default:
-            return state;
-    }
+  // Create unique key for variants, e.g. product._id + variant weight + carat
+  const incomingKey = `${action.payload._id}__${action.payload.selectedVariant?.weight || ''}_${action.payload.selectedVariant?.carat || ''}`;
+
+  // Find index by composite key
+  const itemIndex = cart.findIndex(item => {
+    const itemKey = `${item._id}__${item.selectedVariant?.weight || ''}_${item.selectedVariant?.carat || ''}`;
+    return itemKey === incomingKey;
+  });
+
+  if (itemIndex !== -1) {
+    // Item exists - update quantity
+    const updatedCart = [...cart];
+    const existingItem = updatedCart[itemIndex];
+    updatedCart[itemIndex] = {
+      ...existingItem,
+      cartQty: action.payload.cartQty || (existingItem.cartQty || 1) + 1, // Use payload quantity if provided
+    };
+    const newState4 = {
+      ...state,
+      data: updatedCart,
+    };
+    saveState(newState4);
+    return newState4;
+  }
+
+  // New item - add to cart with initial quantity
+  const newItem = {
+    ...action.payload,
+    cartQty: action.payload.cartQty || 1
+  };
+  const newState5 = {
+    ...state,
+    data: [...cart, newItem],
+  };
+  saveState(newState5);
+  return newState5;
+  
+    default:
+      return state;
+  }
 };
 
 // Combine reducers (only one here, but necessary for persistReducer)

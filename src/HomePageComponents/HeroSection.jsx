@@ -33,7 +33,7 @@ const SlideImage = styled("img")(({ theme }) => ({
     borderRadius: "10px",
     [theme.breakpoints.down("lg")]: {
         width: "auto",
-        height: "230px",
+        height: "180px",
     },
 }));
 const SliderWrapper = styled(Box)(({ theme }) => ({

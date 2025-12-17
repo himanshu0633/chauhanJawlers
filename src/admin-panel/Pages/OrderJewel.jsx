@@ -62,6 +62,25 @@ const StatusChip = styled(Chip)(({ theme, status }) => ({
 
 const statusOptions = ['Pending', 'Delivered', 'Cancelled'];
 
+// Base URL for images
+const BASE_URL = 'https://backend.chauhansonsjewellers.com';
+
+// Helper function to get complete image URL
+const getImageUrl = (imagePath) => {
+  if (!imagePath) return "https://via.placeholder.com/60?text=No+Image";
+  
+  // If already has http or https, return as is
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+  
+  // Remove leading slash if present to avoid double slash
+  const cleanPath = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
+  
+  // Return full URL
+  return `${BASE_URL}/${cleanPath}`;
+};
+
 const OrderJewel = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -225,6 +244,40 @@ const OrderJewel = () => {
       minute: "2-digit"
     });
   };
+
+  const processManualRefund = async (orderId, amount) => {
+    if (!window.confirm(`Initiate refund of ₹${amount} for this order?`)) return;
+    
+    try {
+      setUpdatingStatusId(orderId);
+      const response = await axiosInstance.post(`/api/orders/${orderId}/refund`, {
+        amount: amount
+      });
+      
+      if (response.data.success) {
+        alert("Refund initiated successfully!");
+        // Update the order with refund info
+        setOrders(prev =>
+          prev.map(o => 
+            o._id === orderId 
+              ? { ...o, refundInfo: response.data.refundInfo } 
+              : o
+          )
+        );
+        // Refresh the order details if open
+        if (selectedOrder && selectedOrder._id === orderId) {
+          const updatedOrder = { ...selectedOrder, refundInfo: response.data.refundInfo };
+          setSelectedOrder(updatedOrder);
+        }
+      }
+    } catch (error) {
+      console.error("Refund failed", error);
+      alert("Refund failed: " + (error.response?.data?.message || error.message));
+    } finally {
+      setUpdatingStatusId(null);
+    }
+  };
+
   return (
     <Container maxWidth="xl">
       <Box sx={{ my: 4 }}>
@@ -257,17 +310,14 @@ const OrderJewel = () => {
             <Table>
               <TableHead>
                 <TableRow sx={{ backgroundColor: (theme) => theme.palette.primary.main }}>
-                  
                   <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Image</TableCell>
                   <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Name</TableCell>
                   <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Price</TableCell>
                   <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Quantity</TableCell>
-
                   <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Order Status</TableCell>
                   <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Payment Status</TableCell>
                   <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Refund Status</TableCell>
                   <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Actions</TableCell>
-
                 </TableRow>
               </TableHead>
 
@@ -277,7 +327,8 @@ const OrderJewel = () => {
 
                   return items.map((item, index) => {
                      const product = item.productId; // populated product
-                     const image = product?.media?.find(m => m.type === "image")?.url;
+                     const imagePath = product?.media?.find(m => m.type === "image")?.url;
+                     const imageUrl = getImageUrl(imagePath);
 
                      return (
                        <TableRow key={`${order._id}-${item.productId}-${index}`} hover>
@@ -286,7 +337,7 @@ const OrderJewel = () => {
                          <TableCell>
                            <Box
                              component="img"
-                             src={image || "https://via.placeholder.com/60?text=No+Image"}
+                             src={imageUrl}
                              alt={product?.name}
                              sx={{
                                width: 50,
@@ -295,6 +346,10 @@ const OrderJewel = () => {
                                objectFit: 'cover',
                                border: '1px solid #ddd'
                              }}
+                             onError={(e) => {
+                               e.target.onerror = null;
+                               e.target.src = "https://via.placeholder.com/60?text=No+Image";
+                             }}
                            />
                          </TableCell>
 
@@ -302,10 +357,7 @@ const OrderJewel = () => {
                          <TableCell>{product?.name || "Unnamed Product"}</TableCell>
 
                          {/* ================== PRICE =================== */}
-                     <TableCell>
-  ₹{item.price}
-</TableCell>
-
+                         <TableCell>₹{item.price}</TableCell>
 
                          {/* ================== QTY =================== */}
                          <TableCell>{item.quantity}</TableCell>
@@ -359,7 +411,6 @@ const OrderJewel = () => {
                          {index === 0 && (
                            <TableCell rowSpan={items.length}>
                              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                               
                                <Button
                                  variant="outlined"
                                  size="small"
@@ -375,23 +426,19 @@ const OrderJewel = () => {
                                     variant="outlined"
                                     color="warning"
                                     size="small"
-                                 
                                     onClick={() => processManualRefund(order._id, order.totalAmount)}
                                   >
                                     Process Refund
                                   </Button>
                                )}
-
                              </Box>
                            </TableCell>
                          )}
-
                        </TableRow>
                      );
                   });
                 })}
               </TableBody>
-
             </Table>
 
             {/* PAGINATION */}
@@ -404,10 +451,10 @@ const OrderJewel = () => {
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
-
           </StyledTableContainer>
         )}
       </Box>
+
       {/* ===================== CANCEL ORDER DIALOG ===================== */}
       <Dialog open={showCancelDialog} onClose={() => setShowCancelDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Cancel Order</DialogTitle>
@@ -431,7 +478,6 @@ const OrderJewel = () => {
 
         <DialogActions>
           <Button onClick={() => setShowCancelDialog(false)}>Close</Button>
-
           <Button
             variant="contained"
             color="error"
@@ -443,10 +489,8 @@ const OrderJewel = () => {
         </DialogActions>
       </Dialog>
 
-
       {/* ===================== ORDER DETAILS DIALOG ===================== */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-
         {selectedOrder && (
           <>
             <DialogTitle sx={{ fontWeight: "bold" }}>
@@ -454,7 +498,6 @@ const OrderJewel = () => {
             </DialogTitle>
 
             <DialogContent dividers>
-
               {/* ================================================= */}
               {/*                 ORDER INFORMATION                 */}
               {/* ================================================= */}
@@ -479,10 +522,17 @@ const OrderJewel = () => {
 
                   <Typography><strong>Total Amount:</strong> ₹{selectedOrder.totalAmount}</Typography>
                   <Typography><strong>Date:</strong> {formatDate(selectedOrder.createdAt)}</Typography>
-
                   <Typography><strong>Phone:</strong> {selectedOrder.phone}</Typography>
                   <Typography><strong>Address:</strong> {selectedOrder.address}</Typography>
                   <Typography><strong>Razorpay Order ID:</strong> {selectedOrder.razorpayOrderId}</Typography>
+
+                  {/* User Info */}
+                  <Box mt={2} p={2} bgcolor="grey.100" borderRadius={1}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>User Information</Typography>
+                    <Typography variant="body2"><strong>Name:</strong> {selectedOrder.userName}</Typography>
+                    <Typography variant="body2"><strong>Email:</strong> {selectedOrder.userEmail}</Typography>
+                    <Typography variant="body2"><strong>User ID:</strong> {selectedOrder.userId?.slice(-8)}</Typography>
+                  </Box>
 
                   {/* Cancellation Info */}
                   {selectedOrder.cancelReason && (
@@ -498,7 +548,6 @@ const OrderJewel = () => {
                     </Box>
                   )}
                 </Grid>
-
 
                 {/* RIGHT SIDE — PAYMENT + REFUND INFO */}
                 <Grid item xs={12} md={6}>
@@ -517,8 +566,14 @@ const OrderJewel = () => {
                     />
                   </Typography>
 
+                  <Typography><strong>Amount:</strong> ₹{selectedOrder.paymentInfo?.amount || 0}</Typography>
+
                   {selectedOrder.paymentInfo?.method && (
                     <Typography><strong>Method:</strong> {selectedOrder.paymentInfo.method}</Typography>
+                  )}
+
+                  {selectedOrder.paymentInfo?.paymentId && (
+                    <Typography><strong>Payment ID:</strong> {selectedOrder.paymentInfo.paymentId}</Typography>
                   )}
 
                   {selectedOrder.paymentInfo?.updatedAt && (
@@ -528,7 +583,7 @@ const OrderJewel = () => {
                   )}
 
                   {/* Refund block */}
-                  {selectedOrder.refundInfo && (
+                  {selectedOrder.refundInfo && selectedOrder.refundInfo.refundId && (
                     <Box mt={2} p={2} bgcolor="info.light" borderRadius={1}>
                       <Typography variant="subtitle2" color="info.dark" sx={{ fontWeight: "bold" }}>
                         Refund Information
@@ -537,7 +592,7 @@ const OrderJewel = () => {
                       <Typography variant="body2"><strong>Refund ID:</strong> {selectedOrder.refundInfo.refundId}</Typography>
                       <Typography variant="body2"><strong>Amount:</strong> ₹{selectedOrder.refundInfo.amount}</Typography>
                       <Typography variant="body2"><strong>Status:</strong> {selectedOrder.refundInfo.status}</Typography>
-                      <Typography variant="body2"><strong>Reason:</strong> {selectedOrder.refundInfo.reason}</Typography>
+                      <Typography variant="body2"><strong>Reason:</strong> {selectedOrder.refundInfo.reason || 'Not specified'}</Typography>
 
                       {selectedOrder.refundInfo.estimatedSettlement && (
                         <Typography variant="body2">
@@ -546,8 +601,24 @@ const OrderJewel = () => {
                       )}
                     </Box>
                   )}
-                </Grid>
 
+                  {/* Manual Refund Button */}
+                  {selectedOrder.paymentInfo?.status === 'captured' &&
+                   selectedOrder.status !== 'Cancelled' &&
+                   !selectedOrder.refundInfo?.refundId && (
+                    <Box mt={2}>
+                      <Button
+                        variant="contained"
+                        color="warning"
+                        fullWidth
+                        onClick={() => processManualRefund(selectedOrder._id, selectedOrder.totalAmount)}
+                        disabled={updatingStatusId === selectedOrder._id}
+                      >
+                        {updatingStatusId === selectedOrder._id ? "Processing..." : "Process Manual Refund"}
+                      </Button>
+                    </Box>
+                  )}
+                </Grid>
 
                 {/* ================================================= */}
                 {/*               ITEMS IN THIS ORDER                 */}
@@ -560,7 +631,8 @@ const OrderJewel = () => {
 
                   {selectedOrder.items.map((item, index) => {
                     const product = item.productId;
-                    const image = product?.media?.find(m => m.type === "image")?.url;
+                    const imagePath = product?.media?.find(m => m.type === "image")?.url;
+                    const imageUrl = getImageUrl(imagePath);
 
                     return (
                       <Box
@@ -577,7 +649,7 @@ const OrderJewel = () => {
                         {/* Product Image */}
                         <Box
                           component="img"
-                          src={image || "https://via.placeholder.com/80?text=No+Image"}
+                          src={imageUrl}
                           alt={product?.name}
                           sx={{
                             width: 80,
@@ -586,29 +658,24 @@ const OrderJewel = () => {
                             objectFit: "cover",
                             border: "1px solid #ddd"
                           }}
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "https://via.placeholder.com/80?text=No+Image";
+                          }}
                         />
 
                         <Box sx={{ flex: 1 }}>
                           <Typography><strong>Name:</strong> {product?.name}</Typography>
-
-                          <Typography>
-                            <strong>Price:</strong> ₹{product?.consumer_price || 0}
-                          </Typography>
-
+                          <Typography><strong>Price:</strong> ₹{item.price}</Typography>
                           <Typography><strong>Quantity:</strong> {item.quantity}</Typography>
-
-                          <Typography>
-                            <strong>Subtotal:</strong> ₹{(product?.consumer_price || 0) * item.quantity}
-                          </Typography>
+                          <Typography><strong>Subtotal:</strong> ₹{item.price * item.quantity}</Typography>
                         </Box>
                       </Box>
                     );
                   })}
                 </Grid>
-
               </Grid>
             </DialogContent>
-
 
             <DialogActions>
               <Button onClick={handleCloseDialog} variant="contained" color="primary">
@@ -617,7 +684,6 @@ const OrderJewel = () => {
             </DialogActions>
           </>
         )}
-
       </Dialog>
     </Container>
   );
